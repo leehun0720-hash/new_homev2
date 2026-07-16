@@ -1,0 +1,14 @@
+# 의존성 / 빌드 산출물
+node_modules/
+dist/
+.next/
+
+# 환경변수 (Supabase 키 등)
+.env
+.env.local
+.env.*.local
+
+# 로그 / 임시
+*.log
+.DS_Store
+Thumbs.db
