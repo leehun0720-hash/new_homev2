@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TEN AI — 한국어 특화 LLM TenOS-Ko-28B 개발사이자 실천적 AI 리터러시 교육 기관. 과정별·레벨별 핸드북 아카데미, 대표 강의, AI 앱 쇼케이스를 만나보세요.">
+    <meta property="og:title" content="TEN AI | 인간의 지혜와 실천이 만나는 10번째 인공지능">
+    <meta property="og:description" content="AI를 배우는 시대에서 AI로 배우는 시대로. 과정별·레벨별 교육 핸드북 플랫폼.">
+    <title>TEN AI | 인간의 지혜와 실천이 만나는 10번째 인공지능</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-navy: #0a1628;
+            --navy-light: #152238;
+            --navy-soft: #1c2d4a;
+            --cyan-glow: #00d4ff;
+            --cyan-soft: #7ee8fa;
+            --amber: #ffb63d;
+            --kakao: #fee500;
+            --white: #ffffff;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-400: #94a3b8;
+            --gray-600: #64748b;
+            --gradient-cyan: linear-gradient(135deg, #00d4ff 0%, #7ee8fa 100%);
+            --gradient-card: linear-gradient(180deg, rgba(21, 34, 56, 0.8) 0%, rgba(10, 22, 40, 0.95) 100%);
+            --section-padding: clamp(64px, 10vw, 128px);
+            --container-max: 1200px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--deep-navy);
+            color: var(--white);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .outfit { font-family: 'Outfit', sans-serif; }
+        .container { max-width: var(--container-max); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+
+        ::selection { background: rgba(0, 212, 255, 0.35); }
+
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--cyan-glow);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            html { scroll-behavior: auto; }
+        }
+
+        /* ============ Navigation ============ */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1150;
+            padding: 1.1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 22, 40, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+        nav.scrolled {
+            background: rgba(10, 22, 40, 0.95);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        }
+
+        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+        .logo-icon {
+            width: 42px; height: 42px;
+            background: var(--gradient-cyan);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 1.05rem;
+            color: var(--deep-navy);
+            position: relative; overflow: hidden;
+        }
+        .logo-icon[hidden] { display: none; }
+        .logo-tagline[hidden] { display: none; }
+        .logo-icon::after {
+            content: '';
+            position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: rotate(45deg);
+            animation: shine 1.6s ease infinite;
+            animation-play-state: paused;
+            opacity: 0;
+        }
+        .logo:hover .logo-icon::after { animation-play-state: running; opacity: 1; }
+        @keyframes shine {
+            0%, 100% { transform: translateX(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) rotate(45deg); }
+        }
+        .logo-lockup {
+            display: flex;
+            flex-direction: column;
+            gap: 0.22rem;
+            line-height: 1;
+        }
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--white); letter-spacing: -0.03em;
+            line-height: 1;
+        }
+        .logo-text span { color: var(--cyan-glow); }
+        .logo-tagline {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.56rem;
+            font-weight: 600;
+            letter-spacing: 0.34em;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .nav-links { display: flex; gap: 2.2rem; list-style: none; align-items: center; }
+        .nav-links a {
+            color: var(--gray-200);
+            text-decoration: none;
+            white-space: nowrap;
+            font-size: 0.95rem; font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+            padding: 0.25rem 0;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute; bottom: -4px; left: 0;
+            width: 0; height: 2px;
+            background: var(--cyan-glow);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--cyan-glow); }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-login {
+            padding: 0.6rem 1.4rem;
+            background: transparent;
+            color: var(--cyan-glow);
+            border: 1px solid rgba(0, 212, 255, 0.45);
+            border-radius: 999px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex; align-items: center; gap: 0.45rem;
+        }
+        .nav-login:hover { background: rgba(0, 212, 255, 0.12); border-color: var(--cyan-glow); transform: translateY(-1px); }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none; border: none;
+            cursor: pointer; padding: 0.5rem;
+            z-index: 1101;
+        }
+        .mobile-menu-btn span {
+            display: block;
+            width: 24px; height: 2px;
+            background: var(--white);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        .mobile-menu-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .mobile-menu-btn.open span:nth-child(2) { opacity: 0; }
+        .mobile-menu-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-menu {
+            position: fixed; inset: 0;
+            background: rgba(10, 22, 40, 0.98);
+            backdrop-filter: blur(24px);
+            z-index: 1100;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 2rem;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .mobile-menu.open { opacity: 1; visibility: visible; }
+        .mobile-menu a {
+            color: var(--white);
+            text-decoration: none;
+            font-size: 1.5rem; font-weight: 700;
+            transition: color 0.3s ease;
+        }
+        .mobile-menu a:hover { color: var(--cyan-glow); }
+        .mobile-menu .nav-login { font-size: 1.05rem; padding: 0.9rem 2.4rem; }
+
+        /* ============ Hero ============ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 8rem 5% 5rem;
+            overflow: hidden;
+        }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
+        .hero-grid-bg {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.045) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, black 30%, transparent 75%);
+        }
+        .hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.5;
+        }
+        .hero-orb-1 { width: 480px; height: 480px; background: rgba(0, 212, 255, 0.22); top: -12%; right: -8%; }
+        .hero-orb-2 { width: 380px; height: 380px; background: rgba(79, 70, 229, 0.28); bottom: -10%; left: -6%; }
+
+        .hero-inner {
+            position: relative; z-index: 1;
+            max-width: var(--container-max);
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: clamp(2rem, 6vw, 5rem);
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 0.5rem 1.15rem;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: 999px;
+            font-size: 0.85rem; font-weight: 500;
+            color: var(--cyan-soft);
+            margin-bottom: 1.75rem;
+            opacity: 0;
+            animation: riseIn 0.8s ease 0.15s forwards;
+        }
+        .hero-badge-dot {
+            width: 8px; height: 8px;
+            background: var(--cyan-glow);
+            border-radius: 50%;
+        }
+        .hero-badge:hover .hero-badge-dot { animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+            50% { box-shadow: 0 0 0 5px rgba(0, 212, 255, 0); }
+        }
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(28px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.3rem, 5.2vw, 3.9rem);
+            font-weight: 900;
+            line-height: 1.22;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: riseIn 0.9s ease 0.3s forwards;
+        }
+        .hero h1 .highlight {
+            background: var(--gradient-cyan);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-subtitle {
+            font-size: clamp(1.02rem, 1.6vw, 1.2rem);
+            color: var(--gray-400);
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: riseIn 0.8s ease 0.55s forwards;
+        }
+        .hero-subtitle strong { color: var(--gray-200); font-weight: 500; }
+
+        .hero-cta-group {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            opacity: 0;
+            animation: riseIn 0.7s ease 0.8s forwards;
+        }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 1rem 2.1rem;
+            background: var(--gradient-cyan);
+            color: var(--deep-navy);
+            border: none; border-radius: 999px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1rem; font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 8px 28px rgba(0, 212, 255, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 38px rgba(0, 212, 255, 0.45); }
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 1rem 2.1rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1rem; font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(0, 212, 255, 0.5); transform: translateY(-3px); }
+
+        .hero-stats {
+            display: flex; gap: clamp(1.5rem, 4vw, 3rem);
+            margin-top: 3rem;
+            opacity: 0;
+            animation: riseIn 0.7s ease 1s forwards;
+        }
+        .hero-stat .num {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 800;
+            color: var(--cyan-glow);
+            line-height: 1.2;
+        }
+        .hero-stat .label { font-size: 0.85rem; color: var(--gray-400); }
+
+        /* Hero visual: floating handbook stack */
+        .hero-visual {
+            position: relative;
+            height: clamp(360px, 44vw, 520px);
+            opacity: 0;
+            animation: riseIn 1s ease 0.6s forwards;
+        }
+        .hb-float {
+            position: absolute;
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.18);
+            border-radius: var(--radius-lg);
+            padding: 1.3rem 1.4rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+            width: min(280px, 68%);
+            transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+        .hb-float:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: rgba(0, 212, 255, 0.55);
+            box-shadow: 0 30px 70px rgba(0, 212, 255, 0.15);
+        }
+        .hb-float-1 { top: 4%; left: 0; z-index: 3; }
+        .hb-float-2 { top: 32%; right: 0; z-index: 2; }
+        .hb-float-3 { bottom: 4%; left: 8%; z-index: 1; }
+        .hb-float .hb-tag {
+            display: inline-block;
+            font-size: 0.72rem; font-weight: 700;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            margin-bottom: 0.6rem;
+        }
+        .hb-float .t { font-weight: 700; font-size: 1.02rem; line-height: 1.45; margin-bottom: 0.4rem; }
+        .hb-float .d { font-size: 0.82rem; color: var(--gray-400); line-height: 1.55; }
+        .tag-vibe { background: rgba(0, 212, 255, 0.14); color: var(--cyan-glow); }
+        .tag-genai { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
+        .tag-biz { background: rgba(255, 182, 61, 0.14); color: var(--amber); }
+
+        .hero-chip {
+            position: absolute;
+            bottom: 24%; right: 4%;
+            z-index: 4;
+            display: flex; align-items: center; gap: 0.6rem;
+            background: rgba(10, 22, 40, 0.92);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 999px;
+            padding: 0.6rem 1.2rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem; font-weight: 600;
+            color: var(--cyan-soft);
+            box-shadow: 0 10px 34px rgba(0, 212, 255, 0.22);
+            transition: transform 0.4s ease;
+        }
+        .hero-chip:hover { transform: translateY(-6px); }
+
+        /* ============ Marquee ============ */
+        .marquee {
+            border-top: 1px solid rgba(0, 212, 255, 0.12);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+            background: rgba(21, 34, 56, 0.45);
+            overflow: hidden;
+            padding: 1.05rem 0;
+            white-space: nowrap;
+        }
+        .marquee-track {
+            display: inline-flex;
+            gap: 3rem;
+            animation: marquee 45s linear infinite;
+            animation-play-state: paused;
+            will-change: transform;
+        }
+        .marquee:hover .marquee-track { animation-play-state: running; }
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .marquee-item {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem; font-weight: 600;
+            color: var(--gray-400);
+            display: inline-flex; align-items: center; gap: 3rem;
+        }
+        .marquee-item em { color: var(--cyan-glow); font-style: normal; }
+        .marquee-item::after { content: '✦'; color: rgba(0, 212, 255, 0.4); font-size: 0.8rem; }
+
+        /* ============ Section common ============ */
+        section { padding: var(--section-padding) 5%; position: relative; }
+        .section-header { text-align: center; max-width: 720px; margin: 0 auto 3.5rem; }
+        .section-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--cyan-glow);
+            margin-bottom: 0.9rem;
+        }
+        .section-title {
+            font-size: clamp(1.8rem, 3.6vw, 2.7rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+        }
+        .section-desc { font-size: 1.05rem; color: var(--gray-400); font-weight: 300; }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+        /* ============ About / Philosophy ============ */
+        .philosophy { background: var(--deep-navy); }
+        .philosophy-content {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .philosophy-visual { position: relative; height: 400px; display: flex; align-items: center; justify-content: center; }
+        .circle-main {
+            width: 170px; height: 170px;
+            background: var(--gradient-cyan);
+            color: var(--deep-navy);
+            font-weight: 900; font-size: 1.25rem;
+            text-align: center; line-height: 1.4;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 80px rgba(0, 212, 255, 0.35);
+            z-index: 2; position: relative;
+        }
+        .circle-orbit {
+            position: absolute; inset: 0;
+            animation: orbit 30s linear infinite;
+            animation-play-state: paused;
+        }
+        .philosophy-visual:hover .circle-orbit,
+        .philosophy-visual:hover .circle-item { animation-play-state: running; }
+        @keyframes orbit { to { transform: rotate(360deg); } }
+        .circle-item {
+            position: absolute;
+            width: 86px; height: 86px;
+            background: var(--navy-light);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: 700;
+            color: var(--cyan-soft);
+            animation: orbitCounter 30s linear infinite;
+            animation-play-state: paused;
+        }
+        @keyframes orbitCounter { to { transform: rotate(-360deg); } }
+        .circle-1 { top: 0; left: calc(50% - 43px); }
+        .circle-2 { top: calc(50% - 43px); right: 0; }
+        .circle-3 { bottom: 0; left: calc(50% - 43px); }
+        .circle-4 { top: calc(50% - 43px); left: 0; }
+
+        .philosophy-text blockquote {
+            font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+            font-weight: 700;
+            line-height: 1.5;
+            border-left: 4px solid var(--cyan-glow);
+            padding-left: 1.5rem;
+            margin-bottom: 1.75rem;
+        }
+        .philosophy-text p { color: var(--gray-400); margin-bottom: 1.1rem; }
+        .philosophy-stats { display: flex; gap: 2.5rem; margin-top: 2.25rem; }
+        .stat-number {
+            font-size: 2.4rem; font-weight: 800;
+            color: var(--cyan-glow);
+            line-height: 1.2;
+        }
+        .stat-label { font-size: 0.88rem; color: var(--gray-400); }
+
+        /* TenOS model spec */
+        .tenos-band {
+            max-width: var(--container-max);
+            margin: 5rem auto 0;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.08) 0%, rgba(21, 34, 56, 0.9) 55%);
+            border: 1px solid rgba(0, 212, 255, 0.22);
+            border-radius: var(--radius-lg);
+            padding: clamp(1.75rem, 4vw, 3rem);
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .tenos-band::before {
+            content: 'TenOS';
+            position: absolute;
+            right: -1rem; bottom: -2.6rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 9rem; font-weight: 900;
+            color: rgba(0, 212, 255, 0.05);
+            pointer-events: none;
+            line-height: 1;
+        }
+        .tenos-title-chip {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--cyan-glow);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 999px;
+            padding: 0.35rem 0.95rem;
+            margin-bottom: 1.1rem;
+        }
+        .tenos-band h3 { font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-weight: 900; margin-bottom: 0.9rem; letter-spacing: -0.02em; }
+        .tenos-band h3 .outfit { color: var(--cyan-glow); }
+        .tenos-band > div > p { color: var(--gray-400); font-size: 0.98rem; }
+        .tenos-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; position: relative; z-index: 1; }
+        .tenos-spec {
+            background: rgba(10, 22, 40, 0.72);
+            border: 1px solid rgba(0, 212, 255, 0.14);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.2rem;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+        .tenos-spec:hover { border-color: rgba(0, 212, 255, 0.45); transform: translateY(-3px); }
+        .tenos-spec .k { font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--cyan-glow); }
+        .tenos-spec .v { font-size: 0.82rem; color: var(--gray-400); }
+
+        /* ============ Evolution (horizontal scroll) ============ */
+        .evolution { background: var(--navy-light); }
+        .evolution-scroller {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(210px, 1fr);
+            gap: 1.1rem;
+            overflow-x: auto;
+            padding: 0.5rem 0.25rem 1.5rem;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 212, 255, 0.4) transparent;
+        }
+        .evolution-scroller::-webkit-scrollbar { height: 6px; }
+        .evolution-scroller::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.35); border-radius: 999px; }
+        .evo-card {
+            scroll-snap-align: start;
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 1.5rem 1.35rem;
+            transition: all 0.35s ease;
+        }
+        .evo-card:hover { border-color: rgba(0, 212, 255, 0.4); transform: translateY(-6px); }
+        .evo-card.highlight-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.16) 0%, rgba(10, 22, 40, 0.95) 100%);
+            border-color: rgba(0, 212, 255, 0.5);
+        }
+        .evo-number { font-size: 1.9rem; font-weight: 800; color: rgba(0, 212, 255, 0.5); line-height: 1; margin-bottom: 0.8rem; }
+        .evo-card.highlight-card .evo-number { color: var(--cyan-glow); }
+        .evo-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .evo-desc { font-size: 0.84rem; color: var(--gray-400); line-height: 1.6; }
+        .evolution-hint { text-align: center; font-size: 0.82rem; color: var(--gray-600); margin-top: 0.4rem; }
+
+        /* ============ Business + Values ============ */
+        .business { background: var(--deep-navy); }
+        .business-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .biz-card {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.75rem;
+            transition: all 0.35s ease;
+        }
+        .biz-card:hover { border-color: rgba(0, 212, 255, 0.38); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35); }
+        .biz-icon {
+            width: 54px; height: 54px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+        .biz-title { font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .biz-subtitle { font-size: 0.86rem; color: var(--cyan-soft); margin-bottom: 0.8rem; font-weight: 500; }
+        .biz-desc { font-size: 0.9rem; color: var(--gray-400); margin-bottom: 1.1rem; }
+        .biz-features { list-style: none; }
+        .biz-features li {
+            font-size: 0.85rem; color: var(--gray-200);
+            padding: 0.3rem 0 0.3rem 1.4rem;
+            position: relative;
+        }
+        .biz-features li::before {
+            content: '';
+            position: absolute; left: 0; top: 0.78rem;
+            width: 7px; height: 7px;
+            background: var(--cyan-glow);
+            border-radius: 2px;
+            transform: rotate(45deg);
+        }
+
+        .values-strip {
+            max-width: var(--container-max);
+            margin: 4rem auto 0;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+        }
+        .value-chip {
+            text-align: center;
+            padding: 1.5rem 0.9rem;
+            background: rgba(21, 34, 56, 0.5);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: var(--radius-md);
+            transition: all 0.35s ease;
+        }
+        .value-chip:hover { border-color: rgba(0, 212, 255, 0.35); background: rgba(21, 34, 56, 0.85); transform: translateY(-4px); }
+        .value-chip .ic { font-size: 1.6rem; margin-bottom: 0.6rem; }
+        .value-chip .t { font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .value-chip .d { font-size: 0.74rem; color: var(--gray-400); line-height: 1.55; }
+
+        /* ============ Academy / Handbook ============ */
+        .academy {
+            background:
+                radial-gradient(ellipse 60% 45% at 85% 8%, rgba(0, 212, 255, 0.07) 0%, transparent 60%),
+                var(--navy-light);
+        }
+        .academy-filters {
+            max-width: var(--container-max);
+            margin: 0 auto 2.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .course-tabs { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .course-tab {
+            padding: 0.65rem 1.35rem;
+            background: rgba(10, 22, 40, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            color: var(--gray-200);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .course-tab:hover { border-color: rgba(0, 212, 255, 0.45); color: var(--cyan-soft); }
+        .course-tab.active {
+            background: var(--gradient-cyan);
+            color: var(--deep-navy);
+            border-color: transparent;
+        }
+        .level-chips { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; }
+        .level-chips .lv-label { font-size: 0.82rem; color: var(--gray-600); margin-right: 0.3rem; }
+        .level-chip {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: rgba(10, 22, 40, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--gray-200);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.82rem; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .level-chip:hover { border-color: rgba(0, 212, 255, 0.45); color: var(--cyan-soft); }
+        .level-chip.active { background: rgba(0, 212, 255, 0.16); border-color: var(--cyan-glow); color: var(--cyan-glow); }
+
+        .handbook-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.4rem;
+        }
+        .handbook-card {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.12);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.35s ease;
+            display: flex; flex-direction: column;
+            animation: cardIn 0.45s ease both;
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(18px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .handbook-card:hover {
+            border-color: rgba(0, 212, 255, 0.45);
+            transform: translateY(-7px);
+            box-shadow: 0 22px 52px rgba(0, 0, 0, 0.4);
+        }
+        .hb-cover {
+            height: 118px;
+            position: relative;
+            display: flex; align-items: flex-end;
+            padding: 1rem 1.4rem;
+            overflow: hidden;
+        }
+        .hb-cover::before {
+            content: attr(data-deco);
+            position: absolute;
+            right: 0.6rem; top: -1.4rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 5.2rem; font-weight: 900;
+            opacity: 0.14;
+            line-height: 1;
+            pointer-events: none;
+        }
+        .cover-vibe { background: linear-gradient(135deg, rgba(0, 212, 255, 0.28), rgba(10, 22, 40, 0.2)); }
+        .cover-genai { background: linear-gradient(135deg, rgba(139, 92, 246, 0.32), rgba(10, 22, 40, 0.2)); }
+        .cover-biz { background: linear-gradient(135deg, rgba(255, 182, 61, 0.26), rgba(10, 22, 40, 0.2)); }
+        .hb-level {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem; font-weight: 800;
+            letter-spacing: 0.08em;
+            background: rgba(10, 22, 40, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+        }
+        .hb-body { padding: 1.4rem; flex: 1; display: flex; flex-direction: column; }
+        .hb-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.7rem; flex-wrap: wrap; }
+        .hb-course-tag { font-size: 0.74rem; font-weight: 700; padding: 0.22rem 0.7rem; border-radius: 999px; }
+        .hb-access {
+            font-size: 0.72rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.22rem 0.7rem;
+            border-radius: 999px;
+        }
+        .access-public { background: rgba(52, 211, 153, 0.14); color: #6ee7b7; }
+        .access-member { background: rgba(0, 212, 255, 0.12); color: var(--cyan-soft); }
+        .access-enrolled { background: rgba(255, 182, 61, 0.14); color: var(--amber); }
+        .hb-title { font-size: 1.08rem; font-weight: 700; line-height: 1.45; margin-bottom: 0.5rem; }
+        .hb-desc { font-size: 0.85rem; color: var(--gray-400); line-height: 1.65; flex: 1; margin-bottom: 1.1rem; }
+        .hb-open {
+            align-self: flex-start;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 1.3rem;
+            border-radius: 999px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.86rem; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .hb-open.unlocked { background: rgba(0, 212, 255, 0.14); color: var(--cyan-glow); border: 1px solid rgba(0, 212, 255, 0.4); }
+        .hb-open.unlocked:hover { background: var(--gradient-cyan); color: var(--deep-navy); }
+        .hb-open.locked { background: rgba(255, 255, 255, 0.05); color: var(--gray-400); border: 1px solid rgba(255, 255, 255, 0.14); }
+        .hb-open.locked:hover { border-color: var(--amber); color: var(--amber); }
+        .handbook-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3.5rem 1rem;
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+        }
+        .academy-note {
+            max-width: var(--container-max);
+            margin: 2.25rem auto 0;
+            display: flex; gap: 0.8rem; align-items: flex-start;
+            font-size: 0.84rem;
+            color: var(--gray-600);
+            line-height: 1.7;
+        }
+        .academy-note svg { flex-shrink: 0; margin-top: 0.2rem; }
+
+        /* ============ Lectures ============ */
+        .lectures { background: var(--deep-navy); }
+        .lectures-head {
+            max-width: var(--container-max);
+            margin: 0 auto 3rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2rem;
+            align-items: end;
+        }
+        .lectures-head .section-label { margin-bottom: 0.9rem; }
+        .lectures-head h2 { font-size: clamp(1.8rem, 3.6vw, 2.7rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 0.8rem; }
+        .lectures-head p { color: var(--gray-400); font-weight: 300; max-width: 560px; }
+        .channel-btn {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 0.85rem 1.7rem;
+            background: rgba(255, 0, 51, 0.12);
+            color: #ff6b81;
+            border: 1px solid rgba(255, 0, 51, 0.35);
+            border-radius: 999px;
+            font-size: 0.92rem; font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .channel-btn:hover { background: rgba(255, 0, 51, 0.22); transform: translateY(-2px); }
+
+        .lecture-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.3rem;
+        }
+        .lecture-card {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            text-align: left;
+            padding: 0;
+            font-family: inherit;
+            color: inherit;
+        }
+        .lecture-card:hover { border-color: rgba(0, 212, 255, 0.4); transform: translateY(-6px); box-shadow: 0 18px 46px rgba(0,0,0,0.4); }
+        .lecture-thumb {
+            aspect-ratio: 16 / 9;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .lecture-thumb .play {
+            width: 52px; height: 52px;
+            background: rgba(10, 22, 40, 0.8);
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+        .lecture-card:hover .play { background: var(--cyan-glow); border-color: var(--cyan-glow); transform: scale(1.12); }
+        .lecture-card:hover .play svg { fill: var(--deep-navy); }
+        .lecture-thumb .play svg { fill: var(--white); margin-left: 3px; transition: fill 0.3s ease; }
+        .lecture-thumb .dur {
+            position: absolute; right: 0.7rem; bottom: 0.7rem;
+            background: rgba(0, 0, 0, 0.72);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem; font-weight: 600;
+            padding: 0.18rem 0.55rem;
+            border-radius: 5px;
+        }
+        .lecture-body { padding: 1.15rem 1.25rem 1.35rem; }
+        .lecture-cat { font-size: 0.72rem; font-weight: 700; color: var(--cyan-soft); margin-bottom: 0.45rem; letter-spacing: 0.04em; }
+        .lecture-title { font-size: 0.96rem; font-weight: 700; line-height: 1.5; }
+
+        /* Video modal */
+        .video-modal {
+            position: fixed; inset: 0;
+            z-index: 1200;
+            background: rgba(4, 10, 20, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 5%;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .video-modal.open { opacity: 1; visibility: visible; }
+        .video-modal-box {
+            width: min(880px, 100%);
+            background: var(--navy-light);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transform: translateY(24px) scale(0.97);
+            transition: transform 0.35s ease;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        }
+        .video-modal.open .video-modal-box { transform: translateY(0) scale(1); }
+        .video-frame { aspect-ratio: 16 / 9; background: #000; position: relative; }
+        .video-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+        .video-placeholder {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 1rem; text-align: center;
+            padding: 2rem;
+            background:
+                radial-gradient(ellipse 70% 60% at 50% 40%, rgba(0, 212, 255, 0.12) 0%, transparent 65%),
+                #050c18;
+        }
+        .video-placeholder .t { font-weight: 700; font-size: 1.1rem; }
+        .video-placeholder .d { font-size: 0.86rem; color: var(--gray-400); max-width: 420px; }
+        .video-modal-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem;
+            padding: 1.1rem 1.5rem;
+        }
+        .video-modal-meta .cat { font-size: 0.75rem; color: var(--cyan-soft); font-weight: 700; margin-bottom: 0.2rem; }
+        .video-modal-meta .title { font-weight: 700; font-size: 1.02rem; }
+        .modal-close {
+            flex-shrink: 0;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: var(--white);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: rgba(0, 212, 255, 0.18); border-color: var(--cyan-glow); }
+
+        /* ============ Apps Showcase ============ */
+        .apps { background: var(--navy-light); }
+        .apps-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        .app-card {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.12);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.35s ease;
+        }
+        .app-card:hover { border-color: rgba(0, 212, 255, 0.42); transform: translateY(-6px); box-shadow: 0 22px 55px rgba(0,0,0,0.4); }
+        .app-thumb {
+            height: 210px;
+            position: relative;
+            overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .app-mockup {
+            width: 74%;
+            background: rgba(10, 22, 40, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 12px 12px 0 0;
+            padding: 0.85rem 1rem 1.1rem;
+            transform: translateY(24px);
+            transition: transform 0.45s ease;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+        }
+        .app-card:hover .app-mockup { transform: translateY(10px); }
+        .mock-dots { display: flex; gap: 5px; margin-bottom: 0.7rem; }
+        .mock-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.22); }
+        .mock-line { height: 9px; border-radius: 4px; background: rgba(255, 255, 255, 0.1); margin-bottom: 7px; }
+        .mock-line.w60 { width: 60%; }
+        .mock-line.w85 { width: 85%; }
+        .mock-line.cy { background: rgba(0, 212, 255, 0.4); width: 42%; }
+        .app-overlay {
+            position: absolute; inset: 0;
+            background: rgba(6, 13, 26, 0.88);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.75rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray-200);
+            line-height: 1.75;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .app-card:hover .app-overlay { opacity: 1; }
+        .app-body { padding: 1.5rem 1.6rem 1.7rem; }
+        .app-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.55rem; }
+        .app-name { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; }
+        .app-badge {
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.24rem 0.7rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .app-oneliner { font-size: 0.9rem; color: var(--gray-400); margin-bottom: 1.25rem; }
+        .app-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+        .app-btn {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.6rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.84rem; font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .app-btn.launch { background: var(--gradient-cyan); color: var(--deep-navy); }
+        .app-btn.launch:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35); }
+        .app-btn.gh { background: rgba(255,255,255,0.06); color: var(--gray-200); border: 1px solid rgba(255,255,255,0.18); }
+        .app-btn.gh:hover { border-color: var(--cyan-glow); color: var(--cyan-glow); }
+
+        /* ============ News (게시물) ============ */
+        .news { background: var(--deep-navy); }
+        .news-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.4rem;
+        }
+        .news-card {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.12);
+            border-radius: var(--radius-lg);
+            padding: 1.6rem 1.7rem;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            text-align: left;
+            font-family: inherit;
+            color: inherit;
+            display: flex; flex-direction: column;
+        }
+        .news-card:hover { border-color: rgba(0, 212, 255, 0.42); transform: translateY(-6px); box-shadow: 0 18px 46px rgba(0,0,0,0.4); }
+        .news-meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+        .news-cat {
+            font-size: 0.72rem; font-weight: 700;
+            padding: 0.2rem 0.7rem;
+            border-radius: 999px;
+        }
+        .news-cat-notice { background: rgba(0, 212, 255, 0.12); color: var(--cyan-soft); }
+        .news-cat-news { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
+        .news-cat-edu { background: rgba(255, 182, 61, 0.14); color: var(--amber); }
+        .news-pin { font-size: 0.72rem; font-weight: 700; color: #6ee7b7; }
+        .news-date { font-size: 0.76rem; color: var(--gray-600); margin-left: auto; }
+        .news-title { font-size: 1.06rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.55rem; }
+        .news-excerpt { font-size: 0.86rem; color: var(--gray-400); line-height: 1.65; flex: 1; }
+        .news-more { margin-top: 1rem; font-size: 0.82rem; font-weight: 700; color: var(--cyan-glow); }
+        .news-empty, .qna-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-600);
+            font-size: 0.92rem;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+        }
+
+        /* 게시물 읽기 모달 */
+        .post-modal-body {
+            padding: 2rem 2.2rem 2.4rem;
+            max-height: 62vh;
+            overflow-y: auto;
+        }
+        .post-modal-body .news-meta { margin-bottom: 1rem; }
+        .post-modal-body h3 { font-size: 1.35rem; font-weight: 800; line-height: 1.45; margin-bottom: 1.1rem; }
+        .post-modal-body .content { font-size: 0.95rem; color: var(--gray-200); line-height: 1.85; white-space: pre-wrap; }
+
+        /* ============ Q&A ============ */
+        .qna {
+            background:
+                radial-gradient(ellipse 55% 45% at 90% 10%, rgba(79, 70, 229, 0.08) 0%, transparent 60%),
+                var(--navy-light);
+        }
+        .qna-inner {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: clamp(2rem, 5vw, 4rem);
+            align-items: start;
+        }
+        .qna-form {
+            background: rgba(21, 34, 56, 0.72);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: clamp(1.6rem, 3.5vw, 2.4rem);
+            display: flex; flex-direction: column; gap: 0.9rem;
+            position: sticky; top: 96px;
+        }
+        .qna-form h3, .qna-list-wrap h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+        .qna-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+        .qna-form input, .qna-form textarea {
+            width: 100%;
+            background: rgba(10, 22, 40, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 0.85rem 1.05rem;
+            color: var(--white);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+        .qna-form textarea { min-height: 120px; resize: vertical; }
+        .qna-form input::placeholder, .qna-form textarea::placeholder { color: var(--gray-600); }
+        .qna-form input:focus, .qna-form textarea:focus { outline: none; border-color: var(--cyan-glow); }
+        .qna-form .btn-primary { border: none; width: 100%; }
+        .qna-form-note { font-size: 0.76rem; color: var(--gray-600); line-height: 1.7; }
+
+        .qna-list { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem; }
+        .qna-item {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.12);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+        .qna-item.open { border-color: rgba(0, 212, 255, 0.4); }
+        .qna-item-q {
+            width: 100%;
+            display: flex; align-items: center; gap: 0.9rem;
+            padding: 1.15rem 1.35rem;
+            background: none; border: none;
+            color: var(--white);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.95rem; font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+        .qna-item-q .q-mark {
+            flex-shrink: 0;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 212, 255, 0.12);
+            color: var(--cyan-glow);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .qna-item-q .q-text { flex: 1; line-height: 1.55; }
+        .qna-item-q .q-arrow { flex-shrink: 0; color: var(--gray-600); transition: transform 0.3s ease; }
+        .qna-item.open .q-arrow { transform: rotate(180deg); color: var(--cyan-glow); }
+        .qna-item-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .qna-item.open .qna-item-a { max-height: 600px; }
+        .qna-item-a-inner {
+            display: flex; gap: 0.9rem;
+            padding: 0 1.35rem 1.3rem;
+        }
+        .qna-item-a .a-mark {
+            flex-shrink: 0;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--gradient-cyan);
+            color: var(--deep-navy);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 0.85rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .qna-item-a .a-body { font-size: 0.89rem; color: var(--gray-400); line-height: 1.75; white-space: pre-wrap; }
+        .qna-item-a .a-by { font-size: 0.74rem; color: var(--gray-600); margin-top: 0.5rem; }
+
+        /* ============ Membership ============ */
+        .membership {
+            background:
+                radial-gradient(ellipse 55% 50% at 12% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 90% 85%, rgba(79, 70, 229, 0.1) 0%, transparent 60%),
+                var(--deep-navy);
+        }
+        .membership-inner {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 0.9fr;
+            gap: clamp(2.5rem, 6vw, 5rem);
+            align-items: center;
+        }
+        .tier-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+        .tier-row {
+            display: flex; gap: 1.1rem; align-items: flex-start;
+            background: rgba(21, 34, 56, 0.55);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.4rem;
+            transition: all 0.3s ease;
+        }
+        .tier-row:hover { border-color: rgba(0, 212, 255, 0.35); transform: translateX(6px); }
+        .tier-icon {
+            flex-shrink: 0;
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+        .tier-icon.pub { background: rgba(52, 211, 153, 0.13); }
+        .tier-icon.mem { background: rgba(0, 212, 255, 0.12); }
+        .tier-icon.enr { background: rgba(255, 182, 61, 0.13); }
+        .tier-row .t { font-weight: 700; font-size: 0.98rem; margin-bottom: 0.2rem; }
+        .tier-row .t small { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--gray-600); margin-left: 0.4rem; letter-spacing: 0.05em; }
+        .tier-row .d { font-size: 0.86rem; color: var(--gray-400); line-height: 1.65; }
+
+        .login-panel {
+            background: rgba(21, 34, 56, 0.72);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: clamp(1.75rem, 4vw, 2.75rem);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        }
+        .login-panel h3 { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+        .login-panel > p { font-size: 0.9rem; color: var(--gray-400); margin-bottom: 1.75rem; }
+        .social-btn {
+            width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+            padding: 0.95rem 1rem;
+            border-radius: 12px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.95rem; font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+            margin-bottom: 0.8rem;
+        }
+        .social-btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
+        .social-btn.google { background: var(--white); color: #1f2937; box-shadow: 0 6px 20px rgba(255,255,255,0.08); }
+        .social-btn.kakao { background: var(--kakao); color: #191600; box-shadow: 0 6px 20px rgba(254,229,0,0.12); }
+        .login-divider {
+            display: flex; align-items: center; gap: 0.9rem;
+            color: var(--gray-600); font-size: 0.78rem;
+            margin: 1.4rem 0;
+        }
+        .login-divider::before, .login-divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .login-fields { display: grid; gap: 0.8rem; }
+        .login-fields input {
+            width: 100%;
+            background: rgba(10, 22, 40, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 0.85rem 1.1rem;
+            color: var(--white);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+        .login-fields input::placeholder { color: var(--gray-600); }
+        .login-fields input:focus { outline: none; border-color: var(--cyan-glow); }
+        .login-note { font-size: 0.76rem; color: var(--gray-600); margin-top: 1.1rem; line-height: 1.7; }
+        .login-note a { color: var(--cyan-soft); }
+
+        /* ============ CTA & Footer ============ */
+        .cta {
+            background: linear-gradient(135deg, var(--navy-light) 0%, var(--deep-navy) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-bg {
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(79, 70, 229, 0.1) 0%, transparent 50%);
+        }
+        .cta-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+        .cta h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 900; margin-bottom: 1.4rem; letter-spacing: -0.02em; line-height: 1.35; }
+        .cta p { font-size: 1.1rem; color: var(--gray-400); margin-bottom: 2.5rem; font-weight: 300; }
+        .cta .hero-cta-group { justify-content: center; opacity: 1; animation: none; }
+
+        footer {
+            background: #060e1c;
+            padding: 4.5rem 5% 2rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+        }
+        .footer-content {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+        }
+        .footer-brand p { color: var(--gray-400); font-size: 0.92rem; margin-top: 1rem; max-width: 300px; }
+        .footer-title { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 0.7rem; }
+        .footer-links a { color: var(--gray-400); text-decoration: none; font-size: 0.88rem; transition: color 0.3s ease; }
+        .footer-links a:hover { color: var(--cyan-glow); }
+        .footer-bottom {
+            max-width: var(--container-max);
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        .footer-copyright { color: var(--gray-600); font-size: 0.84rem; }
+        .footer-slogan { font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--cyan-glow); font-weight: 500; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            left: 50%; bottom: 2rem;
+            transform: translateX(-50%) translateY(140%);
+            background: var(--navy-soft);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 999px;
+            padding: 0.85rem 1.7rem;
+            font-size: 0.9rem; font-weight: 500;
+            z-index: 1300;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
+            max-width: 90vw;
+            text-align: center;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ============ Responsive ============ */
+        @media (max-width: 1100px) {
+            .nav-links { display: none; }
+            .nav-right .nav-login { display: none; }
+            .mobile-menu-btn { display: block; }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-inner { grid-template-columns: 1fr; gap: 3.5rem; }
+            .hero-visual { height: 380px; max-width: 520px; }
+            .philosophy-content { grid-template-columns: 1fr; gap: 3rem; }
+            .philosophy-visual { height: 340px; }
+            .tenos-band { grid-template-columns: 1fr; }
+            .business-grid { grid-template-columns: repeat(2, 1fr); }
+            .values-strip { grid-template-columns: repeat(3, 1fr); }
+            .handbook-grid { grid-template-columns: repeat(2, 1fr); }
+            .lecture-grid { grid-template-columns: repeat(2, 1fr); }
+            .membership-inner { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding-top: 7rem; }
+            .hero-stats { flex-wrap: wrap; gap: 1.4rem 2rem; }
+            .business-grid { grid-template-columns: 1fr; }
+            .values-strip { grid-template-columns: repeat(2, 1fr); }
+            .handbook-grid { grid-template-columns: 1fr; }
+            .lecture-grid { grid-template-columns: 1fr; }
+            .apps-grid { grid-template-columns: 1fr; }
+            .lectures-head { grid-template-columns: 1fr; align-items: start; }
+            .academy-filters { flex-direction: column; align-items: flex-start; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .footer-brand p { max-width: 100%; margin-left: auto; margin-right: auto; }
+            .footer-brand .logo { justify-content: center; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-cta-group { flex-direction: column; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+            .values-strip { grid-template-columns: 1fr 1fr; }
+            .hero-chip { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============ Navigation ============ -->
+    <nav id="nav" aria-label="주 메뉴">
+        <a href="#home" class="logo" aria-label="TenAI 홈">
+            <div class="logo-icon" hidden>10</div>
+            <span class="logo-lockup">
+                <span class="logo-text">Ten<span>AI</span></span>
+                <span class="logo-tagline">AX HUB PLATFORM</span>
+            </span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#about">소개 &amp; 철학</a></li>
+            <li><a href="#academy">교육 아카데미</a></li>
+            <li><a href="#lectures">대표님 강의</a></li>
+            <li><a href="#apps">쇼케이스</a></li>
+            <li><a href="#news">소식·Q&amp;A</a></li>
+            <li><a href="#membership">멤버십</a></li>
+        </ul>
+        <div class="nav-right">
+            <button class="nav-login" data-login>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                로그인
+            </button>
+            <button class="mobile-menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#about">소개 &amp; 철학</a>
+        <a href="#academy">교육 아카데미</a>
+        <a href="#lectures">대표님 강의</a>
+        <a href="#apps">쇼케이스</a>
+        <a href="#news">소식·Q&amp;A</a>
+        <a href="#membership">멤버십</a>
+        <button class="nav-login" data-login>로그인 / 회원가입</button>
+    </div>
+
+    <!-- ============ Hero ============ -->
+    <header class="hero" id="home">
+        <div class="hero-bg" aria-hidden="true">
+            <div class="hero-grid-bg"></div>
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+        </div>
+        <div class="hero-inner">
+            <div>
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    <span data-set="heroBadge">The 10th Intelligence for Human Progress</span>
+                </div>
+                <h1>
+                    <span data-set="heroTitle1">AI를 배우는 시대에서,</span><br>
+                    <span class="highlight" data-set="heroTitle2">AI로 배우는 시대로</span>
+                </h1>
+                <p class="hero-subtitle" data-set="heroSubtitle">
+                    인간의 지혜와 실천이 만나는 10번째 인공지능, TEN AI.<br>
+                    <strong>과정별·레벨별 교육 핸드북</strong>부터 대표 강의, 실전 AI 앱까지 —<br>
+                    실천형 인공지능 생태계를 한곳에서 만나보세요.
+                </p>
+                <div class="hero-cta-group">
+                    <a href="#academy" class="btn-primary">
+                        교육 아카데미 둘러보기
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#apps" class="btn-secondary">TEN AI Apps 보기</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="num outfit" data-counter="10">0</div>
+                        <div class="label">교육 핸드북 (종)</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num outfit" data-counter="3">0</div>
+                        <div class="label">전문 교육 과정</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num outfit" data-counter="28" data-suffix="B">0</div>
+                        <div class="label">TenOS-Ko 파라미터</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual" aria-hidden="true">
+                <div class="hb-float hb-float-1">
+                    <span class="hb-tag tag-vibe">바이브코딩 · Level 1</span>
+                    <div class="t">바이브코딩 입문 가이드</div>
+                    <div class="d">비개발자를 위한 자연어 개발의 첫걸음</div>
+                </div>
+                <div class="hb-float hb-float-2">
+                    <span class="hb-tag tag-genai">생성형 AI 실무 · Level 2</span>
+                    <div class="t">프롬프트 라이브러리 가이드</div>
+                    <div class="d">전문가를 위한 프롬프트 설계 패턴</div>
+                </div>
+                <div class="hb-float hb-float-3">
+                    <span class="hb-tag tag-biz">AI 경영 전략 · Level 2</span>
+                    <div class="t">정부지원사업 가이드 v3</div>
+                    <div class="d">AI로 완성하는 사업계획서 작성법</div>
+                </div>
+                <div class="hero-chip outfit">⚡ TenOS-Ko-28B Powered</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ Marquee ============ -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track" id="marqueeTrack">
+            <span class="marquee-item"><em>VibeCoding</em>&nbsp;바이브코딩 코스</span>
+            <span class="marquee-item"><em>GenAI</em>&nbsp;생성형 AI 실무</span>
+            <span class="marquee-item"><em>Strategy</em>&nbsp;AI 경영 전략</span>
+            <span class="marquee-item"><em>TenOS-Ko-28B</em>&nbsp;한국어 특화 LLM</span>
+            <span class="marquee-item"><em>Handbook</em>&nbsp;10+ 교육 핸드북</span>
+            <span class="marquee-item"><em>Lecture</em>&nbsp;정원훈 박사의 챗GPT 연구소</span>
+        </div>
+    </div>
+
+    <!-- ============ 1. About & Philosophy ============ -->
+    <section class="philosophy" id="about">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">01 · About &amp; Philosophy</p>
+            <h2 class="section-title">TEN AI의 철학적 기원</h2>
+            <p class="section-desc">기술 중심이 아닌 '활용 중심의 AI'를 지향합니다</p>
+        </div>
+        <div class="philosophy-content">
+            <div class="philosophy-visual animate-on-scroll" aria-hidden="true">
+                <div class="circle-main">실천적<br>지능</div>
+                <div class="circle-orbit">
+                    <div class="circle-item circle-1">교육</div>
+                    <div class="circle-item circle-2">컨설팅</div>
+                    <div class="circle-item circle-3">플랫폼</div>
+                    <div class="circle-item circle-4">커뮤니티</div>
+                </div>
+            </div>
+            <div class="philosophy-text animate-on-scroll">
+                <blockquote>"AI는 도구가 아니라,<br>인간 지혜의 확장이다."</blockquote>
+                <p>TEN AI는 튜링머신에서 시작된 인간 사고의 여정이 실천과 교육으로 귀결되는 10번째 단계를 상징합니다.</p>
+                <p>기술보다 실천, 결과보다 과정을 중시하며, 인간과 AI의 공진화를 통한 실천적 지능을 구현합니다.</p>
+                <div class="philosophy-stats">
+                    <div class="stat-item">
+                        <div class="stat-number outfit">10</div>
+                        <div class="stat-label">AI 진화 단계</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number outfit">5</div>
+                        <div class="stat-label">핵심 사업영역</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number outfit">∞</div>
+                        <div class="stat-label">무한한 가능성</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TenOS model spec band -->
+        <div class="tenos-band animate-on-scroll">
+            <div>
+                <span class="tenos-title-chip">FLAGSHIP MODEL</span>
+                <h3><span class="outfit">TenOS-Ko-28B</span> — 한국어 특화 대형 언어 모델</h3>
+                <p>TEN AI가 자체 개발한 한국어 특화 LLM입니다. 한국어의 맥락과 존대 체계, 도메인 용어를 깊이 이해하며, 교육·컨설팅·플랫폼 전 사업 영역의 기술적 기반이 됩니다.</p>
+            </div>
+            <div class="tenos-specs">
+                <div class="tenos-spec">
+                    <div class="k">28B</div>
+                    <div class="v">파라미터 규모</div>
+                </div>
+                <div class="tenos-spec">
+                    <div class="k">Ko-First</div>
+                    <div class="v">한국어 우선 설계</div>
+                </div>
+                <div class="tenos-spec">
+                    <div class="k">RAG</div>
+                    <div class="v">검색증강 생성 최적화</div>
+                </div>
+                <div class="tenos-spec">
+                    <div class="k">Agentic</div>
+                    <div class="v">에이전트 오케스트레이션</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Evolution -->
+    <section class="evolution">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">AI Evolution</p>
+            <h2 class="section-title">AI의 진화 10단계</h2>
+            <p class="section-desc">튜링머신에서 TEN AI까지, 인간 사고의 여정</p>
+        </div>
+        <div class="evolution-scroller animate-on-scroll" tabindex="0" aria-label="AI 진화 10단계 타임라인 (좌우 스크롤)">
+            <div class="evo-card"><div class="evo-number outfit">01</div><h3 class="evo-title">튜링머신</h3><p class="evo-desc">생각의 시작, 계산 가능성의 개념 도입</p></div>
+            <div class="evo-card"><div class="evo-number outfit">02</div><h3 class="evo-title">퍼셉트론</h3><p class="evo-desc">학습의 시도, 데이터로부터 배우는 기계</p></div>
+            <div class="evo-card"><div class="evo-number outfit">03</div><h3 class="evo-title">전문가 시스템</h3><p class="evo-desc">지식의 구조화, 노하우를 시스템화</p></div>
+            <div class="evo-card"><div class="evo-number outfit">04</div><h3 class="evo-title">딥러닝</h3><p class="evo-desc">인지의 확장, 복잡한 패턴 인식</p></div>
+            <div class="evo-card"><div class="evo-number outfit">05</div><h3 class="evo-title">생성 AI</h3><p class="evo-desc">창조의 시작, 창의력의 민주화</p></div>
+            <div class="evo-card"><div class="evo-number outfit">06</div><h3 class="evo-title">LLM</h3><p class="evo-desc">언어의 이해, 소통의 기술</p></div>
+            <div class="evo-card"><div class="evo-number outfit">07</div><h3 class="evo-title">멀티모달</h3><p class="evo-desc">감각의 융합, 인간처럼 '보는' AI</p></div>
+            <div class="evo-card"><div class="evo-number outfit">08</div><h3 class="evo-title">에이전트</h3><p class="evo-desc">자율의 구현, '실행하는 AI'의 시대</p></div>
+            <div class="evo-card"><div class="evo-number outfit">09</div><h3 class="evo-title">스웜 AI</h3><p class="evo-desc">집단지성, 함께 학습하는 사회적 지능</p></div>
+            <div class="evo-card highlight-card"><div class="evo-number outfit">10</div><h3 class="evo-title">TEN AI</h3><p class="evo-desc">활용과 실천의 지능, 인간 중심의 AI 생태계</p></div>
+        </div>
+        <p class="evolution-hint">← 좌우로 스크롤하여 전체 여정을 확인하세요 →</p>
+    </section>
+
+    <!-- Business + Values -->
+    <section class="business">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">Business Areas</p>
+            <h2 class="section-title">사업영역</h2>
+            <p class="section-desc">AI의 가치를 현장에서 실현합니다</p>
+        </div>
+        <div class="business-grid stagger animate-on-scroll">
+            <div class="biz-card">
+                <div class="biz-icon">📚</div>
+                <h3 class="biz-title">TEN AI Education</h3>
+                <p class="biz-subtitle">AI를 배우는 시대에서 AI로 배우는 시대로</p>
+                <p class="biz-desc">실무형 AI 교육 노하우를 커리큘럼화하여 공공기관, 대학, 기업을 대상으로 맞춤형 교육을 제공합니다.</p>
+                <ul class="biz-features">
+                    <li>AI 리터러시 프로그램</li>
+                    <li>생성형 AI 실무 활용법</li>
+                    <li>AI 경영 전략 교육</li>
+                    <li>AI Creator School 운영</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">💼</div>
+                <h3 class="biz-title">TEN AI Consulting</h3>
+                <p class="biz-subtitle">AI로 조직의 문제를 해결하다</p>
+                <p class="biz-desc">정부·지자체·기업의 AI 도입 전략을 수립하고, RAG 기반 LLM 솔루션 구축을 지원합니다.</p>
+                <ul class="biz-features">
+                    <li>정부·지자체 AI 자문</li>
+                    <li>RAG 기반 LLM 솔루션</li>
+                    <li>AI 데이터센터 구축 자문</li>
+                    <li>산업 전환 전략 컨설팅</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">🚀</div>
+                <h3 class="biz-title">TEN AI Platform</h3>
+                <p class="biz-subtitle">모든 사람이 AI를 도구로 활용하게 한다</p>
+                <p class="biz-desc">TEN AI Hub를 통해 교육, 툴킷, 템플릿, 사례를 공유하며 실무형 AI 생태계를 구축합니다.</p>
+                <ul class="biz-features">
+                    <li>TEN AI Hub 플랫폼</li>
+                    <li>RAG 기반 실무 도구</li>
+                    <li>Prompt Template 라이브러리</li>
+                    <li>ChatGPT 플러그인 개발</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">🎓</div>
+                <h3 class="biz-title">TEN AI Academy</h3>
+                <p class="biz-subtitle">함께 배우고 실천하는 학습 생태계</p>
+                <p class="biz-desc">AI 전문 강사 양성과정과 지역 기반 AI 실전 커뮤니티를 운영합니다.</p>
+                <ul class="biz-features">
+                    <li>강사 양성 과정</li>
+                    <li>AI Creator School</li>
+                    <li>지역 AI 커뮤니티</li>
+                    <li>온/오프라인 하이브리드</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">📊</div>
+                <h3 class="biz-title">TEN AI Report &amp; Journal</h3>
+                <p class="biz-subtitle">활용 중심 AI의 이론화</p>
+                <p class="biz-desc">AI 활용 사례 연구와 정책 제안 리포트를 발행하며, 실천적 지능의 학술적 기반을 구축합니다.</p>
+                <ul class="biz-features">
+                    <li>AI 활용 사례 연구</li>
+                    <li>정책 제안 리포트</li>
+                    <li>산업별 AI 가이드라인</li>
+                    <li>교육 혁신 저널</li>
+                </ul>
+            </div>
+            <div class="biz-card" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(10, 22, 40, 0.95) 100%); border-color: rgba(0, 212, 255, 0.3);">
+                <div class="biz-icon" style="background: var(--gradient-cyan);">🤝</div>
+                <h3 class="biz-title">파트너십 문의</h3>
+                <p class="biz-subtitle">함께 성장하는 AI 생태계</p>
+                <p class="biz-desc">TEN AI와 함께 AI의 가치를 현장에서 실현할 파트너를 찾습니다.</p>
+                <ul class="biz-features">
+                    <li>교육 기관 협력</li>
+                    <li>기업 AI 도입 지원</li>
+                    <li>정부 정책 자문</li>
+                    <li>연구 협력 네트워크</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="values-strip animate-on-scroll">
+            <div class="value-chip"><div class="ic">👤</div><div class="t">Human-Centric</div><div class="d">기술은 인간을 위해 존재합니다</div></div>
+            <div class="value-chip"><div class="ic">⚙️</div><div class="t">Practical Innovation</div><div class="d">기술보다 실천, 결과보다 과정</div></div>
+            <div class="value-chip"><div class="ic">🤝</div><div class="t">Co-Creation</div><div class="d">인간과 AI의 협력적 가치 창출</div></div>
+            <div class="value-chip"><div class="ic">📖</div><div class="t">Continuous Learning</div><div class="d">배우고 나누며 성장하는 문화</div></div>
+            <div class="value-chip"><div class="ic">🛡️</div><div class="t">Trustworthy AI</div><div class="d">안전하고 검증된 AI 솔루션</div></div>
+            <div class="value-chip"><div class="ic">🔍</div><div class="t">Transparency</div><div class="d">데이터와 의사결정의 투명성</div></div>
+        </div>
+    </section>
+
+    <!-- ============ 2. Academy / Handbook Explorer ============ -->
+    <section class="academy" id="academy">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">02 · Handbook Academy</p>
+            <h2 class="section-title">교육 아카데미 — 핸드북 탐색기</h2>
+            <p class="section-desc">과정별 · 레벨별로 체계화된 교육 핸드북을 탐색하고, 나의 수강 단계에 맞는 교재를 바로 열어보세요</p>
+        </div>
+
+        <div class="academy-filters animate-on-scroll">
+            <div class="course-tabs" role="tablist" aria-label="과정 필터">
+                <button class="course-tab active" data-course="all" role="tab" aria-selected="true">전체</button>
+                <button class="course-tab" data-course="vibecoding" role="tab" aria-selected="false">바이브코딩</button>
+                <button class="course-tab" data-course="genai" role="tab" aria-selected="false">생성형 AI 실무</button>
+                <button class="course-tab" data-course="ai_business" role="tab" aria-selected="false">AI 경영 전략</button>
+            </div>
+            <div class="level-chips" aria-label="레벨 필터">
+                <span class="lv-label">레벨</span>
+                <button class="level-chip active" data-level="all">All</button>
+                <button class="level-chip" data-level="1">L1</button>
+                <button class="level-chip" data-level="2">L2</button>
+                <button class="level-chip" data-level="3">L3</button>
+                <button class="level-chip" data-level="4">L4</button>
+            </div>
+        </div>
+
+        <div class="handbook-grid" id="handbookGrid" aria-live="polite"></div>
+
+        <div class="academy-note animate-on-scroll">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span>
+                <strong>공개</strong> 핸드북은 로그인 없이 열람할 수 있습니다. <strong>회원</strong> 핸드북은 구글/카카오 간편 가입 후,
+                <strong>수강생</strong> 핸드북은 해당 과정 수강 등록(관리자 권한 부여) 후 활성화됩니다.
+                신규 핸드북은 관리자 콘솔에서 HTML 업로드만으로 무중단 반영됩니다.
+            </span>
+        </div>
+    </section>
+
+    <!-- ============ 3. Lectures ============ -->
+    <section class="lectures" id="lectures">
+        <div class="lectures-head animate-on-scroll">
+            <div>
+                <p class="section-label">03 · CEO Lectures</p>
+                <h2>대표님 강의</h2>
+                <p>'정원훈 박사의 챗GPT 연구소' 채널의 최신 강의가 매일 자동으로 업데이트됩니다. 카드를 클릭하면 사이트를 벗어나지 않고 팝업 플레이어에서 바로 시청할 수 있습니다.</p>
+            </div>
+            <a class="channel-btn" href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
+                YouTube 채널 방문
+            </a>
+        </div>
+        <div class="lecture-grid" id="lectureGrid"></div>
+    </section>
+
+    <!-- ============ 4. Apps Showcase ============ -->
+    <section class="apps" id="apps">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">04 · TEN AI Apps</p>
+            <h2 class="section-title">쇼케이스 — 직접 만든 AI</h2>
+            <p class="section-desc">TEN AI가 직접 개발한 전문가용 AI 애플리케이션. 카드에 마우스를 올려 작동 원리를 확인하고, 바로 실행해 보세요</p>
+        </div>
+        <div class="apps-grid" id="appsGrid"></div>
+    </section>
+
+    <!-- ============ 5. News (게시물) ============ -->
+    <section class="news" id="news">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">05 · News &amp; Board</p>
+            <h2 class="section-title">소식</h2>
+            <p class="section-desc">TEN AI의 공지사항, 교육 일정, 새로운 소식을 전해드립니다</p>
+        </div>
+        <div class="news-grid" id="newsGrid" aria-live="polite"></div>
+    </section>
+
+    <!-- ============ 6. Q&A ============ -->
+    <section class="qna" id="qna">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">06 · Q&amp;A</p>
+            <h2 class="section-title">무엇이든 물어보세요</h2>
+            <p class="section-desc">교육 과정, 핸드북, 컨설팅에 대해 궁금한 점을 남겨주시면 답변해 드립니다</p>
+        </div>
+        <div class="qna-inner">
+            <form class="qna-form animate-on-scroll" id="qnaForm">
+                <h3>질문 남기기</h3>
+                <div class="qna-form-row">
+                    <input type="text" id="qName" placeholder="이름 (또는 닉네임)" maxlength="40" aria-label="이름">
+                    <input type="email" id="qEmail" placeholder="이메일 (선택 — 답변 알림용)" maxlength="80" aria-label="이메일">
+                </div>
+                <textarea id="qQuestion" placeholder="궁금한 내용을 자유롭게 적어주세요" maxlength="2000" required aria-label="질문 내용"></textarea>
+                <button type="submit" class="btn-primary" style="justify-content:center;">
+                    질문 등록하기
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+                <p class="qna-form-note">등록된 질문은 관리자 답변 후 아래 목록에 공개됩니다. (비공개 답변을 원하시면 이메일을 남겨주세요)</p>
+            </form>
+            <div class="qna-list-wrap animate-on-scroll">
+                <h3>자주 나온 질문과 답변</h3>
+                <div class="qna-list" id="qnaPublicList" aria-live="polite"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 7. Membership ============ -->
+    <section class="membership" id="membership">
+        <div class="membership-inner">
+            <div class="animate-on-scroll">
+                <p class="section-label">07 · Membership</p>
+                <h2 class="section-title" style="text-align:left;">멤버십 &amp; 내 강의실</h2>
+                <p class="section-desc" style="text-align:left;">구글·카카오 원클릭 가입으로 나만의 학습 공간을 만들고, 수강 단계에 맞는 핸드북 권한을 받아보세요.</p>
+                <div class="tier-list">
+                    <div class="tier-row">
+                        <div class="tier-icon pub">🌐</div>
+                        <div>
+                            <div class="t">전체 공개 <small>PUBLIC</small></div>
+                            <div class="d">핸드북 소개(Chapter 00)와 입문용 가이드는 로그인 없이 누구나 열람할 수 있습니다.</div>
+                        </div>
+                    </div>
+                    <div class="tier-row">
+                        <div class="tier-icon mem">👥</div>
+                        <div>
+                            <div class="t">회원 공개 <small>REGISTERED</small></div>
+                            <div class="d">소셜 로그인을 마친 인증 회원에게 개방되는 실무 핸드북. 가입 시 이름·회사명·이메일만 수집합니다.</div>
+                        </div>
+                    </div>
+                    <div class="tier-row">
+                        <div class="tier-icon enr">🎓</div>
+                        <div>
+                            <div class="t">수강생 전용 <small>RESTRICTED COURSE</small></div>
+                            <div class="d">유료 과정 수강생에게만 활성화되는 심화 교재. 관리자가 과정 권한을 부여하면 즉시 열람 가능합니다.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="login-panel animate-on-scroll" id="loginPanel">
+                <h3>3초 만에 시작하기</h3>
+                <p>비밀번호 없이, 쓰던 계정으로 바로 가입하세요.</p>
+                <button class="social-btn google" data-social="구글">
+                    <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    구글로 계속하기
+                </button>
+                <button class="social-btn kakao" data-social="카카오">
+                    <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#191600" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.84 5.18 4.6 6.56-.2.74-.74 2.7-.85 3.12-.13.52.19.51.4.37.17-.11 2.65-1.8 3.72-2.53.69.1 1.4.15 2.13.15 5.52 0 10-3.48 10-7.67C22 6.48 17.52 3 12 3z"/></svg>
+                    카카오로 계속하기
+                </button>
+                <div class="login-divider">가입 시 수집 정보</div>
+                <div class="login-fields">
+                    <input type="text" placeholder="이름 (소셜 프로필 자동 입력)" aria-label="이름" disabled>
+                    <input type="text" placeholder="회사명 (최초 가입 시 입력)" aria-label="회사명" disabled>
+                    <input type="email" placeholder="이메일 (소셜 계정 연동)" aria-label="이메일" disabled>
+                </div>
+                <p class="login-note">
+                    간결한 3개 항목만 수집하며, 수강 권한 관리 목적 외에는 사용되지 않습니다.
+                    로그인 시 <a href="#membership">이용약관</a> 및 <a href="#membership">개인정보처리방침</a>에 동의하게 됩니다.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta" id="contact">
+        <div class="cta-bg" aria-hidden="true"></div>
+        <div class="cta-content animate-on-scroll">
+            <h2>AI가 삶에 닿을 때,<br>혁신은 현실이 됩니다</h2>
+            <p>TEN AI와 함께 실천적 지능의 시대를 열어가세요.<br>교육, 컨설팅, 플랫폼 구축까지 맞춤형 솔루션을 제공합니다.</p>
+            <div class="hero-cta-group">
+                <a href="mailto:contact@tenai.kr" class="btn-primary" data-mail>
+                    상담 신청하기
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#academy" class="btn-secondary">교육 과정 둘러보기</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ Footer ============ -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="#home" class="logo">
+                    <div class="logo-icon" hidden>10</div>
+                    <span class="logo-lockup">
+                        <span class="logo-text">Ten<span>AI</span></span>
+                        <span class="logo-tagline">AX HUB PLATFORM</span>
+                    </span>
+                </a>
+                <p>인간의 지혜와 실천이 만나는 10번째 인공지능. 활용 중심의 AI, 실천형 인공지능 생태계를 구축합니다.</p>
+            </div>
+            <div>
+                <h4 class="footer-title">플랫폼</h4>
+                <ul class="footer-links">
+                    <li><a href="#academy">교육 아카데미</a></li>
+                    <li><a href="#lectures">대표님 강의</a></li>
+                    <li><a href="#apps">TEN AI Apps</a></li>
+                    <li><a href="#news">소식·Q&amp;A</a></li>
+                    <li><a href="#membership">멤버십</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-title">회사</h4>
+                <ul class="footer-links">
+                    <li><a href="#about">소개 &amp; 철학</a></li>
+                    <li><a href="#about">TenOS-Ko-28B</a></li>
+                    <li><a href="#about">사업영역</a></li>
+                    <li><a href="#contact">파트너십 문의</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="footer-title">연락처</h4>
+                <ul class="footer-links">
+                    <li><a href="mailto:contact@tenai.kr" data-mail>contact@tenai.kr</a></li>
+                    <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
+                    <li><a href="#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
+                    <li><a href="admin.html" style="opacity:0.55;">관리자 콘솔</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-copyright">© 2026 TEN AI. All rights reserved.</p>
+            <p class="footer-slogan" data-set="footerSlogan">AI를 배우다, AI로 실천하다</p>
+        </div>
+    </footer>
+
+    <!-- ============ Post Modal ============ -->
+    <div class="video-modal" id="postModal" role="dialog" aria-modal="true" aria-label="게시물 보기">
+        <div class="video-modal-box">
+            <div class="post-modal-body">
+                <div class="news-meta" id="postModalMeta"></div>
+                <h3 id="postModalTitle"></h3>
+                <div class="content" id="postModalContent"></div>
+            </div>
+            <div class="video-modal-meta" style="border-top:1px solid rgba(255,255,255,0.08);">
+                <div></div>
+                <button class="modal-close" id="postModalClose" aria-label="닫기">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Video Modal ============ -->
+    <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-label="강의 플레이어">
+        <div class="video-modal-box">
+            <div class="video-frame" id="videoFrame"></div>
+            <div class="video-modal-meta">
+                <div>
+                    <div class="cat" id="videoCat"></div>
+                    <div class="title" id="videoTitle"></div>
+                </div>
+                <button class="modal-close" id="videoClose" aria-label="닫기">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="data-store.js"></script>
+    <script>
+        /* =====================================================
+           콘텐츠 데이터 (운영 시 Supabase DB/Storage와 연동)
+           - handbooks 테이블 스키마와 동일한 필드 구성:
+             title / course_tag / level_tier / access_level
+           ===================================================== */
+        const HANDBOOKS = [
+            { id: 1,  title: '바이브코딩 입문 가이드',            course_tag: 'vibecoding',  level_tier: 1, access_level: 'public',
+              desc: '비개발자를 위한 자연어 개발 기초와 프롬프트의 이해. 코딩 없이 아이디어를 앱으로 만드는 첫걸음.' },
+            { id: 2,  title: '무릎앱 만들기 기초 실습',           course_tag: 'vibecoding',  level_tier: 2, access_level: 'member',
+              desc: '생각을 그대로 화면으로. 실습 중심의 무릎앱 제작 워크북으로 나만의 도구를 완성합니다.' },
+            { id: 3,  title: '바이브코딩 실무 실습서',            course_tag: 'vibecoding',  level_tier: 3, access_level: 'enrolled',
+              desc: '역참목조분검 프레임워크 기반의 실전 개발 프로세스와 무릎앱 고도화 전략.' },
+            { id: 4,  title: '디버깅 심화 & 함정 회피 가이드',    course_tag: 'vibecoding',  level_tier: 4, access_level: 'enrolled',
+              desc: 'AI 협업 개발에서 만나는 디버깅 함정과 해결 패턴. 실무자를 위한 심화 트러블슈팅.' },
+            { id: 5,  title: '실무 생산성 혁신 핸드북',           course_tag: 'genai',       level_tier: 1, access_level: 'public',
+              desc: 'ChatGPT · Claude · Gemini를 업무에 바로 적용하는 실전 비법. 일반인을 위한 생산성 가이드.' },
+            { id: 6,  title: '프롬프트 라이브러리 가이드',        course_tag: 'genai',       level_tier: 2, access_level: 'member',
+              desc: '재사용 가능한 프롬프트 자산 구축법. 직무별 템플릿과 설계 패턴 모음.' },
+            { id: 7,  title: 'API 연동 & 에이전틱 오케스트레이션', course_tag: 'genai',       level_tier: 3, access_level: 'enrolled',
+              desc: 'LLM API 연동부터 멀티 에이전트 오케스트레이션까지, 전문가를 위한 심화 과정.' },
+            { id: 8,  title: 'RAG 구축 실무 가이드',              course_tag: 'genai',       level_tier: 3, access_level: 'enrolled',
+              desc: '조직의 지식을 AI에 연결하는 검색증강생성(RAG) 파이프라인 설계와 구축 실무.' },
+            { id: 9,  title: '중소기업 AI 도입 로드맵',           course_tag: 'ai_business', level_tier: 2, access_level: 'member',
+              desc: '기업 임직원을 위한 단계별 AI 도입 전략. 진단부터 실행까지의 경영 로드맵.' },
+            { id: 10, title: '정부지원사업 가이드 v3',            course_tag: 'ai_business', level_tier: 2, access_level: 'enrolled',
+              desc: 'AI를 활용한 정부지원사업 계획서 작성법. 선정률을 높이는 구조화 전략과 실전 템플릿.' },
+            { id: 11, title: '기술가치평가 핸드북',               course_tag: 'ai_business', level_tier: 3, access_level: 'enrolled',
+              desc: '기술 기반 기업을 위한 가치평가 프레임워크와 AI 활용 분석 기법.' },
+        ];
+
+        const COURSE_META = {
+            vibecoding:  { name: '바이브코딩',      tagClass: 'tag-vibe',  coverClass: 'cover-vibe',  deco: 'V' },
+            genai:       { name: '생성형 AI 실무',  tagClass: 'tag-genai', coverClass: 'cover-genai', deco: 'G' },
+            ai_business: { name: 'AI 경영 전략',    tagClass: 'tag-biz',   coverClass: 'cover-biz',   deco: 'B' },
+        };
+
+        const ACCESS_META = {
+            public:   { label: '전체 공개',   cls: 'access-public',   icon: '🌐' },
+            member:   { label: '회원 공개',   cls: 'access-member',   icon: '👥' },
+            enrolled: { label: '수강생 전용', cls: 'access-enrolled', icon: '🔒' },
+        };
+
+        /* 강의 데이터 — 운영 시 Netlify 크론이 유튜브 RSS를 1일 1회 캐싱하여 자동 갱신.
+           videoId를 채우면 팝업 플레이어에서 즉시 재생됩니다. */
+        const LECTURES = [
+            { cat: 'ChatGPT 실무',        title: 'ChatGPT 실무 활용법 — 업무 자동화의 시작',        dur: '18:42', videoId: '', grad: ['#0e7490', '#164e63'] },
+            { cat: '생성형 AI 가이드',    title: '생성형 AI 완벽 가이드 — 도구 선택부터 활용까지',   dur: '24:15', videoId: '', grad: ['#6d28d9', '#312e81'] },
+            { cat: 'AI 경영 전략',        title: 'AI 경영 전략 강의 — 우리 회사에 AI 심는 법',       dur: '21:08', videoId: '', grad: ['#b45309', '#7c2d12'] },
+            { cat: '프롬프트 엔지니어링', title: '프롬프트 엔지니어링 스킬업 — 좋은 질문의 기술',    dur: '16:33', videoId: '', grad: ['#0f766e', '#134e4a'] },
+        ];
+
+        /* 앱 쇼케이스 — 운영 시 apps.json 드래그 앤 드롭 업로드로 자동 갱신 */
+        const APPS = [
+            { name: '서울LAW봇', badge: 'Legal AI', badgeCls: 'tag-vibe',
+              oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇',
+              how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.',
+              launch: '#apps', github: '#apps' },
+            { name: '블록ESG', badge: 'ESG Analytics', badgeCls: 'tag-genai',
+              oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구',
+              how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.',
+              launch: '#apps', github: '#apps' },
+            { name: 'TEN AI Hub', badge: 'Platform', badgeCls: 'tag-biz',
+              oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브',
+              how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.',
+              launch: '#apps', github: '#apps' },
+            { name: 'Prompt Library', badge: 'Toolkit', badgeCls: 'tag-vibe',
+              oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리',
+              how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.',
+              launch: '#apps', github: '#apps' },
+        ];
+
+        /* ============ 핸드북 탐색기 ============ */
+        const grid = document.getElementById('handbookGrid');
+        let curCourse = 'all', curLevel = 'all';
+
+        function renderHandbooks() {
+            const items = HANDBOOKS.filter(h =>
+                (curCourse === 'all' || h.course_tag === curCourse) &&
+                (curLevel === 'all' || h.level_tier === Number(curLevel))
+            );
+            if (!items.length) {
+                grid.innerHTML = '<div class="handbook-empty">해당 과정·레벨의 핸드북이 아직 없습니다.<br>새 교재는 관리자 콘솔 업로드 즉시 이곳에 반영됩니다.</div>';
+                return;
+            }
+            grid.innerHTML = items.map((h, i) => {
+                const c = COURSE_META[h.course_tag];
+                const a = ACCESS_META[h.access_level];
+                const unlocked = h.access_level === 'public';
+                return `
+                <article class="handbook-card" style="animation-delay:${i * 0.06}s">
+                    <div class="hb-cover ${c.coverClass}" data-deco="${c.deco}${h.level_tier}">
+                        <span class="hb-level outfit">LEVEL ${h.level_tier}</span>
+                    </div>
+                    <div class="hb-body">
+                        <div class="hb-meta">
+                            <span class="hb-course-tag ${c.tagClass}">${c.name}</span>
+                            <span class="hb-access ${a.cls}">${a.icon} ${a.label}</span>
+                        </div>
+                        <h3 class="hb-title">${h.title}</h3>
+                        <p class="hb-desc">${h.desc}</p>
+                        <button class="hb-open ${unlocked ? 'unlocked' : 'locked'}" data-hb="${h.id}">
+                            ${unlocked ? '핸드북 열기 →' : (h.access_level === 'member' ? '로그인 후 열람' : '수강 등록 후 열람')}
+                        </button>
+                    </div>
+                </article>`;
+            }).join('');
+        }
+
+        document.querySelectorAll('.course-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.course-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                curCourse = tab.dataset.course;
+                renderHandbooks();
+            });
+        });
+        document.querySelectorAll('.level-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.level-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                curLevel = chip.dataset.level;
+                renderHandbooks();
+            });
+        });
+
+        grid.addEventListener('click', e => {
+            const btn = e.target.closest('.hb-open');
+            if (!btn) return;
+            const hb = HANDBOOKS.find(h => h.id === Number(btn.dataset.hb));
+            if (hb.access_level === 'public') {
+                showToast(`『${hb.title}』 웹 뷰어는 Supabase Storage 연동 후 열립니다.`);
+            } else {
+                showToast(hb.access_level === 'member'
+                    ? '회원 전용 핸드북입니다. 소셜 로그인 후 이용해 주세요.'
+                    : '수강생 전용 핸드북입니다. 과정 등록 후 열람할 수 있습니다.');
+                document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        renderHandbooks();
+
+        /* ============ 강의 카드 & 팝업 플레이어 ============ */
+        const lectureGrid = document.getElementById('lectureGrid');
+        lectureGrid.innerHTML = LECTURES.map((v, i) => `
+            <button class="lecture-card animate-on-scroll" data-idx="${i}">
+                <div class="lecture-thumb" style="background: linear-gradient(135deg, ${v.grad[0]}, ${v.grad[1]});">
+                    <div class="play"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+                    <span class="dur outfit">${v.dur}</span>
+                </div>
+                <div class="lecture-body">
+                    <div class="lecture-cat">${v.cat}</div>
+                    <div class="lecture-title">${v.title}</div>
+                </div>
+            </button>
+        `).join('');
+
+        const videoModal = document.getElementById('videoModal');
+        const videoFrame = document.getElementById('videoFrame');
+
+        lectureGrid.addEventListener('click', e => {
+            const card = e.target.closest('.lecture-card');
+            if (!card) return;
+            const v = LECTURES[Number(card.dataset.idx)];
+            document.getElementById('videoCat').textContent = v.cat;
+            document.getElementById('videoTitle').textContent = v.title;
+            if (v.videoId) {
+                videoFrame.innerHTML = `<iframe src="https://www.youtube.com/embed/${v.videoId}?autoplay=1&rel=0" title="${v.title}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+            } else {
+                videoFrame.innerHTML = `
+                    <div class="video-placeholder">
+                        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>
+                        <div class="t">채널 연동 대기 중</div>
+                        <div class="d">운영 배포 시 유튜브 RSS 피드가 1일 1회 자동 수급되어 이 자리에 최신 강의가 재생됩니다. 지금은 채널에서 직접 시청해 주세요.</div>
+                        <a class="channel-btn" href="${(window.SITE_SETTINGS && window.SITE_SETTINGS.youtubeUrl) || 'https://www.youtube.com/@smauelchung'}" target="_blank" rel="noopener">채널에서 시청하기</a>
+                    </div>`;
+            }
+            videoModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
+
+        function closeVideo() {
+            videoModal.classList.remove('open');
+            videoFrame.innerHTML = '';
+            document.body.style.overflow = '';
+        }
+        document.getElementById('videoClose').addEventListener('click', closeVideo);
+        videoModal.addEventListener('click', e => { if (e.target === videoModal) closeVideo(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
+
+        /* ============ 앱 쇼케이스 ============ */
+        document.getElementById('appsGrid').innerHTML = APPS.map(a => `
+            <article class="app-card animate-on-scroll">
+                <div class="app-thumb" style="background: radial-gradient(ellipse 80% 90% at 50% 110%, rgba(0,212,255,0.18) 0%, transparent 60%), var(--navy-soft);">
+                    <div class="app-mockup" aria-hidden="true">
+                        <div class="mock-dots"><i></i><i></i><i></i></div>
+                        <div class="mock-line cy"></div>
+                        <div class="mock-line w85"></div>
+                        <div class="mock-line w60"></div>
+                        <div class="mock-line w85"></div>
+                    </div>
+                    <div class="app-overlay">${a.how}</div>
+                </div>
+                <div class="app-body">
+                    <div class="app-head">
+                        <h3 class="app-name">${a.name}</h3>
+                        <span class="app-badge ${a.badgeCls}">${a.badge}</span>
+                    </div>
+                    <p class="app-oneliner">${a.oneliner}</p>
+                    <div class="app-actions">
+                        <a class="app-btn launch" href="${a.launch}" onclick="showToast('『${a.name}』 앱은 정식 배포 후 실행 링크가 연결됩니다.'); return false;">
+                            ⚡ App Launch
+                        </a>
+                        <a class="app-btn gh" href="${a.github}" onclick="showToast('GitHub 저장소는 오픈소스 공개 후 연결됩니다.'); return false;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.4.6.1.83-.26.83-.58v-2.03c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.76-1.34-1.76-1.08-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.5 1 .1-.78.42-1.31.76-1.6-2.66-.31-5.47-1.34-5.47-5.93 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.53.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.88.12 3.18.77.84 1.23 1.9 1.23 3.23 0 4.6-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.23v3.3c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                            GitHub 보러가기
+                        </a>
+                    </div>
+                </div>
+            </article>
+        `).join('');
+
+        /* ============ 소셜 로그인 (데모) ============ */
+        document.querySelectorAll('[data-social]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                showToast(`${btn.dataset.social} 로그인은 Supabase Auth(OAuth) 연동 후 활성화됩니다.`);
+            });
+        });
+        document.querySelectorAll('[data-login]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeMobileMenu();
+                document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        /* ============ Toast ============ */
+        const toast = document.getElementById('toast');
+        let toastTimer;
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+        }
+
+        /* ============ 내비게이션 동작 ============ */
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        }, { passive: true });
+
+        // 모바일 메뉴
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        function closeMobileMenu() {
+            menuBtn.classList.remove('open');
+            mobileMenu.classList.remove('open');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuBtn.addEventListener('click', () => {
+            const opening = !mobileMenu.classList.contains('open');
+            menuBtn.classList.toggle('open', opening);
+            mobileMenu.classList.toggle('open', opening);
+            menuBtn.setAttribute('aria-expanded', String(opening));
+            document.body.style.overflow = opening ? 'hidden' : '';
+        });
+        mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
+
+        // 현재 섹션 하이라이트 (qna는 소식·Q&A 메뉴에 매핑)
+        const NAV_MAP = { about: '#about', academy: '#academy', lectures: '#lectures', apps: '#apps', news: '#news', qna: '#news', membership: '#membership' };
+        const navAnchors = document.querySelectorAll('.nav-links a');
+        const sectionObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = NAV_MAP[entry.target.id];
+                    navAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === target));
+                }
+            });
+        }, { rootMargin: '-40% 0px -55% 0px' });
+        Object.keys(NAV_MAP).forEach(id => { const el = document.getElementById(id); if (el) sectionObserver.observe(el); });
+
+        /* ============ 스크롤 등장 애니메이션 ============ */
+        const revealObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+        document.querySelectorAll('.animate-on-scroll').forEach(el => revealObserver.observe(el));
+
+        // 스태거(순차) 등장
+        document.querySelectorAll('.stagger').forEach(parent => {
+            Array.from(parent.children).forEach((child, i) => {
+                child.style.transitionDelay = `${i * 0.08}s`;
+            });
+        });
+
+        /* ============ 카운터 애니메이션 ============ */
+        const counterObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                const el = entry.target;
+                const target = Number(el.dataset.counter);
+                const suffix = el.dataset.suffix || '+';
+                const dur = 1400;
+                const start = performance.now();
+                (function tick(now) {
+                    const p = Math.min((now - start) / dur, 1);
+                    const eased = 1 - Math.pow(1 - p, 3);
+                    el.textContent = Math.round(target * eased) + (p === 1 ? suffix : '');
+                    if (p < 1) requestAnimationFrame(tick);
+                })(start);
+                counterObserver.unobserve(el);
+            });
+        }, { threshold: 0.6 });
+        document.querySelectorAll('[data-counter]').forEach(el => counterObserver.observe(el));
+
+        /* ============ 마퀴 무한 루프 복제 ============ */
+        const track = document.getElementById('marqueeTrack');
+        track.innerHTML += track.innerHTML;
+
+        /* =====================================================
+           동적 콘텐츠 — TenStore (Firebase 또는 로컬 모드) 연동
+           관리자 콘솔(admin.html)에서 수정한 내용이 반영됩니다.
+           ===================================================== */
+        const escHtml = s => String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+        window.SITE_SETTINGS = null;
+
+        /* ----- 설정 반영 (로고, 문구, 연락처) ----- */
+        async function applySettings() {
+            const s = await TenStore.getSettings();
+            window.SITE_SETTINGS = s;
+
+            // 로고 (네비게이션 + 푸터) — 이미지가 있으면 아이콘 표시, 없으면 텍스트 록업만
+            document.querySelectorAll('.logo').forEach(logo => {
+                const icon = logo.querySelector('.logo-icon');
+                const text = logo.querySelector('.logo-text');
+                const tagline = logo.querySelector('.logo-tagline');
+                if (icon) {
+                    if (s.logoImage) {
+                        icon.hidden = false;
+                        icon.innerHTML = '<img src="' + s.logoImage + '" alt="' + escHtml(s.logoText + s.logoAccent) + ' 로고" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+                    } else {
+                        icon.hidden = true;
+                    }
+                }
+                if (text) text.innerHTML = escHtml(s.logoText || 'Ten') + '<span>' + escHtml(s.logoAccent || 'AI') + '</span>';
+                if (tagline) {
+                    tagline.textContent = s.logoTagline || '';
+                    tagline.hidden = !s.logoTagline;
+                }
+            });
+
+            // 문구류 (data-set 훅)
+            document.querySelectorAll('[data-set]').forEach(el => {
+                const key = el.dataset.set;
+                if (!(key in s) || s[key] == null || s[key] === '') return;
+                if (key === 'heroSubtitle') {
+                    el.innerHTML = escHtml(s[key]).replace(/\n/g, '<br>');
+                } else {
+                    el.textContent = s[key];
+                }
+            });
+
+            // 링크류
+            document.querySelectorAll('[data-mail]').forEach(a => { a.href = 'mailto:' + s.contactEmail; });
+            document.querySelectorAll('[data-mail]:not(.btn-primary)').forEach(a => { a.textContent = s.contactEmail; });
+            document.querySelectorAll('[data-yt]').forEach(a => { a.href = s.youtubeUrl; });
+        }
+
+        /* ----- 소식 (게시물) ----- */
+        const CAT_CLS = { '공지': 'news-cat-notice', '뉴스': 'news-cat-news', '교육': 'news-cat-edu' };
+        let NEWS_CACHE = [];
+
+        async function renderNews() {
+            const posts = await TenStore.listPosts();
+            NEWS_CACHE = posts;
+            const el = document.getElementById('newsGrid');
+            if (!posts.length) {
+                el.innerHTML = '<div class="news-empty">등록된 소식이 없습니다.</div>';
+                return;
+            }
+            el.innerHTML = posts.slice(0, 6).map(p => `
+                <button class="news-card" data-post="${p.id}">
+                    <div class="news-meta">
+                        <span class="news-cat ${CAT_CLS[p.category] || 'news-cat-notice'}">${escHtml(p.category)}</span>
+                        ${p.pinned ? '<span class="news-pin">📌 고정</span>' : ''}
+                        <span class="news-date">${fmtDate(p.createdAt)}</span>
+                    </div>
+                    <div class="news-title">${escHtml(p.title)}</div>
+                    <p class="news-excerpt">${escHtml((p.content || '').slice(0, 90))}${(p.content || '').length > 90 ? '…' : ''}</p>
+                    <span class="news-more">자세히 보기 →</span>
+                </button>
+            `).join('');
+        }
+
+        const postModal = document.getElementById('postModal');
+        document.getElementById('newsGrid').addEventListener('click', e => {
+            const card = e.target.closest('.news-card');
+            if (!card) return;
+            const p = NEWS_CACHE.find(x => x.id === card.dataset.post);
+            if (!p) return;
+            document.getElementById('postModalMeta').innerHTML =
+                '<span class="news-cat ' + (CAT_CLS[p.category] || 'news-cat-notice') + '">' + escHtml(p.category) + '</span>' +
+                '<span class="news-date">' + fmtDate(p.createdAt) + '</span>';
+            document.getElementById('postModalTitle').textContent = p.title;
+            document.getElementById('postModalContent').textContent = p.content || '';
+            postModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
+        function closePostModal() {
+            postModal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('postModalClose').addEventListener('click', closePostModal);
+        postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePostModal(); });
+
+        /* ----- Q&A ----- */
+        async function renderPublicQna() {
+            const items = await TenStore.listQna({ publicOnly: true });
+            const el = document.getElementById('qnaPublicList');
+            if (!items.length) {
+                el.innerHTML = '<div class="qna-empty">아직 공개된 답변이 없습니다.<br>첫 질문을 남겨주세요!</div>';
+                return;
+            }
+            el.innerHTML = items.map(q => `
+                <div class="qna-item">
+                    <button class="qna-item-q" aria-expanded="false">
+                        <span class="q-mark">Q</span>
+                        <span class="q-text">${escHtml(q.question)}</span>
+                        <svg class="q-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="qna-item-a">
+                        <div class="qna-item-a-inner">
+                            <span class="a-mark">A</span>
+                            <div>
+                                <div class="a-body">${escHtml(q.answer)}</div>
+                                <div class="a-by">${escHtml(q.name)} 님의 질문 · ${fmtDate(q.answeredAt || q.createdAt)} 답변</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('qnaPublicList').addEventListener('click', e => {
+            const btn = e.target.closest('.qna-item-q');
+            if (!btn) return;
+            const item = btn.closest('.qna-item');
+            const open = item.classList.toggle('open');
+            btn.setAttribute('aria-expanded', String(open));
+        });
+
+        document.getElementById('qnaForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const question = document.getElementById('qQuestion').value.trim();
+            if (!question) { showToast('질문 내용을 입력해 주세요.'); return; }
+            try {
+                await TenStore.submitQuestion({
+                    name: document.getElementById('qName').value.trim() || '익명',
+                    email: document.getElementById('qEmail').value.trim(),
+                    question
+                });
+                e.target.reset();
+                showToast('질문이 등록되었습니다. 관리자 답변 후 공개됩니다. 감사합니다!');
+            } catch (err) {
+                console.error(err);
+                showToast('등록에 실패했습니다: ' + err.message);
+            }
+        });
+
+        /* ----- 초기 로드 ----- */
+        (async function initDynamic() {
+            try { await applySettings(); } catch (e) { console.warn('설정 적용 실패', e); }
+            try { await renderNews(); } catch (e) { console.warn('소식 로드 실패', e); }
+            try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
+        })();
+    </script>
+</body>
+</html>

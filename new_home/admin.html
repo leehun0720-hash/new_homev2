@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>TEN AI 관리자 콘솔</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-navy: #0a1628;
+            --navy-light: #152238;
+            --navy-soft: #1c2d4a;
+            --cyan-glow: #00d4ff;
+            --cyan-soft: #7ee8fa;
+            --amber: #ffb63d;
+            --red: #ff6b81;
+            --green: #6ee7b7;
+            --white: #ffffff;
+            --gray-200: #e2e8f0;
+            --gray-400: #94a3b8;
+            --gray-600: #64748b;
+            --gradient-cyan: linear-gradient(135deg, #00d4ff 0%, #7ee8fa 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--deep-navy);
+            color: var(--white);
+            line-height: 1.65;
+            min-height: 100vh;
+        }
+        .outfit { font-family: 'Outfit', sans-serif; }
+        button { font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
+        a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+            outline: 2px solid var(--cyan-glow); outline-offset: 2px;
+        }
+
+        /* ===== 접속 게이트 ===== */
+        .gate {
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(0,212,255,0.08) 0%, transparent 60%), var(--deep-navy);
+            z-index: 500;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
+        }
+        .gate.hidden { display: none; }
+        .gate-box {
+            width: min(400px, 100%);
+            background: var(--navy-light);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: 20px;
+            padding: 2.5rem 2.25rem;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+        }
+        .gate-box .logo-icon {
+            width: 52px; height: 52px; margin: 0 auto 1.2rem;
+            background: var(--gradient-cyan);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800; font-size: 1.2rem;
+            color: var(--deep-navy);
+        }
+        .gate-box h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.4rem; }
+        .gate-box p { font-size: 0.85rem; color: var(--gray-400); margin-bottom: 1.5rem; }
+        .gate-box input {
+            width: 100%;
+            background: rgba(10, 22, 40, 0.7);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            color: var(--white);
+            font-size: 0.95rem;
+            text-align: center;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.9rem;
+        }
+        .gate-box input:focus { outline: none; border-color: var(--cyan-glow); }
+        .gate-note { font-size: 0.74rem; color: var(--gray-600); margin-top: 1.1rem; line-height: 1.7; }
+
+        /* ===== 공용 버튼 ===== */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.7rem 1.5rem;
+            border-radius: 999px;
+            font-size: 0.9rem; font-weight: 700;
+            border: none;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .btn-cyan { background: var(--gradient-cyan); color: var(--deep-navy); }
+        .btn-cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,255,0.35); }
+        .btn-ghost { background: rgba(255,255,255,0.06); color: var(--gray-200); border: 1px solid rgba(255,255,255,0.16); }
+        .btn-ghost:hover { border-color: var(--cyan-glow); color: var(--cyan-glow); }
+        .btn-danger { background: rgba(255,107,129,0.1); color: var(--red); border: 1px solid rgba(255,107,129,0.35); }
+        .btn-danger:hover { background: rgba(255,107,129,0.2); }
+        .btn-sm { padding: 0.4rem 0.95rem; font-size: 0.8rem; }
+
+        /* ===== 레이아웃 ===== */
+        .admin-header {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem;
+            padding: 1rem 5%;
+            background: rgba(10, 22, 40, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.12);
+        }
+        .admin-brand { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; color: var(--white); }
+        .admin-brand .ic {
+            width: 38px; height: 38px;
+            background: var(--gradient-cyan);
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem;
+            color: var(--deep-navy);
+        }
+        .admin-brand .t { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; }
+        .admin-brand .t em { font-style: normal; color: var(--cyan-glow); }
+        .admin-brand small {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--amber);
+            border: 1px solid rgba(255,182,61,0.4);
+            border-radius: 999px;
+            padding: 0.12rem 0.6rem;
+            margin-left: 0.5rem;
+        }
+        .mode-badge {
+            font-size: 0.75rem; font-weight: 700;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .mode-badge.fb { background: rgba(255,182,61,0.12); color: var(--amber); border: 1px solid rgba(255,182,61,0.35); }
+        .mode-badge.local { background: rgba(0,212,255,0.1); color: var(--cyan-soft); border: 1px solid rgba(0,212,255,0.3); }
+        .header-right { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 5%;
+            align-items: start;
+        }
+        .admin-tabs {
+            display: flex; flex-direction: column; gap: 0.4rem;
+            position: sticky; top: 84px;
+        }
+        .admin-tab {
+            display: flex; align-items: center; gap: 0.7rem;
+            padding: 0.85rem 1.1rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            color: var(--gray-400);
+            font-size: 0.92rem; font-weight: 600;
+            text-align: left;
+            transition: all 0.25s ease;
+        }
+        .admin-tab:hover { color: var(--cyan-soft); background: rgba(0,212,255,0.05); }
+        .admin-tab.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.3);
+            color: var(--cyan-glow);
+        }
+        .panel { display: none; }
+        .panel.active { display: block; animation: fadeUp 0.35s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: linear-gradient(180deg, rgba(21,34,56,0.8) 0%, rgba(10,22,40,0.95) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.14);
+            border-radius: 18px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem; }
+        .card .sub { font-size: 0.84rem; color: var(--gray-400); margin-bottom: 1.4rem; }
+
+        .field { margin-bottom: 1.1rem; }
+        .field label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--gray-200); margin-bottom: 0.4rem; }
+        .field input[type="text"], .field input[type="email"], .field input[type="password"], .field textarea, .field select {
+            width: 100%;
+            background: rgba(10, 22, 40, 0.7);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--white);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.25s ease;
+        }
+        .field textarea { resize: vertical; min-height: 96px; }
+        .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--cyan-glow); }
+        .field .hint { font-size: 0.74rem; color: var(--gray-600); margin-top: 0.35rem; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+        /* 로고 미리보기 */
+        .logo-preview {
+            display: flex; align-items: center; gap: 0.75rem;
+            background: rgba(10, 22, 40, 0.85);
+            border: 1px dashed rgba(0, 212, 255, 0.3);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1.4rem;
+        }
+        .logo-preview .pv-icon {
+            width: 44px; height: 44px;
+            background: var(--gradient-cyan);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.05rem;
+            color: var(--deep-navy);
+            overflow: hidden; flex-shrink: 0;
+        }
+        .logo-preview .pv-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .logo-preview .pv-icon[hidden] { display: none; }
+        .logo-preview .pv-tagline[hidden] { display: none; }
+        .logo-preview .pv-lockup { display: flex; flex-direction: column; gap: 0.22rem; line-height: 1; }
+        .logo-preview .pv-text { font-family: 'Outfit', sans-serif; font-size: 1.55rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+        .logo-preview .pv-text em { font-style: normal; color: var(--cyan-glow); }
+        .logo-preview .pv-tagline { font-family: 'Outfit', sans-serif; font-size: 0.56rem; font-weight: 600; letter-spacing: 0.34em; color: var(--gray-400); text-transform: uppercase; white-space: nowrap; }
+        .file-drop {
+            border: 1.5px dashed rgba(255,255,255,0.25);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .file-drop:hover, .file-drop.drag { border-color: var(--cyan-glow); color: var(--cyan-soft); background: rgba(0,212,255,0.04); }
+
+        /* 목록 */
+        .item-list { display: flex; flex-direction: column; gap: 0.8rem; }
+        .item-row {
+            background: rgba(10, 22, 40, 0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            padding: 1.1rem 1.3rem;
+            transition: border-color 0.25s ease;
+        }
+        .item-row:hover { border-color: rgba(0,212,255,0.3); }
+        .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+        .item-title { font-weight: 700; font-size: 0.98rem; }
+        .item-meta { font-size: 0.76rem; color: var(--gray-600); margin-top: 0.25rem; }
+        .item-actions { display: flex; gap: 0.45rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+        .chip {
+            display: inline-block;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 0.16rem 0.6rem;
+            border-radius: 999px;
+            margin-right: 0.4rem;
+        }
+        .chip-notice { background: rgba(0,212,255,0.12); color: var(--cyan-soft); }
+        .chip-news { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+        .chip-edu { background: rgba(255,182,61,0.13); color: var(--amber); }
+        .chip-pin { background: rgba(110,231,183,0.12); color: var(--green); }
+        .chip-pending { background: rgba(255,107,129,0.12); color: var(--red); }
+        .chip-answered { background: rgba(110,231,183,0.12); color: var(--green); }
+        .chip-public { background: rgba(0,212,255,0.12); color: var(--cyan-soft); }
+        .chip-private { background: rgba(255,255,255,0.08); color: var(--gray-400); }
+
+        .qna-q { font-size: 0.92rem; margin: 0.6rem 0 0.8rem; color: var(--gray-200); white-space: pre-wrap; }
+        .qna-answer-box { margin-top: 0.4rem; }
+        .empty {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            border: 1px dashed rgba(255,255,255,0.15);
+            border-radius: 14px;
+        }
+
+        .filter-row { display: flex; gap: 0.5rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 0.45rem 1.1rem;
+            border-radius: 999px;
+            background: rgba(10,22,40,0.6);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--gray-200);
+            font-size: 0.82rem; font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .filter-btn:hover { border-color: rgba(0,212,255,0.4); }
+        .filter-btn.active { background: var(--gradient-cyan); color: var(--deep-navy); border-color: transparent; }
+
+        .checkbox-line { display: flex; align-items: center; gap: 0.55rem; font-size: 0.86rem; color: var(--gray-200); }
+        .checkbox-line input { width: 17px; height: 17px; accent-color: var(--cyan-glow); }
+
+        .toast {
+            position: fixed;
+            left: 50%; bottom: 2rem;
+            transform: translateX(-50%) translateY(140%);
+            background: var(--navy-soft);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 999px;
+            padding: 0.85rem 1.7rem;
+            font-size: 0.9rem;
+            z-index: 900;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 16px 44px rgba(0,0,0,0.5);
+            max-width: 90vw; text-align: center;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 860px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .admin-tabs { flex-direction: row; overflow-x: auto; position: static; padding-bottom: 0.4rem; }
+            .admin-tab { white-space: nowrap; }
+            .field-row, .field-row-3 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== 접속 게이트 ===== -->
+    <div class="gate" id="gate">
+        <div class="gate-box">
+            <div class="logo-icon">10</div>
+            <h1>TEN AI 관리자 콘솔</h1>
+            <p>접속 암호를 입력하세요</p>
+            <input type="password" id="gatePass" placeholder="••••••••" autocomplete="off">
+            <button class="btn btn-cyan" style="width:100%; justify-content:center;" id="gateBtn">접속하기</button>
+            <p class="gate-note">
+                초기 암호: <b>tenai2026</b> (설정 탭에서 변경하세요)<br>
+                ※ 이 게이트는 간이 보호 장치입니다. 운영 환경에서는 Firebase
+                Authentication과 Firestore 보안 규칙으로 반드시 보강하세요.
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== 헤더 ===== -->
+    <header class="admin-header">
+        <a class="admin-brand" href="index.html">
+            <span class="ic">10</span>
+            <span class="t">Ten<em>AI</em></span>
+            <small>ADMIN</small>
+        </a>
+        <div class="header-right">
+            <span class="mode-badge local" id="modeBadge">확인 중…</span>
+            <a class="btn btn-ghost btn-sm" href="index.html">사이트 보기 ↗</a>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn">잠금</button>
+        </div>
+    </header>
+
+    <!-- ===== 본문 ===== -->
+    <div class="admin-layout">
+        <nav class="admin-tabs" aria-label="관리 메뉴">
+            <button class="admin-tab active" data-panel="settings">⚙️ 사이트 설정</button>
+            <button class="admin-tab" data-panel="logo">🎨 로고 관리</button>
+            <button class="admin-tab" data-panel="posts">📋 게시물 관리</button>
+            <button class="admin-tab" data-panel="qna">💬 Q&amp;A 관리</button>
+        </nav>
+
+        <main>
+            <!-- ===== 사이트 설정 ===== -->
+            <section class="panel active" id="panel-settings">
+                <div class="card">
+                    <h2>메인 화면 문구</h2>
+                    <p class="sub">홈페이지 히어로 영역의 문구를 수정합니다. 저장 즉시 사이트에 반영됩니다.</p>
+                    <div class="field">
+                        <label for="sHeroBadge">상단 배지 문구</label>
+                        <input type="text" id="sHeroBadge">
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="sHeroTitle1">메인 타이틀 1행</label>
+                            <input type="text" id="sHeroTitle1">
+                        </div>
+                        <div class="field">
+                            <label for="sHeroTitle2">메인 타이틀 2행 (강조색)</label>
+                            <input type="text" id="sHeroTitle2">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="sHeroSubtitle">서브 타이틀 (줄바꿈 반영)</label>
+                        <textarea id="sHeroSubtitle"></textarea>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>연락처 &amp; 링크</h2>
+                    <p class="sub">문의 이메일, 주소, 유튜브 채널 주소를 관리합니다.</p>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="sContactEmail">문의 이메일</label>
+                            <input type="email" id="sContactEmail">
+                        </div>
+                        <div class="field">
+                            <label for="sYoutubeUrl">유튜브 채널 URL</label>
+                            <input type="text" id="sYoutubeUrl">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="sAddress">주소</label>
+                        <input type="text" id="sAddress">
+                    </div>
+                    <div class="field">
+                        <label for="sFooterSlogan">푸터 슬로건</label>
+                        <input type="text" id="sFooterSlogan">
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>관리자 암호</h2>
+                    <p class="sub">이 콘솔의 접속 암호를 변경합니다. 비워두면 기존 암호가 유지됩니다.</p>
+                    <div class="field">
+                        <label for="sAdminPass">새 접속 암호</label>
+                        <input type="password" id="sAdminPass" placeholder="변경할 때만 입력" autocomplete="new-password">
+                    </div>
+                </div>
+                <button class="btn btn-cyan" id="saveSettingsBtn">💾 설정 저장</button>
+            </section>
+
+            <!-- ===== 로고 관리 ===== -->
+            <section class="panel" id="panel-logo">
+                <div class="card">
+                    <h2>로고 미리보기</h2>
+                    <p class="sub">아래 미리보기는 입력과 동시에 갱신됩니다. 저장을 눌러야 사이트에 반영됩니다.</p>
+                    <div class="logo-preview">
+                        <div class="pv-icon" id="pvIcon" hidden>10</div>
+                        <div class="pv-lockup">
+                            <div class="pv-text"><span id="pvText">Ten</span><em id="pvAccent">AI</em></div>
+                            <div class="pv-tagline" id="pvTagline">AX HUB PLATFORM</div>
+                        </div>
+                    </div>
+                    <div class="field-row-3">
+                        <div class="field">
+                            <label for="lText">로고 텍스트 (흰색)</label>
+                            <input type="text" id="lText" maxlength="12">
+                        </div>
+                        <div class="field">
+                            <label for="lAccent">강조 텍스트 (시안색)</label>
+                            <input type="text" id="lAccent" maxlength="12">
+                        </div>
+                        <div class="field">
+                            <label for="lTagline">태그라인 (하단 소문자)</label>
+                            <input type="text" id="lTagline" maxlength="30">
+                            <div class="hint">비워두면 태그라인 없이 표시</div>
+                        </div>
+                    </div>
+                    <div class="field" style="max-width:220px;">
+                        <label for="lIcon">아이콘 텍스트 (이미지 업로드 시 대체용)</label>
+                        <input type="text" id="lIcon" maxlength="4">
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>로고 이미지</h2>
+                    <p class="sub">이미지를 업로드하면 아이콘 텍스트 대신 이미지가 표시됩니다. (PNG/JPG/SVG, 300KB 이하 권장)</p>
+                    <div class="file-drop" id="logoDrop">
+                        클릭하거나 이미지를 끌어다 놓으세요
+                        <input type="file" id="logoFile" accept="image/*" hidden>
+                    </div>
+                    <div style="margin-top:1rem; display:flex; gap:0.6rem;">
+                        <button class="btn btn-danger btn-sm" id="logoRemoveBtn">이미지 제거 (텍스트 아이콘 사용)</button>
+                    </div>
+                </div>
+                <button class="btn btn-cyan" id="saveLogoBtn">💾 로고 저장</button>
+            </section>
+
+            <!-- ===== 게시물 관리 ===== -->
+            <section class="panel" id="panel-posts">
+                <div class="card">
+                    <h2 id="postFormTitle">새 게시물 작성</h2>
+                    <p class="sub">공지·뉴스·교육 소식을 등록합니다. 사이트의 '소식' 섹션에 노출됩니다.</p>
+                    <input type="hidden" id="pId">
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="pTitle">제목</label>
+                            <input type="text" id="pTitle" placeholder="게시물 제목">
+                        </div>
+                        <div class="field">
+                            <label for="pCategory">카테고리</label>
+                            <select id="pCategory">
+                                <option value="공지">공지</option>
+                                <option value="뉴스">뉴스</option>
+                                <option value="교육">교육</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="pContent">내용 (줄바꿈 반영)</label>
+                        <textarea id="pContent" style="min-height:150px;" placeholder="게시물 내용을 입력하세요"></textarea>
+                    </div>
+                    <div class="field checkbox-line">
+                        <input type="checkbox" id="pPinned">
+                        <label for="pPinned" style="margin:0;">상단 고정</label>
+                    </div>
+                    <div style="display:flex; gap:0.6rem;">
+                        <button class="btn btn-cyan" id="savePostBtn">💾 게시물 저장</button>
+                        <button class="btn btn-ghost" id="resetPostBtn">새로 작성</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>게시물 목록</h2>
+                    <p class="sub" id="postCount"></p>
+                    <div class="item-list" id="postList"></div>
+                </div>
+            </section>
+
+            <!-- ===== Q&A 관리 ===== -->
+            <section class="panel" id="panel-qna">
+                <div class="card">
+                    <h2>Q&amp;A 관리</h2>
+                    <p class="sub">방문자 질문에 답변을 작성하고 공개 여부를 결정합니다. '공개' 상태의 답변 완료 질문만 사이트에 노출됩니다.</p>
+                    <div class="filter-row">
+                        <button class="filter-btn active" data-qf="all">전체</button>
+                        <button class="filter-btn" data-qf="pending">답변 대기</button>
+                        <button class="filter-btn" data-qf="answered">답변 완료</button>
+                    </div>
+                    <div class="item-list" id="qnaList"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="data-store.js"></script>
+    <script>
+        'use strict';
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+
+        let SETTINGS = {};
+
+        /* ===== Toast ===== */
+        let toastTimer;
+        function showToast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        /* ===== 모드 배지 ===== */
+        const badge = $('modeBadge');
+        badge.textContent = TenStore.modeLabel;
+        badge.className = 'mode-badge ' + (TenStore.mode === 'firebase' ? 'fb' : 'local');
+
+        /* ===== 접속 게이트 ===== */
+        async function tryUnlock() {
+            const pass = $('gatePass').value;
+            SETTINGS = await TenStore.getSettings();
+            if (pass === SETTINGS.adminPass) {
+                sessionStorage.setItem('tenai_admin', '1');
+                $('gate').classList.add('hidden');
+                initPanels();
+            } else {
+                showToast('암호가 올바르지 않습니다.');
+                $('gatePass').value = '';
+                $('gatePass').focus();
+            }
+        }
+        $('gateBtn').addEventListener('click', tryUnlock);
+        $('gatePass').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+        $('logoutBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('tenai_admin');
+            location.reload();
+        });
+
+        (async function boot() {
+            if (sessionStorage.getItem('tenai_admin') === '1') {
+                SETTINGS = await TenStore.getSettings();
+                $('gate').classList.add('hidden');
+                initPanels();
+            } else {
+                $('gatePass').focus();
+            }
+        })();
+
+        /* ===== 탭 전환 ===== */
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                $('panel-' + tab.dataset.panel).classList.add('active');
+            });
+        });
+
+        /* ===== 초기화 ===== */
+        function initPanels() {
+            fillSettingsForm();
+            fillLogoForm();
+            renderPosts();
+            renderQna();
+        }
+
+        /* ===== 1) 사이트 설정 ===== */
+        function fillSettingsForm() {
+            $('sHeroBadge').value = SETTINGS.heroBadge || '';
+            $('sHeroTitle1').value = SETTINGS.heroTitle1 || '';
+            $('sHeroTitle2').value = SETTINGS.heroTitle2 || '';
+            $('sHeroSubtitle').value = SETTINGS.heroSubtitle || '';
+            $('sContactEmail').value = SETTINGS.contactEmail || '';
+            $('sYoutubeUrl').value = SETTINGS.youtubeUrl || '';
+            $('sAddress').value = SETTINGS.address || '';
+            $('sFooterSlogan').value = SETTINGS.footerSlogan || '';
+            $('sAdminPass').value = '';
+        }
+        $('saveSettingsBtn').addEventListener('click', async () => {
+            const patch = {
+                heroBadge: $('sHeroBadge').value.trim(),
+                heroTitle1: $('sHeroTitle1').value.trim(),
+                heroTitle2: $('sHeroTitle2').value.trim(),
+                heroSubtitle: $('sHeroSubtitle').value,
+                contactEmail: $('sContactEmail').value.trim(),
+                youtubeUrl: $('sYoutubeUrl').value.trim(),
+                address: $('sAddress').value.trim(),
+                footerSlogan: $('sFooterSlogan').value.trim()
+            };
+            const newPass = $('sAdminPass').value.trim();
+            if (newPass) patch.adminPass = newPass;
+            try {
+                await TenStore.saveSettings(patch);
+                SETTINGS = await TenStore.getSettings();
+                fillSettingsForm();
+                showToast('설정이 저장되었습니다. 사이트에 즉시 반영됩니다.');
+            } catch (e) {
+                console.error(e);
+                showToast('저장 실패: ' + e.message);
+            }
+        });
+
+        /* ===== 2) 로고 관리 ===== */
+        let logoImageData = '';
+        function fillLogoForm() {
+            $('lIcon').value = SETTINGS.logoIcon || '10';
+            $('lText').value = SETTINGS.logoText || 'Ten';
+            $('lAccent').value = SETTINGS.logoAccent || 'AI';
+            $('lTagline').value = SETTINGS.logoTagline != null ? SETTINGS.logoTagline : 'AX HUB PLATFORM';
+            logoImageData = SETTINGS.logoImage || '';
+            updateLogoPreview();
+        }
+        function updateLogoPreview() {
+            const icon = $('pvIcon');
+            if (logoImageData) {
+                icon.hidden = false;
+                icon.innerHTML = '<img src="' + logoImageData + '" alt="로고 이미지">';
+            } else {
+                icon.hidden = true;
+                icon.textContent = $('lIcon').value || '10';
+            }
+            $('pvText').textContent = $('lText').value || 'Ten';
+            $('pvAccent').textContent = $('lAccent').value || 'AI';
+            const tg = $('pvTagline');
+            tg.textContent = $('lTagline').value;
+            tg.hidden = !$('lTagline').value.trim();
+        }
+        ['lIcon', 'lText', 'lAccent', 'lTagline'].forEach(id => $(id).addEventListener('input', updateLogoPreview));
+
+        const drop = $('logoDrop');
+        drop.addEventListener('click', () => $('logoFile').click());
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+        drop.addEventListener('drop', e => {
+            e.preventDefault();
+            drop.classList.remove('drag');
+            if (e.dataTransfer.files[0]) readLogoFile(e.dataTransfer.files[0]);
+        });
+        $('logoFile').addEventListener('change', e => {
+            if (e.target.files[0]) readLogoFile(e.target.files[0]);
+        });
+        function readLogoFile(file) {
+            if (!file.type.startsWith('image/')) { showToast('이미지 파일만 업로드할 수 있습니다.'); return; }
+            if (file.size > 700 * 1024) { showToast('700KB 이하 이미지를 사용해 주세요. (DB 문서 용량 제한)'); return; }
+            const reader = new FileReader();
+            reader.onload = () => {
+                logoImageData = reader.result;
+                updateLogoPreview();
+                showToast('이미지가 준비되었습니다. [로고 저장]을 눌러 반영하세요.');
+            };
+            reader.readAsDataURL(file);
+        }
+        $('logoRemoveBtn').addEventListener('click', () => {
+            logoImageData = '';
+            $('logoFile').value = '';
+            updateLogoPreview();
+            showToast('텍스트 아이콘으로 전환됩니다. [로고 저장]을 눌러 반영하세요.');
+        });
+        $('saveLogoBtn').addEventListener('click', async () => {
+            try {
+                await TenStore.saveSettings({
+                    logoIcon: $('lIcon').value.trim() || '10',
+                    logoText: $('lText').value.trim() || 'Ten',
+                    logoAccent: $('lAccent').value.trim() || 'AI',
+                    logoTagline: $('lTagline').value.trim(),
+                    logoImage: logoImageData
+                });
+                SETTINGS = await TenStore.getSettings();
+                showToast('로고가 저장되었습니다.');
+            } catch (e) {
+                console.error(e);
+                showToast('저장 실패: ' + e.message);
+            }
+        });
+
+        /* ===== 3) 게시물 관리 ===== */
+        const CAT_CHIP = { '공지': 'chip-notice', '뉴스': 'chip-news', '교육': 'chip-edu' };
+
+        async function renderPosts() {
+            const posts = await TenStore.listPosts();
+            $('postCount').textContent = '총 ' + posts.length + '건';
+            const list = $('postList');
+            if (!posts.length) {
+                list.innerHTML = '<div class="empty">등록된 게시물이 없습니다.</div>';
+                return;
+            }
+            list.innerHTML = posts.map(p => `
+                <div class="item-row">
+                    <div class="item-top">
+                        <div>
+                            <div class="item-title">
+                                <span class="chip ${CAT_CHIP[p.category] || 'chip-notice'}">${esc(p.category)}</span>
+                                ${p.pinned ? '<span class="chip chip-pin">📌 고정</span>' : ''}
+                                ${esc(p.title)}
+                            </div>
+                            <div class="item-meta">${fmtDate(p.createdAt)}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-edit="${p.id}">수정</button>
+                            <button class="btn btn-danger btn-sm" data-del="${p.id}">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetPostForm() {
+            $('pId').value = '';
+            $('pTitle').value = '';
+            $('pCategory').value = '공지';
+            $('pContent').value = '';
+            $('pPinned').checked = false;
+            $('postFormTitle').textContent = '새 게시물 작성';
+        }
+        $('resetPostBtn').addEventListener('click', resetPostForm);
+
+        $('savePostBtn').addEventListener('click', async () => {
+            const title = $('pTitle').value.trim();
+            if (!title) { showToast('제목을 입력하세요.'); return; }
+            try {
+                await TenStore.savePost({
+                    id: $('pId').value || null,
+                    title,
+                    category: $('pCategory').value,
+                    content: $('pContent').value,
+                    pinned: $('pPinned').checked
+                });
+                resetPostForm();
+                await renderPosts();
+                showToast('게시물이 저장되었습니다.');
+            } catch (e) {
+                console.error(e);
+                showToast('저장 실패: ' + e.message);
+            }
+        });
+
+        $('postList').addEventListener('click', async e => {
+            const editId = e.target.dataset && e.target.dataset.edit;
+            const delId = e.target.dataset && e.target.dataset.del;
+            if (editId) {
+                const posts = await TenStore.listPosts();
+                const p = posts.find(x => x.id === editId);
+                if (!p) return;
+                $('pId').value = p.id;
+                $('pTitle').value = p.title;
+                $('pCategory').value = p.category;
+                $('pContent').value = p.content;
+                $('pPinned').checked = !!p.pinned;
+                $('postFormTitle').textContent = '게시물 수정';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (delId) {
+                if (!confirm('이 게시물을 삭제할까요? 되돌릴 수 없습니다.')) return;
+                await TenStore.deletePost(delId);
+                await renderPosts();
+                showToast('게시물이 삭제되었습니다.');
+            }
+        });
+
+        /* ===== 4) Q&A 관리 ===== */
+        let qnaFilter = 'all';
+        document.querySelectorAll('[data-qf]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-qf]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                qnaFilter = btn.dataset.qf;
+                renderQna();
+            });
+        });
+
+        async function renderQna() {
+            let items = await TenStore.listQna();
+            if (qnaFilter !== 'all') items = items.filter(q => q.status === qnaFilter);
+            const list = $('qnaList');
+            if (!items.length) {
+                list.innerHTML = '<div class="empty">해당 조건의 질문이 없습니다.</div>';
+                return;
+            }
+            list.innerHTML = items.map(q => `
+                <div class="item-row">
+                    <div class="item-top">
+                        <div>
+                            <div class="item-title">
+                                <span class="chip ${q.status === 'answered' ? 'chip-answered' : 'chip-pending'}">${q.status === 'answered' ? '답변 완료' : '답변 대기'}</span>
+                                <span class="chip ${q.isPublic ? 'chip-public' : 'chip-private'}">${q.isPublic ? '공개' : '비공개'}</span>
+                                ${esc(q.name)}${q.email ? ' · ' + esc(q.email) : ''}
+                            </div>
+                            <div class="item-meta">질문일 ${fmtDate(q.createdAt)}${q.answeredAt ? ' · 답변일 ' + fmtDate(q.answeredAt) : ''}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-qpub="${q.id}">${q.isPublic ? '비공개로' : '공개로'}</button>
+                            <button class="btn btn-danger btn-sm" data-qdel="${q.id}">삭제</button>
+                        </div>
+                    </div>
+                    <p class="qna-q">Q. ${esc(q.question)}</p>
+                    <div class="field qna-answer-box">
+                        <textarea data-qanswer="${q.id}" placeholder="답변을 입력하세요">${esc(q.answer || '')}</textarea>
+                    </div>
+                    <button class="btn btn-cyan btn-sm" data-qsave="${q.id}">답변 저장</button>
+                </div>
+            `).join('');
+        }
+
+        $('qnaList').addEventListener('click', async e => {
+            const d = e.target.dataset || {};
+            if (d.qsave) {
+                const ta = document.querySelector('[data-qanswer="' + d.qsave + '"]');
+                const answer = ta.value.trim();
+                await TenStore.updateQna(d.qsave, {
+                    answer,
+                    status: answer ? 'answered' : 'pending',
+                    answeredAt: answer ? Date.now() : null
+                });
+                await renderQna();
+                showToast(answer ? '답변이 저장되었습니다.' : '답변이 비워져 대기 상태로 변경되었습니다.');
+            }
+            if (d.qpub) {
+                const items = await TenStore.listQna();
+                const q = items.find(x => x.id === d.qpub);
+                if (!q) return;
+                if (!q.isPublic && q.status !== 'answered') {
+                    showToast('답변을 먼저 저장한 뒤 공개할 수 있습니다.');
+                    return;
+                }
+                await TenStore.updateQna(d.qpub, { isPublic: !q.isPublic });
+                await renderQna();
+                showToast(q.isPublic ? '비공개로 전환되었습니다.' : '사이트에 공개되었습니다.');
+            }
+            if (d.qdel) {
+                if (!confirm('이 질문을 삭제할까요? 되돌릴 수 없습니다.')) return;
+                await TenStore.deleteQna(d.qdel);
+                await renderQna();
+                showToast('질문이 삭제되었습니다.');
+            }
+        });
+    </script>
+</body>
+</html>
