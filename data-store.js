@@ -121,6 +121,59 @@ async function getAdminSession() {
     } catch (e) { return null; }
 }
 
+/* ---------- 회원(멤버십) 인증 ----------
+   회원가입 항목: 이메일, 비밀번호, 주소, 회사, 직급
+   주소/회사/직급은 user_metadata로 전달 → DB 트리거가 profiles 테이블에 자동 저장 */
+async function signUpMember({ email, password, address, company, position }) {
+    if (mode !== 'supabase') throw new Error('Supabase 연결 시 사용할 수 있습니다.');
+    const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                address: (address || '').slice(0, 200),
+                company: (company || '').slice(0, 100),
+                position: (position || '').slice(0, 60)
+            }
+        }
+    });
+    if (error) throw error;
+    // Confirm email 이 켜져 있으면 session 이 null → 이메일 인증 필요
+    return { user: data.user, needsEmailConfirm: !data.session };
+}
+
+async function signInMember(email, password) {
+    if (mode !== 'supabase') throw new Error('Supabase 연결 시 사용할 수 있습니다.');
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data.user;
+}
+
+const signOutMember = signOutAdmin;
+
+/* 로그인된 사용자의 프로필(역할 포함) 조회 — 비로그인 시 null */
+async function getMemberProfile() {
+    if (mode !== 'supabase') return null;
+    const session = await getAdminSession();
+    if (!session) return null;
+    try {
+        const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+        if (error) throw error;
+        if (data) return data;
+        // 트리거 이전 가입자 등 프로필이 없으면 최소 정보 반환
+        return { id: session.user.id, email: session.user.email || '', address: '', company: '', position: '', role: 'member' };
+    } catch (e) {
+        console.warn('[TenStore] 프로필 조회 실패', e);
+        return { id: session.user.id, email: session.user.email || '', address: '', company: '', position: '', role: 'member' };
+    }
+}
+
+/* 관리자 여부 (profiles.role === 'admin') */
+async function isAdminUser() {
+    const p = await getMemberProfile();
+    return !!(p && p.role === 'admin');
+}
+
 /* ---------- localStorage 헬퍼 ---------- */
 const LS = {
     read(key, fallback) {
@@ -256,9 +309,9 @@ async function listQna(opts) {
     let items;
     if (mode === 'supabase') {
         try {
-            // 관리자(로그인) : 전체 컬럼·전체 행 / 익명 : 공개 답변만, email 컬럼 제외 (RLS + 컬럼 권한)
-            const session = await getAdminSession();
-            const query = session
+            // 관리자 : 전체 컬럼·전체 행 / 익명·일반 회원 : 공개 답변만, email 컬럼 제외 (RLS + 컬럼 권한)
+            const admin = await isAdminUser();
+            const query = admin
                 ? sb.from('qna').select('*')
                 : sb.from('qna').select('id,name,question,answer,status,is_public,created_at,answered_at')
                     .eq('is_public', true).eq('status', 'answered');
@@ -330,7 +383,8 @@ window.TenStore = {
     getSettings, saveSettings,
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
-    signInAdmin, signOutAdmin, getAdminSession
+    signInAdmin, signOutAdmin, getAdminSession,
+    signUpMember, signInMember, signOutMember, getMemberProfile, isAdminUser
 };
 
 export default window.TenStore;

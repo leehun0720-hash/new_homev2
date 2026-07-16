@@ -1280,6 +1280,47 @@
         .login-note { font-size: 0.76rem; color: var(--gray-600); margin-top: 1.1rem; line-height: 1.7; }
         .login-note a { color: var(--cyan-soft); }
 
+        /* 로그인/회원가입 탭 */
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            background: rgba(10, 22, 40, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.35rem;
+            margin-bottom: 1.3rem;
+        }
+        .auth-tab {
+            padding: 0.65rem 0.5rem;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--gray-400);
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.92rem; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .auth-tab:hover { color: var(--cyan-soft); }
+        .auth-tab.active { background: var(--gradient-cyan); color: var(--deep-navy); }
+        .social-btn[data-social] { opacity: 0.55; }
+        .social-btn[data-social]:hover { opacity: 0.8; }
+
+        /* 내 정보 */
+        .profile-rows { display: grid; gap: 0.55rem; margin-top: 1.2rem; }
+        .profile-row {
+            display: flex; justify-content: space-between; gap: 1rem;
+            background: rgba(10, 22, 40, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.75rem 1.05rem;
+            font-size: 0.88rem;
+        }
+        .profile-row .k { color: var(--gray-600); flex-shrink: 0; }
+        .profile-row .v { color: var(--gray-200); text-align: right; word-break: break-all; }
+        .profile-row .v.role-admin { color: var(--amber); font-weight: 700; }
+
         /* ============ CTA & Footer ============ */
         .cta {
             background: linear-gradient(135deg, var(--navy-light) 0%, var(--deep-navy) 100%);
@@ -1820,26 +1861,50 @@
                 </div>
             </div>
             <div class="login-panel animate-on-scroll" id="loginPanel">
-                <h3>3초 만에 시작하기</h3>
-                <p>비밀번호 없이, 쓰던 계정으로 바로 가입하세요.</p>
-                <button class="social-btn google" data-social="구글">
-                    <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                    구글로 계속하기
-                </button>
-                <button class="social-btn kakao" data-social="카카오">
-                    <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#191600" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.84 5.18 4.6 6.56-.2.74-.74 2.7-.85 3.12-.13.52.19.51.4.37.17-.11 2.65-1.8 3.72-2.53.69.1 1.4.15 2.13.15 5.52 0 10-3.48 10-7.67C22 6.48 17.52 3 12 3z"/></svg>
-                    카카오로 계속하기
-                </button>
-                <div class="login-divider">가입 시 수집 정보</div>
-                <div class="login-fields">
-                    <input type="text" placeholder="이름 (소셜 프로필 자동 입력)" aria-label="이름" disabled>
-                    <input type="text" placeholder="회사명 (최초 가입 시 입력)" aria-label="회사명" disabled>
-                    <input type="email" placeholder="이메일 (소셜 계정 연동)" aria-label="이메일" disabled>
+                <!-- 로그인 후: 내 정보 -->
+                <div id="memberProfileView" hidden>
+                    <h3>내 정보</h3>
+                    <p>TEN AI 멤버십 회원으로 로그인되어 있습니다.</p>
+                    <div class="profile-rows" id="profileRows"></div>
+                    <button class="btn-secondary" id="memberLogoutBtn" style="width:100%; justify-content:center; margin-top:1.2rem;">로그아웃</button>
                 </div>
-                <p class="login-note">
-                    간결한 3개 항목만 수집하며, 수강 권한 관리 목적 외에는 사용되지 않습니다.
-                    로그인 시 <a href="#membership">이용약관</a> 및 <a href="#membership">개인정보처리방침</a>에 동의하게 됩니다.
-                </p>
+
+                <!-- 비로그인: 로그인 / 회원가입 -->
+                <div id="memberAuthView">
+                    <div class="auth-tabs" role="tablist">
+                        <button class="auth-tab active" data-auth-tab="login" role="tab" aria-selected="true">로그인</button>
+                        <button class="auth-tab" data-auth-tab="signup" role="tab" aria-selected="false">회원가입</button>
+                    </div>
+
+                    <form id="memberLoginForm" class="login-fields">
+                        <input type="email" id="mlEmail" placeholder="이메일" autocomplete="username" required aria-label="이메일">
+                        <input type="password" id="mlPass" placeholder="비밀번호" autocomplete="current-password" required aria-label="비밀번호">
+                        <button type="submit" class="btn-primary" style="border:none; width:100%; justify-content:center;">로그인</button>
+                    </form>
+
+                    <form id="memberSignupForm" class="login-fields" hidden>
+                        <input type="email" id="msEmail" placeholder="이메일 *" autocomplete="username" required aria-label="이메일">
+                        <input type="password" id="msPass" placeholder="비밀번호 * (6자 이상)" autocomplete="new-password" minlength="6" required aria-label="비밀번호">
+                        <input type="text" id="msAddress" placeholder="주소 (시/구 정도만 간단히)" maxlength="200" aria-label="주소">
+                        <input type="text" id="msCompany" placeholder="회사명" maxlength="100" aria-label="회사명">
+                        <input type="text" id="msPosition" placeholder="직급" maxlength="60" aria-label="직급">
+                        <button type="submit" class="btn-primary" style="border:none; width:100%; justify-content:center;">회원가입</button>
+                    </form>
+
+                    <div class="login-divider">간편 로그인 (준비 중)</div>
+                    <button class="social-btn google" data-social="구글">
+                        <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        구글로 계속하기
+                    </button>
+                    <button class="social-btn kakao" data-social="카카오">
+                        <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#191600" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.84 5.18 4.6 6.56-.2.74-.74 2.7-.85 3.12-.13.52.19.51.4.37.17-.11 2.65-1.8 3.72-2.53.69.1 1.4.15 2.13.15 5.52 0 10-3.48 10-7.67C22 6.48 17.52 3 12 3z"/></svg>
+                        카카오로 계속하기
+                    </button>
+                    <p class="login-note">
+                        수집 항목은 이메일·주소·회사·직급 5가지이며, 수강 권한 관리 목적 외에는 사용되지 않습니다.
+                        가입 시 <a href="#membership">이용약관</a> 및 <a href="#membership">개인정보처리방침</a>에 동의하게 됩니다.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -2418,11 +2483,120 @@
             }
         });
 
+        /* ----- 멤버십: 로그인 / 회원가입 / 내 정보 ----- */
+        const authView = document.getElementById('memberAuthView');
+        const profileView = document.getElementById('memberProfileView');
+
+        // 로그인/회원가입 탭 전환
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tab').forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                const isLogin = tab.dataset.authTab === 'login';
+                document.getElementById('memberLoginForm').hidden = !isLogin;
+                document.getElementById('memberSignupForm').hidden = isLogin;
+            });
+        });
+
+        // 로그인 상태에 따라 패널/네비 갱신
+        async function refreshMemberUI() {
+            const navLoginBtns = document.querySelectorAll('.nav-login');
+            let profile = null;
+            try { profile = await TenStore.getMemberProfile(); } catch (e) { console.warn(e); }
+            if (profile) {
+                authView.hidden = true;
+                profileView.hidden = false;
+                const rows = [
+                    ['이메일', profile.email || '-'],
+                    ['주소', profile.address || '-'],
+                    ['회사', profile.company || '-'],
+                    ['직급', profile.position || '-'],
+                    ['등급', profile.role === 'admin' ? '관리자' : '일반 회원']
+                ];
+                document.getElementById('profileRows').innerHTML = rows.map(([k, v]) =>
+                    '<div class="profile-row"><span class="k">' + k + '</span><span class="v' +
+                    (k === '등급' && profile.role === 'admin' ? ' role-admin' : '') + '">' + escHtml(v) + '</span></div>'
+                ).join('');
+                navLoginBtns.forEach(b => { b.innerHTML = '👤 내 정보'; });
+            } else {
+                authView.hidden = false;
+                profileView.hidden = true;
+                navLoginBtns.forEach(b => {
+                    b.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 로그인';
+                });
+            }
+        }
+
+        // 로그인
+        document.getElementById('memberLoginForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            try {
+                await TenStore.signInMember(
+                    document.getElementById('mlEmail').value.trim(),
+                    document.getElementById('mlPass').value
+                );
+                e.target.reset();
+                await refreshMemberUI();
+                showToast('로그인되었습니다. 환영합니다!');
+            } catch (err) {
+                console.warn(err);
+                showToast(TenStore.mode === 'supabase'
+                    ? '로그인 실패: 이메일 또는 비밀번호를 확인해 주세요.'
+                    : '로컬 모드에서는 회원 기능을 사용할 수 없습니다.');
+            }
+        });
+
+        // 회원가입 (이메일, 비밀번호, 주소, 회사, 직급)
+        document.getElementById('memberSignupForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            try {
+                const result = await TenStore.signUpMember({
+                    email: document.getElementById('msEmail').value.trim(),
+                    password: document.getElementById('msPass').value,
+                    address: document.getElementById('msAddress').value.trim(),
+                    company: document.getElementById('msCompany').value.trim(),
+                    position: document.getElementById('msPosition').value.trim()
+                });
+                e.target.reset();
+                if (result.needsEmailConfirm) {
+                    showToast('가입 완료! 이메일로 발송된 인증 링크를 확인한 뒤 로그인해 주세요.');
+                    document.querySelector('[data-auth-tab="login"]').click();
+                } else {
+                    await refreshMemberUI();
+                    showToast('회원가입이 완료되었습니다. 환영합니다!');
+                }
+            } catch (err) {
+                console.warn(err);
+                const msg = String(err.message || '');
+                if (/already registered|already been registered/i.test(msg)) {
+                    showToast('이미 가입된 이메일입니다. 로그인 탭을 이용해 주세요.');
+                } else if (/at least 6|password/i.test(msg)) {
+                    showToast('비밀번호는 6자 이상이어야 합니다.');
+                } else if (/signup.*disabled|not allowed/i.test(msg)) {
+                    showToast('현재 회원가입이 비활성화되어 있습니다. 관리자에게 문의해 주세요.');
+                } else {
+                    showToast('가입 실패: ' + (msg || '잠시 후 다시 시도해 주세요.'));
+                }
+            }
+        });
+
+        // 로그아웃
+        document.getElementById('memberLogoutBtn').addEventListener('click', async () => {
+            await TenStore.signOutMember();
+            await refreshMemberUI();
+            showToast('로그아웃되었습니다.');
+        });
+
         /* ----- 초기 로드 ----- */
         (async function initDynamic() {
             try { await applySettings(); } catch (e) { console.warn('설정 적용 실패', e); }
             try { await renderNews(); } catch (e) { console.warn('소식 로드 실패', e); }
             try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
+            try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
         })();
     </script>
 </body>
