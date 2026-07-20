@@ -1479,6 +1479,196 @@
             .values-strip { grid-template-columns: 1fr 1fr; }
             .hero-chip { display: none; }
         }
+        /* =====================================================
+           Stripe-inspired Light Theme Override
+           — 기존 레이아웃은 유지하고 색·표면·그림자만 재정의
+           ===================================================== */
+        :root {
+            /* 배경: 다크 → 라이트 (기존 변수 재정의로 전체 반전) */
+            --deep-navy: #ffffff;
+            --navy-light: #f6f9fc;
+            --navy-soft: #e9eef5;
+            /* 텍스트: 화이트 → Stripe 잉크 */
+            --white: #0a2540;
+            --gray-100: #f6f9fc;
+            --gray-200: #3c4257;
+            --gray-400: #546b8c;
+            --gray-600: #8792a2;
+            /* 포인트: 흰 배경 가독용 블루 계열 */
+            --cyan-glow: #0570de;
+            --cyan-soft: #0b7bc2;
+            --amber: #c05621;
+            --gradient-cyan: linear-gradient(135deg, #0570de 0%, #00b4e6 100%);
+            --gradient-card: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+            --line: #e6ebf1;
+            --line-strong: #cfd9e6;
+            --shadow-card: 0 1px 3px rgba(50, 50, 93, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-lift: 0 13px 27px -5px rgba(50, 50, 93, 0.18), 0 8px 16px -8px rgba(0, 0, 0, 0.15);
+        }
+        ::selection { background: rgba(5, 112, 222, 0.18); }
+
+        /* ---- 내비게이션 ---- */
+        nav {
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid var(--line);
+        }
+        nav.scrolled { background: rgba(255, 255, 255, 0.97); box-shadow: 0 4px 16px rgba(50, 50, 93, 0.08); }
+        .mobile-menu { background: rgba(255, 255, 255, 0.98); }
+        .mobile-menu-btn span { background: #0a2540; }
+
+        /* ---- 히어로: 화이트 + 사선 그라디언트 밴드 (Stripe 시그니처) ---- */
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            top: -48%; left: -12%;
+            width: 128%; height: 76%;
+            background: linear-gradient(100deg, #00d4ff 0%, #0570de 32%, #7a73ff 62%, #00e5c0 96%);
+            opacity: 0.13;
+            transform: skewY(-9deg);
+            border-radius: 48px;
+        }
+        .hero-grid-bg {
+            background-image:
+                linear-gradient(rgba(5, 112, 222, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(5, 112, 222, 0.05) 1px, transparent 1px);
+        }
+        .hero-orb-1 { background: rgba(0, 212, 255, 0.18); opacity: 0.4; }
+        .hero-orb-2 { background: rgba(122, 115, 255, 0.16); opacity: 0.4; }
+        .hero-badge { background: #ffffff; border-color: rgba(5, 112, 222, 0.3); color: #0570de; box-shadow: var(--shadow-card); }
+        .hero-badge-dot { background: #0570de; }
+        .hero-subtitle strong { color: #0a2540; }
+        .hb-float { border-color: var(--line); box-shadow: var(--shadow-lift); }
+        .hb-float:hover { border-color: var(--line-strong); }
+        .hero-chip { background: #ffffff; border-color: rgba(5, 112, 222, 0.35); color: #0570de; box-shadow: var(--shadow-card); }
+        .btn-primary { box-shadow: 0 6px 16px rgba(5, 112, 222, 0.28); color: #ffffff; }
+        .btn-primary:hover { box-shadow: 0 10px 26px rgba(5, 112, 222, 0.38); }
+        .btn-secondary { background: #ffffff; color: #0a2540; border-color: var(--line-strong); box-shadow: var(--shadow-card); }
+        .btn-secondary:hover { background: #f6f9fc; border-color: #0570de; }
+
+        /* ---- 마퀴 ---- */
+        .marquee { background: #f6f9fc; border-color: var(--line); }
+        .marquee-item::after { color: rgba(5, 112, 222, 0.35); }
+
+        /* ---- 공용 카드: 흰 표면 + 얇은 보더 + Stripe 그림자 ---- */
+        .biz-card, .evo-card, .handbook-card, .lecture-card, .app-card,
+        .news-card, .qna-item, .partner-card, .tier-row, .value-chip {
+            border-color: var(--line);
+            box-shadow: var(--shadow-card);
+            background: #ffffff;
+        }
+        .biz-card:hover, .evo-card:hover, .handbook-card:hover, .lecture-card:hover,
+        .app-card:hover, .news-card:hover, .partner-card:hover {
+            border-color: var(--line-strong);
+            box-shadow: var(--shadow-lift);
+        }
+        .evo-card.highlight-card { background: linear-gradient(135deg, #e8f4fd 0%, #ffffff 100%); border-color: rgba(5, 112, 222, 0.4); }
+        .evo-number { color: rgba(5, 112, 222, 0.35); }
+        .evo-card.highlight-card .evo-number { color: #0570de; }
+        .biz-icon { background: #e8f4fd; border-color: rgba(5, 112, 222, 0.2); }
+        .value-chip:hover { background: #ffffff; border-color: var(--line-strong); box-shadow: var(--shadow-lift); }
+        .empty, .news-empty, .qna-empty, .handbook-empty { border-color: var(--line-strong); }
+
+        /* ---- TenOS 밴드: 다크 대비 섹션 (Stripe 다크 블록) ---- */
+        .tenos-band {
+            background: #0a2540;
+            border-color: #0a2540;
+            box-shadow: var(--shadow-lift);
+        }
+        .tenos-band::before { color: rgba(255, 255, 255, 0.045); }
+        .tenos-band h3 { color: #ffffff; }
+        .tenos-band h3 .outfit { color: #00d4ff; }
+        .tenos-band > div > p { color: #a3b8d4; }
+        .tenos-title-chip { color: #7ee8fa; border-color: rgba(126, 232, 250, 0.4); }
+        .tenos-spec { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.12); }
+        .tenos-spec:hover { border-color: rgba(0, 212, 255, 0.5); }
+        .tenos-spec .k { color: #00d4ff; }
+        .tenos-spec .v { color: #8fa5c5; }
+
+        /* ---- 철학 궤도 ---- */
+        .circle-item { background: #ffffff; border-color: #cfe3f8; color: #0570de; box-shadow: var(--shadow-card); }
+        .circle-main { color: #ffffff; box-shadow: 0 18px 44px rgba(5, 112, 222, 0.3); }
+
+        /* ---- 아카데미 필터 ---- */
+        .academy {
+            background:
+                radial-gradient(ellipse 60% 45% at 85% 8%, rgba(5, 112, 222, 0.05) 0%, transparent 60%),
+                #f6f9fc;
+        }
+        .course-tab, .level-chip { background: #ffffff; border-color: var(--line-strong); color: #425466; box-shadow: var(--shadow-card); }
+        .course-tab:hover, .level-chip:hover { border-color: #0570de; color: #0570de; }
+        .course-tab.active { color: #ffffff; }
+        .level-chip.active { background: #e8f4fd; color: #0570de; border-color: #0570de; }
+        .hb-open.unlocked { background: #e8f4fd; color: #0570de; border-color: rgba(5, 112, 222, 0.35); }
+        .hb-open.unlocked:hover { color: #ffffff; }
+        .hb-open.locked { background: #f6f9fc; color: #67748e; border-color: var(--line-strong); }
+        .access-public { background: #e6f9f1; color: #0e9f6e; }
+        .access-member { background: #e8f4fd; color: #0570de; }
+        .access-enrolled { background: #fdf3e0; color: #b7791f; }
+        .tag-genai { background: rgba(122, 115, 255, 0.12); color: #6d5ae8; }
+
+        /* ---- 강의 / 모달 ---- */
+        .lecture-cat { color: #0570de; }
+        .video-modal { background: rgba(10, 37, 64, 0.55); }
+        .video-modal-box { background: #ffffff; border-color: var(--line); }
+        .video-modal-meta .cat { color: #0570de; }
+        .modal-close { background: #f0f4f8; border-color: var(--line); color: #0a2540; }
+        .modal-close:hover { background: #e8f4fd; border-color: #0570de; }
+
+        /* ---- 소식 / Q&A ---- */
+        .news-cat-notice { background: #e8f4fd; color: #0570de; }
+        .news-cat-news { background: rgba(122, 115, 255, 0.12); color: #6d5ae8; }
+        .news-cat-edu { background: #fdf3e0; color: #b7791f; }
+        .news-pin { color: #0e9f6e; }
+        .qna {
+            background:
+                radial-gradient(ellipse 55% 45% at 90% 10%, rgba(122, 115, 255, 0.05) 0%, transparent 60%),
+                #f6f9fc;
+        }
+        .qna-form { background: #ffffff; border-color: var(--line); box-shadow: var(--shadow-card); }
+        .qna-form input, .qna-form textarea {
+            background: #ffffff; border-color: var(--line-strong); color: #0a2540;
+        }
+        .qna-form input:focus, .qna-form textarea:focus { border-color: #0570de; box-shadow: 0 0 0 3px rgba(5, 112, 222, 0.12); }
+        .qna-item.open { border-color: rgba(5, 112, 222, 0.45); }
+        .qna-item-q .q-mark { background: #e8f4fd; color: #0570de; }
+        .qna-item-a .a-mark { color: #ffffff; }
+
+        /* ---- 멤버십 ---- */
+        .membership {
+            background:
+                radial-gradient(ellipse 55% 50% at 12% 20%, rgba(5, 112, 222, 0.05) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 90% 85%, rgba(122, 115, 255, 0.06) 0%, transparent 60%),
+                #ffffff;
+        }
+        .tier-row:hover { border-color: var(--line-strong); box-shadow: var(--shadow-lift); }
+        .tier-icon.pub { background: #e6f9f1; }
+        .tier-icon.mem { background: #e8f4fd; }
+        .tier-icon.enr { background: #fdf3e0; }
+        .login-panel { background: #ffffff; border-color: var(--line); box-shadow: var(--shadow-lift); }
+        .auth-tabs { background: #f0f4f8; border-color: var(--line); }
+        .auth-tab.active { color: #ffffff; }
+        .login-fields input { background: #ffffff; border-color: var(--line-strong); color: #0a2540; }
+        .login-fields input:focus { border-color: #0570de; box-shadow: 0 0 0 3px rgba(5, 112, 222, 0.12); }
+        .login-divider::before, .login-divider::after { background: var(--line); }
+        .social-btn.google { background: #ffffff; color: #1f2937; border: 1px solid var(--line-strong); box-shadow: var(--shadow-card); }
+        .profile-row { background: #f6f9fc; border-color: var(--line); }
+        .profile-row .v.role-admin { color: #b7791f; }
+
+        /* ---- CTA / 푸터 / 토스트 ---- */
+        .cta { background: linear-gradient(180deg, #f6f9fc 0%, #ffffff 100%); }
+        .cta-bg {
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(5, 112, 222, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(122, 115, 255, 0.06) 0%, transparent 50%);
+        }
+        footer { background: #f6f9fc; border-top: 1px solid var(--line); }
+        .footer-bottom { border-top-color: var(--line); }
+        .footer-slogan { color: #0570de; }
+        .toast { background: #0a2540; color: #ffffff; border-color: #0a2540; }
+
+        /* ---- 앱 쇼케이스 ---- */
+        .app-thumb { border-bottom: 1px solid var(--line); }
+        .app-overlay { background: rgba(10, 37, 64, 0.9); color: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -1754,7 +1944,7 @@
                     <li>교육 혁신 저널</li>
                 </ul>
             </div>
-            <div class="biz-card" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(10, 22, 40, 0.95) 100%); border-color: rgba(0, 212, 255, 0.3);">
+            <div class="biz-card" style="background: linear-gradient(135deg, #e8f4fd 0%, #ffffff 100%); border-color: rgba(5, 112, 222, 0.35);">
                 <div class="biz-icon" style="background: var(--gradient-cyan);">🤝</div>
                 <h3 class="biz-title">파트너십 문의</h3>
                 <p class="biz-subtitle">함께 성장하는 AI 생태계</p>
