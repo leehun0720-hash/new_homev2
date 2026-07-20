@@ -359,6 +359,9 @@
             <button class="admin-tab" data-panel="logo">🎨 로고 관리</button>
             <button class="admin-tab" data-panel="posts">📋 게시물 관리</button>
             <button class="admin-tab" data-panel="qna">💬 Q&amp;A 관리</button>
+            <button class="admin-tab" data-panel="handbooks">📚 핸드북 관리</button>
+            <button class="admin-tab" data-panel="lectures">🎬 강의 관리</button>
+            <button class="admin-tab" data-panel="apps">🧩 앱 관리</button>
         </nav>
 
         <main>
@@ -519,6 +522,160 @@
                     <div class="item-list" id="qnaList"></div>
                 </div>
             </section>
+
+            <!-- ===== 핸드북 관리 ===== -->
+            <section class="panel" id="panel-handbooks">
+                <div class="card">
+                    <h2 id="hbFormTitle">새 핸드북 등록</h2>
+                    <p class="sub">사이트의 '교육 아카데미' 탐색기에 노출됩니다. 상단 통계(핸드북 수·과정 수)도 자동 갱신됩니다.</p>
+                    <input type="hidden" id="hbId">
+                    <div class="field">
+                        <label for="hbTitle">제목</label>
+                        <input type="text" id="hbTitle" placeholder="핸드북 제목">
+                    </div>
+                    <div class="field-row-3">
+                        <div class="field">
+                            <label for="hbCourse">과정</label>
+                            <select id="hbCourse">
+                                <option value="vibecoding">바이브코딩</option>
+                                <option value="genai">생성형 AI 실무</option>
+                                <option value="ai_business">AI 경영 전략</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="hbLevel">레벨</label>
+                            <select id="hbLevel">
+                                <option value="1">Level 1</option>
+                                <option value="2">Level 2</option>
+                                <option value="3">Level 3</option>
+                                <option value="4">Level 4</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="hbAccess">접근 권한</label>
+                            <select id="hbAccess">
+                                <option value="public">전체 공개</option>
+                                <option value="member">회원 공개</option>
+                                <option value="enrolled">수강생 전용</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="hbDesc">소개 문구</label>
+                        <textarea id="hbDesc" placeholder="카드에 표시될 한두 문장 소개"></textarea>
+                    </div>
+                    <div style="display:flex; gap:0.6rem;">
+                        <button class="btn btn-cyan" id="saveHbBtn">💾 핸드북 저장</button>
+                        <button class="btn btn-ghost" id="resetHbBtn">새로 작성</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>핸드북 목록</h2>
+                    <p class="sub" id="hbCount"></p>
+                    <div class="item-list" id="hbList"></div>
+                </div>
+            </section>
+
+            <!-- ===== 강의 관리 ===== -->
+            <section class="panel" id="panel-lectures">
+                <div class="card">
+                    <h2 id="lecFormTitle">새 강의 등록</h2>
+                    <p class="sub">유튜브 영상 ID를 입력하면 사이트의 팝업 플레이어에서 바로 재생됩니다.
+                        (예: 주소가 youtube.com/watch?v=<b>abc123XYZ_0</b> 이면 ID는 abc123XYZ_0)</p>
+                    <input type="hidden" id="lecId">
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="lecCat">카테고리</label>
+                            <input type="text" id="lecCat" placeholder="예: ChatGPT 실무">
+                        </div>
+                        <div class="field">
+                            <label for="lecDur">재생 시간</label>
+                            <input type="text" id="lecDur" placeholder="예: 18:42">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="lecTitle">강의 제목</label>
+                        <input type="text" id="lecTitle" placeholder="강의 제목">
+                    </div>
+                    <div class="field-row-3">
+                        <div class="field">
+                            <label for="lecVideo">유튜브 영상 ID</label>
+                            <input type="text" id="lecVideo" placeholder="비워두면 채널 안내 표시">
+                        </div>
+                        <div class="field">
+                            <label for="lecGrad1">썸네일 색 1</label>
+                            <input type="color" id="lecGrad1" value="#0e7490" style="height:44px; padding:0.2rem;">
+                        </div>
+                        <div class="field">
+                            <label for="lecGrad2">썸네일 색 2</label>
+                            <input type="color" id="lecGrad2" value="#164e63" style="height:44px; padding:0.2rem;">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:0.6rem;">
+                        <button class="btn btn-cyan" id="saveLecBtn">💾 강의 저장</button>
+                        <button class="btn btn-ghost" id="resetLecBtn">새로 작성</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>강의 목록</h2>
+                    <p class="sub" id="lecCount"></p>
+                    <div class="item-list" id="lecList"></div>
+                </div>
+            </section>
+
+            <!-- ===== 앱 관리 ===== -->
+            <section class="panel" id="panel-apps">
+                <div class="card">
+                    <h2 id="appFormTitle">새 앱 등록</h2>
+                    <p class="sub">사이트의 'TEN AI Apps' 쇼케이스에 노출됩니다. 실행/GitHub 주소를 비워두면 '준비 중' 안내가 표시됩니다.</p>
+                    <input type="hidden" id="appId">
+                    <div class="field-row-3">
+                        <div class="field">
+                            <label for="appName">앱 이름</label>
+                            <input type="text" id="appName" placeholder="예: 서울LAW봇">
+                        </div>
+                        <div class="field">
+                            <label for="appBadge">배지 텍스트</label>
+                            <input type="text" id="appBadge" placeholder="예: Legal AI">
+                        </div>
+                        <div class="field">
+                            <label for="appBadgeCls">배지 색상</label>
+                            <select id="appBadgeCls">
+                                <option value="tag-vibe">블루</option>
+                                <option value="tag-genai">퍼플</option>
+                                <option value="tag-biz">앰버</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="appOneliner">한 줄 소개</label>
+                        <input type="text" id="appOneliner" placeholder="카드에 표시될 한 줄 설명">
+                    </div>
+                    <div class="field">
+                        <label for="appHow">작동 원리 (마우스 오버 시 표시)</label>
+                        <textarea id="appHow" placeholder="카드에 마우스를 올렸을 때 나타나는 설명"></textarea>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="appLaunch">실행(App Launch) URL</label>
+                            <input type="text" id="appLaunch" placeholder="https:// (비우면 준비 중 안내)">
+                        </div>
+                        <div class="field">
+                            <label for="appGithub">GitHub URL</label>
+                            <input type="text" id="appGithub" placeholder="https:// (비우면 준비 중 안내)">
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:0.6rem;">
+                        <button class="btn btn-cyan" id="saveAppBtn">💾 앱 저장</button>
+                        <button class="btn btn-ghost" id="resetAppBtn">새로 작성</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>앱 목록</h2>
+                    <p class="sub" id="appCount"></p>
+                    <div class="item-list" id="appList"></div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -647,6 +804,9 @@
             fillLogoForm();
             renderPosts();
             renderQna();
+            renderHbAdmin();
+            renderLecAdmin();
+            renderAppAdmin();
         }
 
         /* ===== 1) 사이트 설정 ===== */
@@ -916,6 +1076,222 @@
                 await TenStore.deleteQna(d.qdel);
                 await renderQna();
                 showToast('질문이 삭제되었습니다.');
+            }
+        });
+
+        /* ===== 5) 핸드북 관리 ===== */
+        const HB_COURSE_NAME = { vibecoding: '바이브코딩', genai: '생성형 AI 실무', ai_business: 'AI 경영 전략' };
+        const HB_ACCESS_NAME = { public: '전체 공개', member: '회원 공개', enrolled: '수강생 전용' };
+        const HB_ACCESS_CHIP = { public: 'chip-answered', member: 'chip-notice', enrolled: 'chip-edu' };
+
+        async function renderHbAdmin() {
+            const items = await TenStore.listHandbooks();
+            $('hbCount').textContent = '총 ' + items.length + '권 · 과정 ' + new Set(items.map(h => h.course_tag)).size + '개 (사이트 상단 통계에 자동 반영)';
+            $('hbList').innerHTML = items.length ? items.map(h => `
+                <div class="item-row">
+                    <div class="item-top">
+                        <div>
+                            <div class="item-title">
+                                <span class="chip chip-notice">${esc(HB_COURSE_NAME[h.course_tag] || h.course_tag)}</span>
+                                <span class="chip chip-news">L${h.level_tier}</span>
+                                <span class="chip ${HB_ACCESS_CHIP[h.access_level] || 'chip-notice'}">${esc(HB_ACCESS_NAME[h.access_level] || h.access_level)}</span>
+                                ${esc(h.title)}
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-hbedit="${h.id}">수정</button>
+                            <button class="btn btn-danger btn-sm" data-hbdel="${h.id}">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">등록된 핸드북이 없습니다.</div>';
+        }
+
+        function resetHbForm() {
+            $('hbId').value = ''; $('hbTitle').value = ''; $('hbCourse').value = 'vibecoding';
+            $('hbLevel').value = '1'; $('hbAccess').value = 'public'; $('hbDesc').value = '';
+            $('hbFormTitle').textContent = '새 핸드북 등록';
+        }
+        $('resetHbBtn').addEventListener('click', resetHbForm);
+
+        $('saveHbBtn').addEventListener('click', async () => {
+            const title = $('hbTitle').value.trim();
+            if (!title) { showToast('제목을 입력하세요.'); return; }
+            try {
+                await TenStore.saveHandbook({
+                    id: $('hbId').value || null,
+                    title,
+                    course_tag: $('hbCourse').value,
+                    level_tier: Number($('hbLevel').value),
+                    access_level: $('hbAccess').value,
+                    desc: $('hbDesc').value.trim()
+                });
+                resetHbForm();
+                await renderHbAdmin();
+                showToast('핸드북이 저장되었습니다. 사이트에 즉시 반영됩니다.');
+            } catch (e) { console.error(e); showToast('저장 실패: ' + e.message); }
+        });
+
+        $('hbList').addEventListener('click', async e => {
+            const d = e.target.dataset || {};
+            if (d.hbedit) {
+                const items = await TenStore.listHandbooks();
+                const h = items.find(x => x.id === d.hbedit);
+                if (!h) return;
+                $('hbId').value = h.id; $('hbTitle').value = h.title;
+                $('hbCourse').value = h.course_tag; $('hbLevel').value = String(h.level_tier);
+                $('hbAccess').value = h.access_level; $('hbDesc').value = h.desc || '';
+                $('hbFormTitle').textContent = '핸드북 수정';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (d.hbdel) {
+                if (!confirm('이 핸드북을 삭제할까요? 되돌릴 수 없습니다.')) return;
+                await TenStore.deleteHandbook(d.hbdel);
+                await renderHbAdmin();
+                showToast('핸드북이 삭제되었습니다.');
+            }
+        });
+
+        /* ===== 6) 강의 관리 ===== */
+        async function renderLecAdmin() {
+            const items = await TenStore.listLectures();
+            $('lecCount').textContent = '총 ' + items.length + '건';
+            $('lecList').innerHTML = items.length ? items.map(v => `
+                <div class="item-row">
+                    <div class="item-top">
+                        <div>
+                            <div class="item-title">
+                                <span class="chip chip-notice">${esc(v.cat)}</span>
+                                <span class="chip ${v.videoId ? 'chip-answered' : 'chip-pending'}">${v.videoId ? '▶ 재생 가능' : '영상 ID 없음'}</span>
+                                ${esc(v.title)}
+                            </div>
+                            <div class="item-meta">${esc(v.dur || '')}${v.videoId ? ' · ID: ' + esc(v.videoId) : ''}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-lecedit="${v.id}">수정</button>
+                            <button class="btn btn-danger btn-sm" data-lecdel="${v.id}">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">등록된 강의가 없습니다.</div>';
+        }
+
+        function resetLecForm() {
+            $('lecId').value = ''; $('lecCat').value = ''; $('lecTitle').value = '';
+            $('lecDur').value = ''; $('lecVideo').value = '';
+            $('lecGrad1').value = '#0e7490'; $('lecGrad2').value = '#164e63';
+            $('lecFormTitle').textContent = '새 강의 등록';
+        }
+        $('resetLecBtn').addEventListener('click', resetLecForm);
+
+        $('saveLecBtn').addEventListener('click', async () => {
+            const title = $('lecTitle').value.trim();
+            if (!title) { showToast('강의 제목을 입력하세요.'); return; }
+            try {
+                await TenStore.saveLecture({
+                    id: $('lecId').value || null,
+                    cat: $('lecCat').value.trim(),
+                    title,
+                    dur: $('lecDur').value.trim(),
+                    videoId: $('lecVideo').value.trim(),
+                    grad1: $('lecGrad1').value,
+                    grad2: $('lecGrad2').value
+                });
+                resetLecForm();
+                await renderLecAdmin();
+                showToast('강의가 저장되었습니다. 사이트에 즉시 반영됩니다.');
+            } catch (e) { console.error(e); showToast('저장 실패: ' + e.message); }
+        });
+
+        $('lecList').addEventListener('click', async e => {
+            const d = e.target.dataset || {};
+            if (d.lecedit) {
+                const items = await TenStore.listLectures();
+                const v = items.find(x => x.id === d.lecedit);
+                if (!v) return;
+                $('lecId').value = v.id; $('lecCat').value = v.cat; $('lecTitle').value = v.title;
+                $('lecDur').value = v.dur; $('lecVideo').value = v.videoId || '';
+                $('lecGrad1').value = v.grad1 || '#0e7490'; $('lecGrad2').value = v.grad2 || '#164e63';
+                $('lecFormTitle').textContent = '강의 수정';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (d.lecdel) {
+                if (!confirm('이 강의를 삭제할까요? 되돌릴 수 없습니다.')) return;
+                await TenStore.deleteLecture(d.lecdel);
+                await renderLecAdmin();
+                showToast('강의가 삭제되었습니다.');
+            }
+        });
+
+        /* ===== 7) 앱 관리 ===== */
+        async function renderAppAdmin() {
+            const items = await TenStore.listApps();
+            $('appCount').textContent = '총 ' + items.length + '개';
+            $('appList').innerHTML = items.length ? items.map(a => `
+                <div class="item-row">
+                    <div class="item-top">
+                        <div>
+                            <div class="item-title">
+                                <span class="chip chip-notice">${esc(a.badge || '앱')}</span>
+                                <span class="chip ${a.launch ? 'chip-answered' : 'chip-private'}">${a.launch ? '실행 연결됨' : '실행 준비 중'}</span>
+                                ${esc(a.name)}
+                            </div>
+                            <div class="item-meta">${esc(a.oneliner || '')}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-appedit="${a.id}">수정</button>
+                            <button class="btn btn-danger btn-sm" data-appdel="${a.id}">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">등록된 앱이 없습니다.</div>';
+        }
+
+        function resetAppForm() {
+            $('appId').value = ''; $('appName').value = ''; $('appBadge').value = '';
+            $('appBadgeCls').value = 'tag-vibe'; $('appOneliner').value = '';
+            $('appHow').value = ''; $('appLaunch').value = ''; $('appGithub').value = '';
+            $('appFormTitle').textContent = '새 앱 등록';
+        }
+        $('resetAppBtn').addEventListener('click', resetAppForm);
+
+        $('saveAppBtn').addEventListener('click', async () => {
+            const name = $('appName').value.trim();
+            if (!name) { showToast('앱 이름을 입력하세요.'); return; }
+            try {
+                await TenStore.saveApp({
+                    id: $('appId').value || null,
+                    name,
+                    badge: $('appBadge').value.trim(),
+                    badgeCls: $('appBadgeCls').value,
+                    oneliner: $('appOneliner').value.trim(),
+                    how: $('appHow').value.trim(),
+                    launch: $('appLaunch').value.trim(),
+                    github: $('appGithub').value.trim()
+                });
+                resetAppForm();
+                await renderAppAdmin();
+                showToast('앱이 저장되었습니다. 사이트에 즉시 반영됩니다.');
+            } catch (e) { console.error(e); showToast('저장 실패: ' + e.message); }
+        });
+
+        $('appList').addEventListener('click', async e => {
+            const d = e.target.dataset || {};
+            if (d.appedit) {
+                const items = await TenStore.listApps();
+                const a = items.find(x => x.id === d.appedit);
+                if (!a) return;
+                $('appId').value = a.id; $('appName').value = a.name; $('appBadge').value = a.badge || '';
+                $('appBadgeCls').value = a.badgeCls || 'tag-vibe'; $('appOneliner').value = a.oneliner || '';
+                $('appHow').value = a.how || ''; $('appLaunch').value = a.launch || ''; $('appGithub').value = a.github || '';
+                $('appFormTitle').textContent = '앱 수정';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (d.appdel) {
+                if (!confirm('이 앱을 삭제할까요? 되돌릴 수 없습니다.')) return;
+                await TenStore.deleteApp(d.appdel);
+                await renderAppAdmin();
+                showToast('앱이 삭제되었습니다.');
             }
         });
     </script>

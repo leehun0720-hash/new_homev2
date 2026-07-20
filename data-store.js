@@ -375,6 +375,107 @@ async function deleteQna(id) {
     LS.write('tenai_qna', localList('tenai_qna', SEED_QNA).filter(q => q.id !== id));
 }
 
+/* =====================================================================
+   콘텐츠 관리: 핸드북 / 강의 / TEN AI Apps
+   — 관리자 콘솔에서 편집, 사이트에 실시간 반영
+   ===================================================================== */
+const SEED_HANDBOOKS = [
+    { id: 'h1',  title: '바이브코딩 입문 가이드',             course_tag: 'vibecoding',  level_tier: 1, access_level: 'public',   desc: '비개발자를 위한 자연어 개발 기초와 프롬프트의 이해. 코딩 없이 아이디어를 앱으로 만드는 첫걸음.', createdAt: 1 },
+    { id: 'h2',  title: '무릎앱 만들기 기초 실습',            course_tag: 'vibecoding',  level_tier: 2, access_level: 'member',   desc: '생각을 그대로 화면으로. 실습 중심의 무릎앱 제작 워크북으로 나만의 도구를 완성합니다.', createdAt: 2 },
+    { id: 'h3',  title: '바이브코딩 실무 실습서',             course_tag: 'vibecoding',  level_tier: 3, access_level: 'enrolled', desc: '역참목조분검 프레임워크 기반의 실전 개발 프로세스와 무릎앱 고도화 전략.', createdAt: 3 },
+    { id: 'h4',  title: '디버깅 심화 & 함정 회피 가이드',     course_tag: 'vibecoding',  level_tier: 4, access_level: 'enrolled', desc: 'AI 협업 개발에서 만나는 디버깅 함정과 해결 패턴. 실무자를 위한 심화 트러블슈팅.', createdAt: 4 },
+    { id: 'h5',  title: '실무 생산성 혁신 핸드북',            course_tag: 'genai',       level_tier: 1, access_level: 'public',   desc: 'ChatGPT · Claude · Gemini를 업무에 바로 적용하는 실전 비법. 일반인을 위한 생산성 가이드.', createdAt: 5 },
+    { id: 'h6',  title: '프롬프트 라이브러리 가이드',         course_tag: 'genai',       level_tier: 2, access_level: 'member',   desc: '재사용 가능한 프롬프트 자산 구축법. 직무별 템플릿과 설계 패턴 모음.', createdAt: 6 },
+    { id: 'h7',  title: 'API 연동 & 에이전틱 오케스트레이션', course_tag: 'genai',       level_tier: 3, access_level: 'enrolled', desc: 'LLM API 연동부터 멀티 에이전트 오케스트레이션까지, 전문가를 위한 심화 과정.', createdAt: 7 },
+    { id: 'h8',  title: 'RAG 구축 실무 가이드',               course_tag: 'genai',       level_tier: 3, access_level: 'enrolled', desc: '조직의 지식을 AI에 연결하는 검색증강생성(RAG) 파이프라인 설계와 구축 실무.', createdAt: 8 },
+    { id: 'h9',  title: '중소기업 AI 도입 로드맵',            course_tag: 'ai_business', level_tier: 2, access_level: 'member',   desc: '기업 임직원을 위한 단계별 AI 도입 전략. 진단부터 실행까지의 경영 로드맵.', createdAt: 9 },
+    { id: 'h10', title: '정부지원사업 가이드 v3',             course_tag: 'ai_business', level_tier: 2, access_level: 'enrolled', desc: 'AI를 활용한 정부지원사업 계획서 작성법. 선정률을 높이는 구조화 전략과 실전 템플릿.', createdAt: 10 },
+    { id: 'h11', title: '기술가치평가 핸드북',                course_tag: 'ai_business', level_tier: 3, access_level: 'enrolled', desc: '기술 기반 기업을 위한 가치평가 프레임워크와 AI 활용 분석 기법.', createdAt: 11 }
+];
+const SEED_LECTURES = [
+    { id: 'l1', cat: 'ChatGPT 실무',        title: 'ChatGPT 실무 활용법 — 업무 자동화의 시작',      dur: '18:42', videoId: '', grad1: '#0e7490', grad2: '#164e63', createdAt: 1 },
+    { id: 'l2', cat: '생성형 AI 가이드',    title: '생성형 AI 완벽 가이드 — 도구 선택부터 활용까지', dur: '24:15', videoId: '', grad1: '#6d28d9', grad2: '#312e81', createdAt: 2 },
+    { id: 'l3', cat: 'AI 경영 전략',        title: 'AI 경영 전략 강의 — 우리 회사에 AI 심는 법',     dur: '21:08', videoId: '', grad1: '#b45309', grad2: '#7c2d12', createdAt: 3 },
+    { id: 'l4', cat: '프롬프트 엔지니어링', title: '프롬프트 엔지니어링 스킬업 — 좋은 질문의 기술',  dur: '16:33', videoId: '', grad1: '#0f766e', grad2: '#134e4a', createdAt: 4 }
+];
+const SEED_APPS = [
+    { id: 'a1', name: '서울LAW봇',      badge: 'Legal AI',      badgeCls: 'tag-vibe',  oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇', how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.', launch: '', github: '', createdAt: 1 },
+    { id: 'a2', name: '블록ESG',        badge: 'ESG Analytics', badgeCls: 'tag-genai', oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구', how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.', launch: '', github: '', createdAt: 2 },
+    { id: 'a3', name: 'TEN AI Hub',     badge: 'Platform',      badgeCls: 'tag-biz',   oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브', how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.', launch: '', github: '', createdAt: 3 },
+    { id: 'a4', name: 'Prompt Library', badge: 'Toolkit',       badgeCls: 'tag-vibe',  oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리', how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.', launch: '', github: '', createdAt: 4 }
+];
+
+/* row ↔ JS 매핑 정의: [JS키, DB컬럼] */
+const HB_MAP  = [['title','title'],['course_tag','course_tag'],['level_tier','level_tier'],['access_level','access_level'],['desc','description'],['createdAt','created_at']];
+const LEC_MAP = [['cat','category'],['title','title'],['dur','duration'],['videoId','video_id'],['grad1','grad1'],['grad2','grad2'],['createdAt','created_at']];
+const APP_MAP = [['name','name'],['badge','badge'],['badgeCls','badge_cls'],['oneliner','oneliner'],['how','how'],['launch','launch_url'],['github','github_url'],['createdAt','created_at']];
+
+function makeContentApi(table, lsKey, seed, map) {
+    const fromRow = r => {
+        const o = { id: r.id };
+        map.forEach(([js, col]) => { o[js] = col === 'created_at' || col === 'level_tier' ? Number(r[col]) : r[col]; });
+        return o;
+    };
+    const toRow = item => {
+        const row = {};
+        map.forEach(([js, col]) => { if (js in item) row[col] = item[js]; });
+        return row;
+    };
+    return {
+        async list() {
+            let items;
+            if (mode === 'supabase') {
+                try {
+                    const { data, error } = await sb.from(table).select('*');
+                    if (error) throw error;
+                    items = (data || []).map(fromRow);
+                    // 테이블은 있지만 비어 있으면 그대로 빈 목록 (관리자가 채움)
+                } catch (e) {
+                    console.warn('[TenStore] ' + table + ' 로드 실패 — supabase-content.sql 실행 여부를 확인하세요.', e);
+                    items = seed.slice();   // 테이블 미생성 시 예시 데이터로 표시
+                }
+            } else {
+                items = localList(lsKey, seed);
+            }
+            return items.sort((a, b) => a.createdAt - b.createdAt);
+        },
+        async save(item) {
+            const isNew = !item.id;
+            const data = Object.assign({}, item, { createdAt: item.createdAt || Date.now() });
+            if (mode === 'supabase') {
+                const id = item.id || genId();
+                const row = toRow(data);
+                row.id = id;
+                const { error } = await sb.from(table).upsert(row);
+                if (error) throw error;
+                return id;
+            }
+            const items = localList(lsKey, seed);
+            if (isNew) {
+                data.id = genId();
+                items.push(data);
+            } else {
+                const idx = items.findIndex(x => x.id === item.id);
+                if (idx >= 0) items[idx] = Object.assign({}, items[idx], data, { id: item.id });
+            }
+            LS.write(lsKey, items);
+            return item.id || data.id;
+        },
+        async remove(id) {
+            if (mode === 'supabase') {
+                const { error } = await sb.from(table).delete().eq('id', id);
+                if (error) throw error;
+                return;
+            }
+            LS.write(lsKey, localList(lsKey, seed).filter(x => x.id !== id));
+        }
+    };
+}
+
+const handbookApi = makeContentApi('handbooks', 'tenai_handbooks', SEED_HANDBOOKS, HB_MAP);
+const lectureApi  = makeContentApi('lectures',  'tenai_lectures',  SEED_LECTURES,  LEC_MAP);
+const appApi      = makeContentApi('apps',      'tenai_apps',      SEED_APPS,      APP_MAP);
+
 /* ---------- 공개 API (index.html / admin.html 인라인 스크립트에서 사용) ---------- */
 window.TenStore = {
     mode,
@@ -384,7 +485,10 @@ window.TenStore = {
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
     signInAdmin, signOutAdmin, getAdminSession,
-    signUpMember, signInMember, signOutMember, getMemberProfile, isAdminUser
+    signUpMember, signInMember, signOutMember, getMemberProfile, isAdminUser,
+    listHandbooks: handbookApi.list, saveHandbook: handbookApi.save, deleteHandbook: handbookApi.remove,
+    listLectures: lectureApi.list,  saveLecture: lectureApi.save,   deleteLecture: lectureApi.remove,
+    listApps: appApi.list,          saveApp: appApi.save,           deleteApp: appApi.remove
 };
 
 export default window.TenStore;

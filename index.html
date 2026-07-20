@@ -2285,34 +2285,10 @@
     <script type="module" src="/data-store.js"></script>
     <script type="module">
         /* =====================================================
-           콘텐츠 데이터 (운영 시 Supabase DB/Storage와 연동)
-           - handbooks 테이블 스키마와 동일한 필드 구성:
-             title / course_tag / level_tier / access_level
+           콘텐츠 데이터 — TenStore(DB)에서 로드
+           관리자 콘솔에서 편집하면 사이트에 실시간 반영됩니다.
            ===================================================== */
-        const HANDBOOKS = [
-            { id: 1,  title: '바이브코딩 입문 가이드',            course_tag: 'vibecoding',  level_tier: 1, access_level: 'public',
-              desc: '비개발자를 위한 자연어 개발 기초와 프롬프트의 이해. 코딩 없이 아이디어를 앱으로 만드는 첫걸음.' },
-            { id: 2,  title: '무릎앱 만들기 기초 실습',           course_tag: 'vibecoding',  level_tier: 2, access_level: 'member',
-              desc: '생각을 그대로 화면으로. 실습 중심의 무릎앱 제작 워크북으로 나만의 도구를 완성합니다.' },
-            { id: 3,  title: '바이브코딩 실무 실습서',            course_tag: 'vibecoding',  level_tier: 3, access_level: 'enrolled',
-              desc: '역참목조분검 프레임워크 기반의 실전 개발 프로세스와 무릎앱 고도화 전략.' },
-            { id: 4,  title: '디버깅 심화 & 함정 회피 가이드',    course_tag: 'vibecoding',  level_tier: 4, access_level: 'enrolled',
-              desc: 'AI 협업 개발에서 만나는 디버깅 함정과 해결 패턴. 실무자를 위한 심화 트러블슈팅.' },
-            { id: 5,  title: '실무 생산성 혁신 핸드북',           course_tag: 'genai',       level_tier: 1, access_level: 'public',
-              desc: 'ChatGPT · Claude · Gemini를 업무에 바로 적용하는 실전 비법. 일반인을 위한 생산성 가이드.' },
-            { id: 6,  title: '프롬프트 라이브러리 가이드',        course_tag: 'genai',       level_tier: 2, access_level: 'member',
-              desc: '재사용 가능한 프롬프트 자산 구축법. 직무별 템플릿과 설계 패턴 모음.' },
-            { id: 7,  title: 'API 연동 & 에이전틱 오케스트레이션', course_tag: 'genai',       level_tier: 3, access_level: 'enrolled',
-              desc: 'LLM API 연동부터 멀티 에이전트 오케스트레이션까지, 전문가를 위한 심화 과정.' },
-            { id: 8,  title: 'RAG 구축 실무 가이드',              course_tag: 'genai',       level_tier: 3, access_level: 'enrolled',
-              desc: '조직의 지식을 AI에 연결하는 검색증강생성(RAG) 파이프라인 설계와 구축 실무.' },
-            { id: 9,  title: '중소기업 AI 도입 로드맵',           course_tag: 'ai_business', level_tier: 2, access_level: 'member',
-              desc: '기업 임직원을 위한 단계별 AI 도입 전략. 진단부터 실행까지의 경영 로드맵.' },
-            { id: 10, title: '정부지원사업 가이드 v3',            course_tag: 'ai_business', level_tier: 2, access_level: 'enrolled',
-              desc: 'AI를 활용한 정부지원사업 계획서 작성법. 선정률을 높이는 구조화 전략과 실전 템플릿.' },
-            { id: 11, title: '기술가치평가 핸드북',               course_tag: 'ai_business', level_tier: 3, access_level: 'enrolled',
-              desc: '기술 기반 기업을 위한 가치평가 프레임워크와 AI 활용 분석 기법.' },
-        ];
+        let HANDBOOKS = [];
 
         const COURSE_META = {
             vibecoding:  { name: '바이브코딩',      tagClass: 'tag-vibe',  coverClass: 'cover-vibe',  deco: 'V' },
@@ -2326,34 +2302,11 @@
             enrolled: { label: '수강생 전용', cls: 'access-enrolled', icon: '🔒' },
         };
 
-        /* 강의 데이터 — 운영 시 Netlify 크론이 유튜브 RSS를 1일 1회 캐싱하여 자동 갱신.
-           videoId를 채우면 팝업 플레이어에서 즉시 재생됩니다. */
-        const LECTURES = [
-            { cat: 'ChatGPT 실무',        title: 'ChatGPT 실무 활용법 — 업무 자동화의 시작',        dur: '18:42', videoId: '', grad: ['#0e7490', '#164e63'] },
-            { cat: '생성형 AI 가이드',    title: '생성형 AI 완벽 가이드 — 도구 선택부터 활용까지',   dur: '24:15', videoId: '', grad: ['#6d28d9', '#312e81'] },
-            { cat: 'AI 경영 전략',        title: 'AI 경영 전략 강의 — 우리 회사에 AI 심는 법',       dur: '21:08', videoId: '', grad: ['#b45309', '#7c2d12'] },
-            { cat: '프롬프트 엔지니어링', title: '프롬프트 엔지니어링 스킬업 — 좋은 질문의 기술',    dur: '16:33', videoId: '', grad: ['#0f766e', '#134e4a'] },
-        ];
+        /* 강의 데이터 — 관리자 콘솔에서 등록. videoId를 채우면 팝업 플레이어에서 즉시 재생. */
+        let LECTURES = [];
 
-        /* 앱 쇼케이스 — 운영 시 apps.json 드래그 앤 드롭 업로드로 자동 갱신 */
-        const APPS = [
-            { name: '서울LAW봇', badge: 'Legal AI', badgeCls: 'tag-vibe',
-              oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇',
-              how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.',
-              launch: '#apps', github: '#apps' },
-            { name: '블록ESG', badge: 'ESG Analytics', badgeCls: 'tag-genai',
-              oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구',
-              how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.',
-              launch: '#apps', github: '#apps' },
-            { name: 'TEN AI Hub', badge: 'Platform', badgeCls: 'tag-biz',
-              oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브',
-              how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.',
-              launch: '#apps', github: '#apps' },
-            { name: 'Prompt Library', badge: 'Toolkit', badgeCls: 'tag-vibe',
-              oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리',
-              how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.',
-              launch: '#apps', github: '#apps' },
-        ];
+        /* 앱 쇼케이스 — 관리자 콘솔에서 등록 */
+        let APPS = [];
 
         /* ============ 핸드북 탐색기 ============ */
         const grid = document.getElementById('handbookGrid');
@@ -2369,8 +2322,8 @@
                 return;
             }
             grid.innerHTML = items.map((h, i) => {
-                const c = COURSE_META[h.course_tag];
-                const a = ACCESS_META[h.access_level];
+                const c = COURSE_META[h.course_tag] || COURSE_META.vibecoding;
+                const a = ACCESS_META[h.access_level] || ACCESS_META.public;
                 const unlocked = h.access_level === 'public';
                 return `
                 <article class="handbook-card" style="animation-delay:${i * 0.06}s">
@@ -2428,18 +2381,24 @@
 
         /* ============ 강의 카드 & 팝업 플레이어 ============ */
         const lectureGrid = document.getElementById('lectureGrid');
-        lectureGrid.innerHTML = LECTURES.map((v, i) => `
-            <button class="lecture-card animate-on-scroll" data-idx="${i}">
-                <div class="lecture-thumb" style="background: linear-gradient(135deg, ${v.grad[0]}, ${v.grad[1]});">
-                    <div class="play"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-                    <span class="dur outfit">${v.dur}</span>
-                </div>
-                <div class="lecture-body">
-                    <div class="lecture-cat">${v.cat}</div>
-                    <div class="lecture-title">${v.title}</div>
-                </div>
-            </button>
-        `).join('');
+        function renderLectures() {
+            if (!LECTURES.length) {
+                lectureGrid.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 강의가 없습니다. 관리자 콘솔에서 강의를 추가해 주세요.</div>';
+                return;
+            }
+            lectureGrid.innerHTML = LECTURES.map((v, i) => `
+                <button class="lecture-card visible" data-idx="${i}">
+                    <div class="lecture-thumb" style="background: linear-gradient(135deg, ${v.grad1 || '#0e7490'}, ${v.grad2 || '#164e63'});">
+                        <div class="play"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+                        <span class="dur outfit">${v.dur || ''}</span>
+                    </div>
+                    <div class="lecture-body">
+                        <div class="lecture-cat">${escHtml(v.cat)}</div>
+                        <div class="lecture-title">${escHtml(v.title)}</div>
+                    </div>
+                </button>
+            `).join('');
+        }
 
         const videoModal = document.getElementById('videoModal');
         const videoFrame = document.getElementById('videoFrame');
@@ -2475,8 +2434,14 @@
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
 
         /* ============ 앱 쇼케이스 ============ */
-        document.getElementById('appsGrid').innerHTML = APPS.map(a => `
-            <article class="app-card animate-on-scroll">
+        function renderApps() {
+            const grid = document.getElementById('appsGrid');
+            if (!APPS.length) {
+                grid.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 앱이 없습니다. 관리자 콘솔에서 앱을 추가해 주세요.</div>';
+                return;
+            }
+            grid.innerHTML = APPS.map(a => `
+            <article class="app-card visible">
                 <div class="app-thumb" style="background: radial-gradient(ellipse 80% 90% at 50% 110%, rgba(0,212,255,0.18) 0%, transparent 60%), var(--navy-soft);">
                     <div class="app-mockup" aria-hidden="true">
                         <div class="mock-dots"><i></i><i></i><i></i></div>
@@ -2494,17 +2459,18 @@
                     </div>
                     <p class="app-oneliner">${a.oneliner}</p>
                     <div class="app-actions">
-                        <a class="app-btn launch" href="${a.launch}" onclick="showToast('『${a.name}』 앱은 정식 배포 후 실행 링크가 연결됩니다.'); return false;">
+                        <a class="app-btn launch" href="${a.launch || '#apps'}" ${a.launch ? 'target="_blank" rel="noopener"' : `onclick="showToast('『${a.name}』 앱은 정식 배포 후 실행 링크가 연결됩니다.'); return false;"`}>
                             ⚡ App Launch
                         </a>
-                        <a class="app-btn gh" href="${a.github}" onclick="showToast('GitHub 저장소는 오픈소스 공개 후 연결됩니다.'); return false;">
+                        <a class="app-btn gh" href="${a.github || '#apps'}" ${a.github ? 'target="_blank" rel="noopener"' : `onclick="showToast('GitHub 저장소는 오픈소스 공개 후 연결됩니다.'); return false;"`}>
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.4.6.1.83-.26.83-.58v-2.03c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.76-1.34-1.76-1.08-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.5 1 .1-.78.42-1.31.76-1.6-2.66-.31-5.47-1.34-5.47-5.93 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.53.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.88.12 3.18.77.84 1.23 1.9 1.23 3.23 0 4.6-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.23v3.3c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
                             GitHub 보러가기
                         </a>
                     </div>
                 </div>
             </article>
-        `).join('');
+            `).join('');
+        }
 
         /* ============ 소셜 로그인 (데모) ============ */
         document.querySelectorAll('[data-social]').forEach(btn => {
@@ -2589,13 +2555,14 @@
             entries.forEach(entry => {
                 if (!entry.isIntersecting) return;
                 const el = entry.target;
-                const target = Number(el.dataset.counter);
                 const suffix = el.dataset.suffix || '+';
                 const dur = 1400;
                 const start = performance.now();
                 (function tick(now) {
                     const p = Math.min((now - start) / dur, 1);
                     const eased = 1 - Math.pow(1 - p, 3);
+                    // 매 프레임 최신 목표값 사용 — 데이터 로드로 숫자가 바뀌어도 반영
+                    const target = Number(el.dataset.counter);
                     el.textContent = Math.round(target * eased) + (p === 1 ? suffix : '');
                     if (p < 1) requestAnimationFrame(tick);
                 })(start);
@@ -2869,9 +2836,34 @@
             showToast('로그아웃되었습니다.');
         });
 
+        /* ----- 상단 통계 자동 연동 (핸드북 수 · 과정 수) ----- */
+        function updateHeroStats() {
+            const counters = document.querySelectorAll('.hero-stats [data-counter]');
+            if (counters.length < 2) return;
+            const hbCount = HANDBOOKS.length;
+            const courseCount = new Set(HANDBOOKS.map(h => h.course_tag)).size;
+            counters[0].textContent = hbCount + '+';
+            counters[0].dataset.counter = hbCount;
+            counters[1].textContent = courseCount + '+';
+            counters[1].dataset.counter = courseCount;
+        }
+
         /* ----- 초기 로드 ----- */
         (async function initDynamic() {
             try { await applySettings(); } catch (e) { console.warn('설정 적용 실패', e); }
+            try {
+                HANDBOOKS = await TenStore.listHandbooks();
+                renderHandbooks();
+                updateHeroStats();
+            } catch (e) { console.warn('핸드북 로드 실패', e); }
+            try {
+                LECTURES = await TenStore.listLectures();
+                renderLectures();
+            } catch (e) { console.warn('강의 로드 실패', e); }
+            try {
+                APPS = await TenStore.listApps();
+                renderApps();
+            } catch (e) { console.warn('앱 로드 실패', e); }
             try { await renderNews(); } catch (e) { console.warn('소식 로드 실패', e); }
             try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
             try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
