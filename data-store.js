@@ -14,6 +14,7 @@
    - posts                            : 게시물 (공지/뉴스/교육)
    - qna                              : Q&A (질문/답변/공개 여부)
    ===================================================================== */
+import './supabase-config.js';   // window.SUPABASE_CONFIG (env 미설정 시 폴백)
 import { createClient } from '@supabase/supabase-js';
 
 const DEFAULT_SETTINGS = {
