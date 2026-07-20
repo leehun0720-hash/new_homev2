@@ -672,6 +672,56 @@
         .value-chip .t { font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem; }
         .value-chip .d { font-size: 0.74rem; color: var(--gray-400); line-height: 1.55; }
 
+        /* ============ Partners ============ */
+        .partners-head {
+            max-width: var(--container-max);
+            margin: 4.5rem auto 1.8rem;
+            text-align: center;
+        }
+        .partners-head h3 {
+            font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
+        }
+        .partners-head p { font-size: 0.92rem; color: var(--gray-400); font-weight: 300; }
+        .partner-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.4rem;
+        }
+        .partner-card {
+            background: var(--gradient-card);
+            border: 1px solid rgba(0, 212, 255, 0.12);
+            border-radius: var(--radius-lg);
+            padding: 1.7rem 1.7rem 1.8rem;
+            display: flex; flex-direction: column;
+            transition: all 0.35s ease;
+        }
+        .partner-card:hover { border-color: rgba(0, 212, 255, 0.42); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.38); }
+        .partner-role {
+            align-self: flex-start;
+            font-size: 0.72rem; font-weight: 700;
+            padding: 0.24rem 0.75rem;
+            border-radius: 999px;
+            margin-bottom: 0.9rem;
+        }
+        .partner-name { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .partner-name small { font-family: 'Noto Sans KR', sans-serif; font-size: 0.8rem; font-weight: 500; color: var(--gray-600); margin-left: 0.4rem; }
+        .partner-desc { font-size: 0.87rem; color: var(--gray-400); line-height: 1.7; flex: 1; margin-bottom: 1.2rem; }
+        .partner-link {
+            align-self: flex-start;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.84rem; font-weight: 700;
+            color: var(--cyan-glow);
+            text-decoration: none;
+            transition: gap 0.25s ease;
+        }
+        .partner-link:hover { gap: 0.7rem; }
+        @media (max-width: 1024px) { .partner-grid { grid-template-columns: 1fr; } }
+
         /* ============ Academy / Handbook ============ */
         .academy {
             background:
@@ -1716,6 +1766,44 @@
                     <li>연구 협력 네트워크</li>
                 </ul>
             </div>
+        </div>
+
+        <!-- 파트너사 -->
+        <div class="partners-head animate-on-scroll">
+            <h3>함께하는 파트너</h3>
+            <p>AI 개발부터 ESG 실천까지, 각 분야 전문 기업들과 협력합니다</p>
+        </div>
+        <div class="partner-grid stagger animate-on-scroll">
+            <article class="partner-card">
+                <span class="partner-role tag-vibe">AI 개발 파트너</span>
+                <h4 class="partner-name">VIDRAFT<small>비드래프트</small></h4>
+                <p class="partner-desc">
+                    자체 파운데이션 모델 'Darwin'과 AETHER 아키텍처를 보유한 서울 소재 딥테크 스타트업.
+                    신약 개발·신소재·공공행정 AI 등 고난도 영역에서 적은 자원으로 세계적 벤치마크 성과를
+                    내는 효율 중심 연구가 강점입니다.
+                </p>
+                <a class="partner-link" href="https://vidraft.net/index.html" target="_blank" rel="noopener">웹사이트 방문 →</a>
+            </article>
+            <article class="partner-card">
+                <span class="partner-role tag-vibe">AI 개발 파트너</span>
+                <h4 class="partner-name">Prototie<small>프로토타이</small></h4>
+                <p class="partner-desc">
+                    15년 이상의 글로벌 IT 운영 경험을 바탕으로 한 IT 아웃소싱 전문 기업.
+                    인도·우즈베키스탄 등 전 세계 검증된 개발 인력 네트워크를 통해
+                    합리적인 비용의 맞춤형 개발 솔루션을 제공합니다.
+                </p>
+                <a class="partner-link" href="https://prototie.net/" target="_blank" rel="noopener">웹사이트 방문 →</a>
+            </article>
+            <article class="partner-card">
+                <span class="partner-role tag-biz">ESG 파트너</span>
+                <h4 class="partner-name">트리헌드레드<small>사단법인 리본디어스</small></h4>
+                <p class="partner-desc">
+                    ESG 경영을 실천하는 기업의 제품을 판매하고, 그 수익을 나무 심기에 사용하는
+                    친환경 소셜 벤처. '1인당 100그루 나무 심기' 캠페인으로 지구 온난화 대응에
+                    기여하고 있습니다.
+                </p>
+                <a class="partner-link" href="https://www.treehundred.com" target="_blank" rel="noopener">웹사이트 방문 →</a>
+            </article>
         </div>
 
         <div class="values-strip animate-on-scroll">
