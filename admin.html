@@ -517,8 +517,7 @@
             <section class="panel" id="panel-lectures">
                 <div class="card">
                     <h2 id="lecFormTitle">새 강의 등록</h2>
-                    <p class="sub">유튜브 영상 ID를 입력하면 사이트의 팝업 플레이어에서 바로 재생됩니다.
-                        (예: 주소가 youtube.com/watch?v=<b>abc123XYZ_0</b> 이면 ID는 abc123XYZ_0)</p>
+                    <p class="sub">유튜브 강의 주소 또는 11자리 영상 ID를 입력하면, 홈페이지에서 강의를 누를 때 YouTube가 새 창으로 열립니다.</p>
                     <input type="hidden" id="lecId">
                     <div class="field-row">
                         <div class="field">
@@ -536,8 +535,8 @@
                     </div>
                     <div class="field-row-3">
                         <div class="field">
-                            <label for="lecVideo">유튜브 영상 ID</label>
-                            <input type="text" id="lecVideo" placeholder="비워두면 채널 안내 표시">
+                            <label for="lecVideo">유튜브 강의 주소 또는 영상 ID</label>
+                            <input type="text" id="lecVideo" placeholder="예: https://youtu.be/abc123XYZ_0">
                         </div>
                         <div class="field">
                             <label for="lecGrad1">썸네일 색 1</label>
@@ -626,6 +625,34 @@
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+        const extractYouTubeVideoId = value => {
+            const raw = String(value || '').trim();
+            if (/^[A-Za-z0-9_-]{11}$/.test(raw)) return raw;
+            const legacyWatch = raw.match(/^\/?watch\?v=([A-Za-z0-9_-]{11})(?:[&#]|$)/);
+            if (legacyWatch) return legacyWatch[1];
+
+            const candidate = /^(?:www\.|m\.|music\.)?youtube\.com\/|^youtu\.be\//i.test(raw)
+                ? `https://${raw}`
+                : raw;
+            try {
+                const url = new URL(candidate);
+                const host = url.hostname.toLowerCase().replace(/^www\./, '');
+                let videoId = '';
+                if (host === 'youtu.be') {
+                    videoId = url.pathname.split('/').filter(Boolean)[0] || '';
+                } else if (['youtube.com', 'm.youtube.com', 'music.youtube.com'].includes(host)) {
+                    if (url.pathname === '/watch') {
+                        videoId = url.searchParams.get('v') || '';
+                    } else {
+                        const match = url.pathname.match(/^\/(?:shorts|embed|live)\/([A-Za-z0-9_-]{11})(?:\/|$)/);
+                        videoId = match ? match[1] : '';
+                    }
+                }
+                return /^[A-Za-z0-9_-]{11}$/.test(videoId) ? videoId : '';
+            } catch {
+                return '';
+            }
+        };
 
         let SETTINGS = {};
 
@@ -1037,10 +1064,10 @@
                         <div>
                             <div class="item-title">
                                 <span class="chip chip-notice">${esc(v.cat)}</span>
-                                <span class="chip ${v.videoId ? 'chip-answered' : 'chip-pending'}">${v.videoId ? '▶ 재생 가능' : '영상 ID 없음'}</span>
+                                <span class="chip ${v.videoId ? 'chip-answered' : 'chip-pending'}">${v.videoId ? '↗ YouTube 연결' : 'YouTube 링크 없음'}</span>
                                 ${esc(v.title)}
                             </div>
-                            <div class="item-meta">${esc(v.dur || '')}${v.videoId ? ' · ID: ' + esc(v.videoId) : ''}</div>
+                            <div class="item-meta">${esc(v.dur || '')}${v.videoId ? ' · YouTube 링크 등록됨' : ''}</div>
                         </div>
                         <div class="item-actions">
                             <button class="btn btn-ghost btn-sm" data-lecedit="${v.id}">수정</button>
@@ -1062,13 +1089,19 @@
         $('saveLecBtn').addEventListener('click', async () => {
             const title = $('lecTitle').value.trim();
             if (!title) { showToast('강의 제목을 입력하세요.'); return; }
+            const videoInput = $('lecVideo').value.trim();
+            const videoId = extractYouTubeVideoId(videoInput);
+            if (videoInput && !videoId) {
+                showToast('올바른 YouTube 주소 또는 11자리 영상 ID를 입력하세요.');
+                return;
+            }
             try {
                 await TenStore.saveLecture({
                     id: $('lecId').value || null,
                     cat: $('lecCat').value.trim(),
                     title,
                     dur: $('lecDur').value.trim(),
-                    videoId: $('lecVideo').value.trim(),
+                    videoId,
                     grad1: $('lecGrad1').value,
                     grad2: $('lecGrad2').value
                 });
