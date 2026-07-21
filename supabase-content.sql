@@ -29,8 +29,12 @@ create table if not exists handbooks (
   level_tier   int  not null default 1,
   access_level text not null default 'public',       -- public | member | enrolled
   description  text not null default '',
+  link_url     text not null default '',
   created_at   bigint not null
 );
+
+-- 기존 설치 환경에도 링크 컬럼을 안전하게 추가
+alter table handbooks add column if not exists link_url text not null default '';
 
 -- ---------- 2) 강의 ----------
 create table if not exists lectures (

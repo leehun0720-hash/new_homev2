@@ -564,6 +564,10 @@
                         <label for="hbDesc">소개 문구</label>
                         <textarea id="hbDesc" placeholder="카드에 표시될 한두 문장 소개"></textarea>
                     </div>
+                    <div class="field">
+                        <label for="hbLink">연결 링크 (핸드북 열기 클릭 시 이동할 주소)</label>
+                        <input type="text" id="hbLink" placeholder="https://... (비우면 '링크 미등록' 안내 표시)">
+                    </div>
                     <div style="display:flex; gap:0.6rem;">
                         <button class="btn btn-cyan" id="saveHbBtn">💾 핸드북 저장</button>
                         <button class="btn btn-ghost" id="resetHbBtn">새로 작성</button>
@@ -1096,6 +1100,7 @@
                                 <span class="chip chip-notice">${esc(HB_COURSE_NAME[h.course_tag] || h.course_tag)}</span>
                                 <span class="chip chip-news">L${h.level_tier}</span>
                                 <span class="chip ${HB_ACCESS_CHIP[h.access_level] || 'chip-notice'}">${esc(HB_ACCESS_NAME[h.access_level] || h.access_level)}</span>
+                                <span class="chip ${h.link ? 'chip-answered' : 'chip-private'}">${h.link ? '🔗 링크 있음' : '링크 없음'}</span>
                                 ${esc(h.title)}
                             </div>
                         </div>
@@ -1110,7 +1115,7 @@
 
         function resetHbForm() {
             $('hbId').value = ''; $('hbTitle').value = ''; $('hbCourse').value = 'vibecoding';
-            $('hbLevel').value = '1'; $('hbAccess').value = 'public'; $('hbDesc').value = '';
+            $('hbLevel').value = '1'; $('hbAccess').value = 'public'; $('hbDesc').value = ''; $('hbLink').value = '';
             $('hbFormTitle').textContent = '새 핸드북 등록';
         }
         $('resetHbBtn').addEventListener('click', resetHbForm);
@@ -1125,7 +1130,8 @@
                     course_tag: $('hbCourse').value,
                     level_tier: Number($('hbLevel').value),
                     access_level: $('hbAccess').value,
-                    desc: $('hbDesc').value.trim()
+                    desc: $('hbDesc').value.trim(),
+                    link: $('hbLink').value.trim()
                 });
                 resetHbForm();
                 await renderHbAdmin();
@@ -1141,7 +1147,7 @@
                 if (!h) return;
                 $('hbId').value = h.id; $('hbTitle').value = h.title;
                 $('hbCourse').value = h.course_tag; $('hbLevel').value = String(h.level_tier);
-                $('hbAccess').value = h.access_level; $('hbDesc').value = h.desc || '';
+                $('hbAccess').value = h.access_level; $('hbDesc').value = h.desc || ''; $('hbLink').value = h.link || '';
                 $('hbFormTitle').textContent = '핸드북 수정';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
