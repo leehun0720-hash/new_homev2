@@ -1465,6 +1465,11 @@
             .handbook-grid { grid-template-columns: 1fr; }
             .lecture-grid { grid-template-columns: 1fr; }
             .apps-grid { grid-template-columns: 1fr; }
+            .news-grid { grid-template-columns: minmax(0, 1fr); }
+            .news-card { min-width: 0; }
+            .news-title, .news-excerpt { overflow-wrap: anywhere; }
+            .qna-inner { grid-template-columns: minmax(0, 1fr); }
+            .qna-form { position: static; }
             .lectures-head { grid-template-columns: 1fr; align-items: start; }
             .academy-filters { flex-direction: column; align-items: flex-start; }
             .footer-content { grid-template-columns: 1fr; text-align: center; }
@@ -1478,6 +1483,9 @@
             .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
             .values-strip { grid-template-columns: 1fr 1fr; }
             .hero-chip { display: none; }
+            .news-card { padding: 1.35rem 1.25rem; }
+            .qna-form-row { grid-template-columns: 1fr; }
+            .post-modal-body { padding: 1.35rem 1.25rem 1.6rem; }
         }
         /* =====================================================
            Stripe-inspired Light Theme Override
