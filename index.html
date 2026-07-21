@@ -79,56 +79,20 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
         }
 
-        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
-        .logo-icon {
-            width: 42px; height: 42px;
-            background: var(--gradient-cyan);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800; font-size: 1.05rem;
-            color: var(--deep-navy);
-            position: relative; overflow: hidden;
+        .logo { display: flex; align-items: center; text-decoration: none; }
+        .brand-logo-frame {
+            position: relative;
+            width: 140px;
+            height: 58px;
+            flex: 0 0 auto;
         }
-        .logo-icon[hidden] { display: none; }
-        .logo-tagline[hidden] { display: none; }
-        .logo-icon::after {
-            content: '';
-            position: absolute; top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.35), transparent);
-            transform: rotate(45deg);
-            animation: shine 1.6s ease infinite;
-            animation-play-state: paused;
-            opacity: 0;
+        .brand-logo-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
-        .logo:hover .logo-icon::after { animation-play-state: running; opacity: 1; }
-        @keyframes shine {
-            0%, 100% { transform: translateX(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) rotate(45deg); }
-        }
-        .logo-lockup {
-            display: flex;
-            flex-direction: column;
-            gap: 0.22rem;
-            line-height: 1;
-        }
-        .logo-text {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.6rem; font-weight: 800;
-            color: var(--white); letter-spacing: -0.03em;
-            line-height: 1;
-        }
-        .logo-text span { color: var(--cyan-glow); }
-        .logo-tagline {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.56rem;
-            font-weight: 600;
-            letter-spacing: 0.34em;
-            color: var(--gray-400);
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
+        .footer-brand .brand-logo-frame { width: 184px; height: 78px; }
 
         .nav-links { display: flex; gap: 2.2rem; list-style: none; align-items: center; }
         .nav-links a {
@@ -466,43 +430,27 @@
             gap: 4rem;
             align-items: center;
         }
-        .philosophy-visual { position: relative; height: 400px; display: flex; align-items: center; justify-content: center; }
-        .circle-main {
-            width: 170px; height: 170px;
-            background: var(--gradient-cyan);
-            color: var(--deep-navy);
-            font-weight: 900; font-size: 1.25rem;
-            text-align: center; line-height: 1.4;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 80px rgba(0, 212, 255, 0.35);
-            z-index: 2; position: relative;
-        }
-        .circle-orbit {
-            position: absolute; inset: 0;
-            animation: orbit 30s linear infinite;
-            animation-play-state: paused;
-        }
-        .philosophy-visual:hover .circle-orbit,
-        .philosophy-visual:hover .circle-item { animation-play-state: running; }
-        @keyframes orbit { to { transform: rotate(360deg); } }
-        .circle-item {
-            position: absolute;
-            width: 86px; height: 86px;
+        .philosophy-brand-panel {
+            min-height: 340px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
             background: var(--navy-light);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; font-weight: 700;
-            color: var(--cyan-soft);
-            animation: orbitCounter 30s linear infinite;
-            animation-play-state: paused;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
         }
-        @keyframes orbitCounter { to { transform: rotate(-360deg); } }
-        .circle-1 { top: 0; left: calc(50% - 43px); }
-        .circle-2 { top: calc(50% - 43px); right: 0; }
-        .circle-3 { bottom: 0; left: calc(50% - 43px); }
-        .circle-4 { top: calc(50% - 43px); left: 0; }
+        .philosophy-logo-frame {
+            width: min(100%, 520px);
+            height: 250px;
+        }
+        .philosophy-logo-frame img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
         .philosophy-text blockquote {
             font-size: clamp(1.4rem, 2.6vw, 1.9rem);
@@ -1481,7 +1429,7 @@
             .hero-inner { grid-template-columns: 1fr; gap: 3.5rem; }
             .hero-visual { height: 380px; max-width: 520px; }
             .philosophy-content { grid-template-columns: 1fr; gap: 3rem; }
-            .philosophy-visual { height: 340px; }
+            .philosophy-brand-panel { min-height: 300px; }
             .tenos-band { grid-template-columns: 1fr; }
             .business-grid { grid-template-columns: repeat(2, 1fr); }
             .values-strip { grid-template-columns: repeat(3, 1fr); }
@@ -1517,6 +1465,8 @@
             .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
             .values-strip { grid-template-columns: 1fr 1fr; }
             .hero-chip { display: none; }
+            .philosophy-brand-panel { min-height: 210px; padding: 1rem; }
+            .philosophy-logo-frame { width: 300px; height: 150px; }
             .logo-meaning { grid-template-columns: 1fr; }
             .news-card { padding: 1.35rem 1.25rem; }
             .qna-form-row { grid-template-columns: 1fr; }
@@ -1627,10 +1577,6 @@
         .tenos-spec .k { color: #00d4ff; }
         .tenos-spec .v { color: #8fa5c5; }
 
-        /* ---- 철학 궤도 ---- */
-        .circle-item { background: #ffffff; border-color: #cfe3f8; color: #0570de; box-shadow: var(--shadow-card); }
-        .circle-main { color: #ffffff; box-shadow: 0 18px 44px rgba(5, 112, 222, 0.3); }
-
         /* ---- 아카데미 필터 ---- */
         .academy {
             background:
@@ -1724,10 +1670,8 @@
     <!-- ============ Navigation ============ -->
     <nav id="nav" aria-label="주 메뉴">
         <a href="#home" class="logo" aria-label="TenAI 홈">
-            <div class="logo-icon" hidden>10</div>
-            <span class="logo-lockup">
-                <span class="logo-text">Ten<span>AI</span></span>
-                <span class="logo-tagline">AX HUB PLATFORM</span>
+            <span class="brand-logo-frame">
+                <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM">
             </span>
         </a>
         <ul class="nav-links">
@@ -1841,17 +1785,13 @@
     <section class="philosophy" id="about">
         <div class="section-header animate-on-scroll">
             <p class="section-label">01 · About &amp; Philosophy</p>
-            <h2 class="section-title">사람의 가능성을 확장하는 AI</h2>
+            <h2 class="section-title">TEN AI의 철학적 기원</h2>
             <p class="section-desc">AI와 사람을 연결하는 AX HUB PLATFORM</p>
         </div>
         <div class="philosophy-content">
-            <div class="philosophy-visual animate-on-scroll" aria-hidden="true">
-                <div class="circle-main">사람 중심<br>AI</div>
-                <div class="circle-orbit">
-                    <div class="circle-item circle-1">연결</div>
-                    <div class="circle-item circle-2">접근성</div>
-                    <div class="circle-item circle-3">지능</div>
-                    <div class="circle-item circle-4">신뢰</div>
+            <div class="philosophy-brand-panel">
+                <div class="philosophy-logo-frame">
+                    <img src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM 공식 로고">
                 </div>
             </div>
             <div class="philosophy-text animate-on-scroll">
@@ -2260,11 +2200,9 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <a href="#home" class="logo">
-                    <div class="logo-icon" hidden>10</div>
-                    <span class="logo-lockup">
-                        <span class="logo-text">Ten<span>AI</span></span>
-                        <span class="logo-tagline">AX HUB PLATFORM</span>
+                <a href="#home" class="logo" aria-label="TenAI 홈">
+                    <span class="brand-logo-frame">
+                        <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM">
                     </span>
                 </a>
                 <p>인간의 지혜와 실천이 만나는 10번째 인공지능. 활용 중심의 AI, 실천형 인공지능 생태계를 구축합니다.</p>
@@ -2683,36 +2621,10 @@
         const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
         window.SITE_SETTINGS = null;
 
-        /* ----- 설정 반영 (로고, 문구, 연락처) ----- */
+        /* ----- 설정 반영 (문구, 연락처) ----- */
         async function applySettings() {
             const s = await TenStore.getSettings();
             window.SITE_SETTINGS = s;
-
-            // 로고 (네비게이션 + 푸터) — 이미지가 있으면 아이콘 표시, 없으면 텍스트 록업만
-            document.querySelectorAll('.logo').forEach(logo => {
-                const icon = logo.querySelector('.logo-icon');
-                const text = logo.querySelector('.logo-text');
-                const tagline = logo.querySelector('.logo-tagline');
-                if (icon) {
-                    // data:image 또는 http(s) 이미지 URL만 허용 (스크립트 주입 차단)
-                    const okImg = s.logoImage && /^(data:image\/|https?:\/\/)/i.test(s.logoImage);
-                    if (okImg) {
-                        icon.hidden = false;
-                        const img = document.createElement('img');
-                        img.src = s.logoImage;               // DOM 속성 대입은 HTML 파싱을 거치지 않아 안전
-                        img.alt = (s.logoText || '') + (s.logoAccent || '') + ' 로고';
-                        img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit;';
-                        icon.replaceChildren(img);
-                    } else {
-                        icon.hidden = true;
-                    }
-                }
-                if (text) text.innerHTML = escHtml(s.logoText || 'Ten') + '<span>' + escHtml(s.logoAccent || 'AI') + '</span>';
-                if (tagline) {
-                    tagline.textContent = s.logoTagline || '';
-                    tagline.hidden = !s.logoTagline;
-                }
-            });
 
             // 문구류 (data-set 훅)
             document.querySelectorAll('[data-set]').forEach(el => {
