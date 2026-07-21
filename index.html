@@ -513,13 +513,47 @@
             margin-bottom: 1.75rem;
         }
         .philosophy-text p { color: var(--gray-400); margin-bottom: 1.1rem; }
-        .philosophy-stats { display: flex; gap: 2.5rem; margin-top: 2.25rem; }
-        .stat-number {
-            font-size: 2.4rem; font-weight: 800;
-            color: var(--cyan-glow);
-            line-height: 1.2;
+        .logo-philosophy {
+            margin-top: 2rem;
+            padding-top: 1.4rem;
+            border-top: 1px solid var(--line);
         }
-        .stat-label { font-size: 0.88rem; color: var(--gray-400); }
+        .logo-philosophy-label {
+            margin-bottom: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            color: var(--cyan-glow);
+        }
+        .logo-meaning {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+        .logo-meaning-item {
+            min-width: 0;
+            padding: 1rem;
+            background: var(--navy-light);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-md);
+        }
+        .logo-meaning-item:nth-child(2) { border-color: rgba(5, 112, 222, 0.38); }
+        .logo-meaning-key {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: var(--white);
+        }
+        .logo-meaning-item:nth-child(2) .logo-meaning-key { color: var(--cyan-glow); }
+        .logo-meaning-desc { font-size: 0.78rem; color: var(--gray-400); line-height: 1.5; }
+        .philosophy-text .logo-connection-note {
+            margin: 0.85rem 0 0;
+            font-size: 0.84rem;
+            line-height: 1.65;
+        }
 
         /* TenOS model spec */
         .tenos-band {
@@ -1483,6 +1517,7 @@
             .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
             .values-strip { grid-template-columns: 1fr 1fr; }
             .hero-chip { display: none; }
+            .logo-meaning { grid-template-columns: 1fr; }
             .news-card { padding: 1.35rem 1.25rem; }
             .qna-form-row { grid-template-columns: 1fr; }
             .post-modal-body { padding: 1.35rem 1.25rem 1.6rem; }
@@ -1806,36 +1841,40 @@
     <section class="philosophy" id="about">
         <div class="section-header animate-on-scroll">
             <p class="section-label">01 · About &amp; Philosophy</p>
-            <h2 class="section-title">TEN AI의 철학적 기원</h2>
-            <p class="section-desc">기술 중심이 아닌 '활용 중심의 AI'를 지향합니다</p>
+            <h2 class="section-title">사람의 가능성을 확장하는 AI</h2>
+            <p class="section-desc">AI와 사람을 연결하는 AX HUB PLATFORM</p>
         </div>
         <div class="philosophy-content">
             <div class="philosophy-visual animate-on-scroll" aria-hidden="true">
-                <div class="circle-main">실천적<br>지능</div>
+                <div class="circle-main">사람 중심<br>AI</div>
                 <div class="circle-orbit">
-                    <div class="circle-item circle-1">교육</div>
-                    <div class="circle-item circle-2">컨설팅</div>
-                    <div class="circle-item circle-3">플랫폼</div>
-                    <div class="circle-item circle-4">커뮤니티</div>
+                    <div class="circle-item circle-1">연결</div>
+                    <div class="circle-item circle-2">접근성</div>
+                    <div class="circle-item circle-3">지능</div>
+                    <div class="circle-item circle-4">신뢰</div>
                 </div>
             </div>
             <div class="philosophy-text animate-on-scroll">
-                <blockquote>"AI는 도구가 아니라,<br>인간 지혜의 확장이다."</blockquote>
-                <p>TEN AI는 튜링머신에서 시작된 인간 사고의 여정이 실천과 교육으로 귀결되는 10번째 단계를 상징합니다.</p>
-                <p>기술보다 실천, 결과보다 과정을 중시하며, 인간과 AI의 공진화를 통한 실천적 지능을 구현합니다.</p>
-                <div class="philosophy-stats">
-                    <div class="stat-item">
-                        <div class="stat-number outfit">10</div>
-                        <div class="stat-label">AI 진화 단계</div>
+                <blockquote>"기술은 사람을 향할 때<br>비로소 지능이 됩니다."</blockquote>
+                <p>TenAI는 기술 중심의 AI를 넘어, 사람이 실제로 이해하고 활용할 수 있는 AI 경험을 설계합니다.</p>
+                <p>복잡한 AI를 사람이 이해하고 실행할 수 있는 경험으로 전환하고, 더 나은 판단과 성과로 이어지도록 연결합니다.</p>
+                <div class="logo-philosophy" aria-label="TenAI 로고에 담긴 의미">
+                    <div class="logo-philosophy-label">LOGO PHILOSOPHY</div>
+                    <div class="logo-meaning">
+                        <div class="logo-meaning-item">
+                            <span class="logo-meaning-key">Ten</span>
+                            <span class="logo-meaning-desc">안정 · 사람 · 현실</span>
+                        </div>
+                        <div class="logo-meaning-item">
+                            <span class="logo-meaning-key">A · 14°</span>
+                            <span class="logo-meaning-desc">전환 · 움직임 · 도약</span>
+                        </div>
+                        <div class="logo-meaning-item">
+                            <span class="logo-meaning-key">AI</span>
+                            <span class="logo-meaning-desc">혁신 · 확장 · 미래</span>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-number outfit">5</div>
-                        <div class="stat-label">핵심 사업영역</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number outfit">∞</div>
-                        <div class="stat-label">무한한 가능성</div>
-                    </div>
+                    <p class="logo-connection-note">오른쪽으로 14° 기울고 5% 확대된 A는 멈추지 않는 도약을, n과 A의 연결은 사람과 AI의 끊김 없는 접점을 뜻합니다.</p>
                 </div>
             </div>
         </div>
