@@ -30,11 +30,18 @@ create table if not exists handbooks (
   access_level text not null default 'public',       -- public | member | enrolled
   description  text not null default '',
   link_url     text not null default '',
+  link_target  text not null default '_blank' check (link_target in ('_blank', '_self')),
   created_at   bigint not null
 );
 
 -- 기존 설치 환경에도 링크 컬럼을 안전하게 추가
 alter table handbooks add column if not exists link_url text not null default '';
+alter table handbooks add column if not exists link_target text not null default '_blank';
+
+-- 링크 열기 방식은 새 창(_blank) 또는 현재 페이지(_self)만 허용
+alter table handbooks drop constraint if exists handbooks_link_target_check;
+alter table handbooks
+  add constraint handbooks_link_target_check check (link_target in ('_blank', '_self'));
 
 -- ---------- 2) 강의 ----------
 create table if not exists lectures (

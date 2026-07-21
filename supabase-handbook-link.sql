@@ -6,3 +6,11 @@
 
 alter table handbooks
   add column if not exists link_url text not null default '';
+
+alter table handbooks
+  add column if not exists link_target text not null default '_blank';
+
+alter table handbooks drop constraint if exists handbooks_link_target_check;
+alter table handbooks
+  add constraint handbooks_link_target_check
+  check (link_target in ('_blank', '_self'));

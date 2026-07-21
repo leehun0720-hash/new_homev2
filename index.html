@@ -2395,7 +2395,11 @@
             // 연결 링크가 있으면 새 탭으로 이동 (http/https 만 허용)
             const link = String(hb.link || '').trim();
             if (/^https?:\/\//i.test(link)) {
-                window.open(link, '_blank', 'noopener');
+                if (hb.linkTarget === '_self') {
+                    window.location.assign(link);
+                } else {
+                    window.open(link, '_blank', 'noopener');
+                }
             } else {
                 showToast(`『${hb.title}』 연결 링크가 아직 등록되지 않았습니다. 관리자 콘솔에서 링크를 입력해 주세요.`);
             }

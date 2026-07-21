@@ -407,7 +407,7 @@ const SEED_APPS = [
 ];
 
 /* row ↔ JS 매핑 정의: [JS키, DB컬럼] */
-const HB_MAP  = [['title','title'],['course_tag','course_tag'],['level_tier','level_tier'],['access_level','access_level'],['desc','description'],['link','link_url'],['createdAt','created_at']];
+const HB_MAP  = [['title','title'],['course_tag','course_tag'],['level_tier','level_tier'],['access_level','access_level'],['desc','description'],['link','link_url'],['linkTarget','link_target'],['createdAt','created_at']];
 const LEC_MAP = [['cat','category'],['title','title'],['dur','duration'],['videoId','video_id'],['grad1','grad1'],['grad2','grad2'],['createdAt','created_at']];
 const APP_MAP = [['name','name'],['badge','badge'],['badgeCls','badge_cls'],['oneliner','oneliner'],['how','how'],['launch','launch_url'],['github','github_url'],['createdAt','created_at']];
 

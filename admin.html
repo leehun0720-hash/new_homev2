@@ -565,9 +565,16 @@
                         <textarea id="hbDesc" placeholder="카드에 표시될 한두 문장 소개"></textarea>
                     </div>
                     <div class="field">
-                        <label for="hbLink">웹 링크 URL <span style="font-weight:400;color:var(--gray-600)">(핸드북 열기 시 새 탭 이동)</span></label>
+                        <label for="hbLink">웹 링크 URL</label>
                         <input type="url" id="hbLink" inputmode="url" autocomplete="url" placeholder="https://example.com/handbook" aria-describedby="hbLinkHelp">
                         <small id="hbLinkHelp" style="display:block;margin-top:.45rem;color:var(--gray-600);font-size:.78rem;">http:// 또는 https://로 시작하는 주소를 입력하세요. 비우면 사이트에서 링크 미등록 안내가 표시됩니다.</small>
+                    </div>
+                    <div class="field">
+                        <label for="hbLinkTarget">링크 열기 방식</label>
+                        <select id="hbLinkTarget">
+                            <option value="_blank">새 창(새 탭)에서 열기</option>
+                            <option value="_self">현재 페이지에서 열기</option>
+                        </select>
                     </div>
                     <div style="display:flex; gap:0.6rem;">
                         <button class="btn btn-cyan" id="saveHbBtn">💾 핸드북 저장</button>
@@ -1102,6 +1109,7 @@
                                 <span class="chip chip-news">L${h.level_tier}</span>
                                 <span class="chip ${HB_ACCESS_CHIP[h.access_level] || 'chip-notice'}">${esc(HB_ACCESS_NAME[h.access_level] || h.access_level)}</span>
                                 <span class="chip ${h.link ? 'chip-answered' : 'chip-private'}">${h.link ? '🔗 링크 있음' : '링크 없음'}</span>
+                                ${h.link ? `<span class="chip chip-news">${h.linkTarget === '_self' ? '현재 페이지' : '새 창'}</span>` : ''}
                                 ${esc(h.title)}
                             </div>
                         </div>
@@ -1116,7 +1124,7 @@
 
         function resetHbForm() {
             $('hbId').value = ''; $('hbTitle').value = ''; $('hbCourse').value = 'vibecoding';
-            $('hbLevel').value = '1'; $('hbAccess').value = 'public'; $('hbDesc').value = ''; $('hbLink').value = '';
+            $('hbLevel').value = '1'; $('hbAccess').value = 'public'; $('hbDesc').value = ''; $('hbLink').value = ''; $('hbLinkTarget').value = '_blank';
             $('hbFormTitle').textContent = '새 핸드북 등록';
         }
         $('resetHbBtn').addEventListener('click', resetHbForm);
@@ -1138,7 +1146,8 @@
                     level_tier: Number($('hbLevel').value),
                     access_level: $('hbAccess').value,
                     desc: $('hbDesc').value.trim(),
-                    link
+                    link,
+                    linkTarget: $('hbLinkTarget').value === '_self' ? '_self' : '_blank'
                 });
                 resetHbForm();
                 await renderHbAdmin();
@@ -1155,6 +1164,7 @@
                 $('hbId').value = h.id; $('hbTitle').value = h.title;
                 $('hbCourse').value = h.course_tag; $('hbLevel').value = String(h.level_tier);
                 $('hbAccess').value = h.access_level; $('hbDesc').value = h.desc || ''; $('hbLink').value = h.link || '';
+                $('hbLinkTarget').value = h.linkTarget === '_self' ? '_self' : '_blank';
                 $('hbFormTitle').textContent = '핸드북 수정';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
