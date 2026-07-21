@@ -565,8 +565,9 @@
                         <textarea id="hbDesc" placeholder="카드에 표시될 한두 문장 소개"></textarea>
                     </div>
                     <div class="field">
-                        <label for="hbLink">연결 링크 (핸드북 열기 클릭 시 이동할 주소)</label>
-                        <input type="text" id="hbLink" placeholder="https://... (비우면 '링크 미등록' 안내 표시)">
+                        <label for="hbLink">웹 링크 URL <span style="font-weight:400;color:var(--gray-600)">(핸드북 열기 시 새 탭 이동)</span></label>
+                        <input type="url" id="hbLink" inputmode="url" autocomplete="url" placeholder="https://example.com/handbook" aria-describedby="hbLinkHelp">
+                        <small id="hbLinkHelp" style="display:block;margin-top:.45rem;color:var(--gray-600);font-size:.78rem;">http:// 또는 https://로 시작하는 주소를 입력하세요. 비우면 사이트에서 링크 미등록 안내가 표시됩니다.</small>
                     </div>
                     <div style="display:flex; gap:0.6rem;">
                         <button class="btn btn-cyan" id="saveHbBtn">💾 핸드북 저장</button>
@@ -1123,6 +1124,12 @@
         $('saveHbBtn').addEventListener('click', async () => {
             const title = $('hbTitle').value.trim();
             if (!title) { showToast('제목을 입력하세요.'); return; }
+            const link = $('hbLink').value.trim();
+            if (link && !/^https?:\/\//i.test(link)) {
+                showToast('웹 링크는 http:// 또는 https://로 시작해야 합니다.');
+                $('hbLink').focus();
+                return;
+            }
             try {
                 await TenStore.saveHandbook({
                     id: $('hbId').value || null,
@@ -1131,7 +1138,7 @@
                     level_tier: Number($('hbLevel').value),
                     access_level: $('hbAccess').value,
                     desc: $('hbDesc').value.trim(),
-                    link: $('hbLink').value.trim()
+                    link
                 });
                 resetHbForm();
                 await renderHbAdmin();
