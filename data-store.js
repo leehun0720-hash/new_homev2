@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS = {
     heroTitle1: 'AI를 배우는 시대에서,',
     heroTitle2: 'AI로 배우는 시대로',
     heroSubtitle: '인간의 지혜와 실천이 만나는 10번째 인공지능, TEN AI.\n과정별·레벨별 교육 핸드북부터 대표 강의, 실전 AI 앱까지 —\n실천형 인공지능 생태계를 한곳에서 만나보세요.',
-    contactEmail: 'leesh@teai.kr',
+    contactEmail: 'leesh@tenai.kr',
     address: '서울시 서초구 서초동 1604-19 (대호프레조빌 202호)',
     youtubeUrl: 'https://www.youtube.com/@smauelchung',
     footerSlogan: 'AI를 배우다, AI로 실천하다',
@@ -42,7 +42,7 @@ const SEED_POSTS = [
     },
     {
         id: 'p2', title: '바이브코딩 코스 신규 기수 모집 안내', category: '교육', pinned: false,
-        content: '비개발자를 위한 바이브코딩 코스(Level 1~2) 신규 기수를 모집합니다.\n\n- 대상: 코딩 경험이 없는 일반인/실무자\n- 방식: 온·오프라인 하이브리드\n- 문의: leesh@teai.kr',
+        content: '비개발자를 위한 바이브코딩 코스(Level 1~2) 신규 기수를 모집합니다.\n\n- 대상: 코딩 경험이 없는 일반인/실무자\n- 방식: 온·오프라인 하이브리드\n- 문의: leesh@tenai.kr',
         createdAt: Date.now() - 86400000 * 5
     },
     {
