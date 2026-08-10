@@ -1827,7 +1827,133 @@
         .biz-icon, .value-chip .ic { display: none; }
         /* 핸드북 커버의 LEVEL 칩: 어두운 칩 배경 위 흰색 글씨로 가독성 확보 */
         .hb-level { color: #ffffff; border-color: rgba(255, 255, 255, 0.35); }
+
+        /* =====================================================
+           Motion Layer — anime.js v4 + Motion (motion.dev)
+           .js-anim  : JS가 살아있음 (진입 전 숨김 상태를 맡는다)
+           .fx-on    : motion-fx.js 부팅 성공 (모션 전용 스타일)
+           .fx-soft  : prefers-reduced-motion — 등장 연출만 남기고 상시 모션 제외
+           .fx-fallback : 모션 초기화 실패 — 모든 콘텐츠 즉시 노출
+           ===================================================== */
+        .js-anim .hero-badge,
+        .js-anim .hero h1,
+        .js-anim .hero-subtitle,
+        .js-anim .hero-cta-group,
+        .js-anim .hero-stats,
+        .js-anim .hero-visual { animation: none; opacity: 0; }
+
+        .js-anim .animate-on-scroll { opacity: 0; transform: translateY(34px); transition: none; }
+        .js-anim .animate-on-scroll.stagger { opacity: 1; transform: none; }
+        .js-anim .animate-on-scroll.stagger > * { opacity: 0; }
+        .js-anim .animate-on-scroll.visible { opacity: 1; transform: none; }
+        .js-anim .handbook-card,
+        .js-anim .lecture-card,
+        .js-anim .app-card,
+        .js-anim .news-card { animation: none; }
+
+        /* 안전망: 모션이 실패해도 콘텐츠는 반드시 읽을 수 있어야 한다 */
+        .fx-fallback .hero-badge, .fx-fallback .hero h1, .fx-fallback .hero-subtitle,
+        .fx-fallback .hero-cta-group, .fx-fallback .hero-stats, .fx-fallback .hero-visual,
+        .fx-fallback .hb-float, .fx-fallback .hero-chip, .fx-fallback .evo-card,
+        .fx-fallback .animate-on-scroll,
+        .fx-fallback .animate-on-scroll.stagger > *,
+        .fx-fallback [data-char], .fx-fallback [data-word] {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        /* ---- 스크롤 진행 바 ---- */
+        .scroll-progress {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            z-index: 1200;
+            background: linear-gradient(90deg, #00d4ff 0%, #0570de 48%, #7a73ff 100%);
+            transform: scaleX(0);
+            transform-origin: 0 50%;
+            pointer-events: none;
+        }
+
+        /* ---- 내비게이션 자동 숨김 ---- */
+        .fx-on nav {
+            will-change: transform;
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fx-on nav.nav-hidden { transform: translateY(-118%); }
+
+        /* ---- 히어로 3D 무대 ---- */
+        .fx-on .hero-inner { perspective: 1200px; }
+        .fx-on .hero-visual { transform-style: preserve-3d; will-change: transform; }
+        .fx-on .hb-float, .fx-on .hero-chip { will-change: transform; }
+        /* JS가 transform 을 전담하는 구간에서만 CSS 호버 이동을 비운다 (soft 모드는 CSS 그대로) */
+        .fx-on:not(.fx-soft) .hb-float:hover, .fx-on:not(.fx-soft) .hero-chip:hover { transform: none; }
+        .fx-on:not(.fx-soft) .hb-float:hover { border-color: rgba(5, 112, 222, 0.45); }
+
+        /* ---- 카드 3D 틸트 ---- */
+        .fx-on:not(.fx-soft) .business-grid, .fx-on:not(.fx-soft) .partner-grid { perspective: 1400px; }
+        .fx-on:not(.fx-soft) .biz-card, .fx-on:not(.fx-soft) .partner-card { will-change: transform; }
+        .fx-on:not(.fx-soft) .biz-card:hover, .fx-on:not(.fx-soft) .partner-card:hover { transform: none; }
+
+        /* ---- 마그네틱 버튼 ---- */
+        .fx-on:not(.fx-soft) .btn-primary, .fx-on:not(.fx-soft) .btn-secondary { will-change: transform; }
+        .fx-on:not(.fx-soft) .btn-primary:hover, .fx-on:not(.fx-soft) .btn-secondary:hover { transform: none; }
+
+        /* ---- 마퀴: JS가 구동 (스크롤 속도·방향에 반응) ---- */
+        .fx-on:not(.fx-soft) .marquee-track { animation: none; will-change: transform; }
+
+        /* ---- AI 진화 타임라인 ---- */
+        .fx-on .evolution-scroller {
+            scroll-snap-type: x proximity;
+            perspective: 1200px;
+        }
+        /* 마우스 환경에선 스냅을 끄고 스크롤 연동·드래그에 맡긴다 (터치는 스냅 유지) */
+        @media (hover: hover) and (pointer: fine) {
+            .fx-on .evolution-scroller { scroll-snap-type: none; cursor: grab; }
+        }
+        .fx-on .evolution-scroller.is-dragging { cursor: grabbing; }
+        .fx-on .evolution-scroller.is-dragging .evo-card { pointer-events: none; }
+        .evo-rail {
+            max-width: var(--container-max);
+            margin: 0.1rem auto 0;
+            height: 3px;
+            border-radius: 999px;
+            background: rgba(5, 112, 222, 0.12);
+            overflow: hidden;
+        }
+        .evo-rail-fill {
+            display: block;
+            height: 100%;
+            width: 24%;
+            border-radius: 999px;
+            background: var(--gradient-cyan);
+        }
+        .fx-fallback .evo-rail { display: none; }
+
+        /* ---- 텍스트 분할(anime.js splitText) 보정 ---- */
+        .fx-on [data-char], .fx-on [data-word] { will-change: transform, opacity; }
+
+        /* 그라디언트 문구는 넓게 깔아두고 배경 위치를 흘려보낸다 */
+        .fx-on .hero h1 .highlight {
+            background: linear-gradient(100deg, #0570de 0%, #00d4ff 22%, #7a73ff 44%, #00d4ff 66%, #0570de 88%, #00d4ff 100%);
+            background-size: 220% 100%;
+            background-position: 0% 50%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fx-soft nav.nav-hidden { transform: none; }
     </style>
+    <script>
+        /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
+           motion-fx.js 가 제때 부팅하지 못하면 안전망(fx-fallback)으로 콘텐츠를 드러낸다. */
+        document.documentElement.classList.add('js-anim');
+        window.addEventListener('load', () => setTimeout(() => {
+            if (!document.documentElement.classList.contains('fx-ready')) {
+                document.documentElement.classList.add('fx-fallback');
+            }
+        }, 1500));
+    </script>
 </head>
 <body>
     <!-- ============ Navigation ============ -->
@@ -1840,7 +1966,7 @@
         <ul class="nav-links">
             <li><a href="#about">소개 &amp; 철학</a></li>
             <li><a href="#academy">교육 아카데미</a></li>
-            <li><a href="#lectures">대표님 강의</a></li>
+            <li><a href="#lectures">정원훈 박사 강의</a></li>
             <li><a href="#apps">쇼케이스</a></li>
             <li><a href="#news">소식·Q&amp;A</a></li>
             <li><a href="#membership">멤버십</a></li>
@@ -1860,7 +1986,7 @@
     <div class="mobile-menu" id="mobileMenu">
         <a href="#about">소개 &amp; 철학</a>
         <a href="#academy">교육 아카데미</a>
-        <a href="#lectures">대표님 강의</a>
+        <a href="#lectures">정원훈 박사 강의</a>
         <a href="#apps">쇼케이스</a>
         <a href="#news">소식·Q&amp;A</a>
         <a href="#membership">멤버십</a>
@@ -2001,7 +2127,7 @@
         </div>
 
         <!-- TenOS model spec band -->
-        <div class="tenos-band animate-on-scroll">
+        <div class="tenos-band animate-on-scroll" data-fx-stagger=".tenos-spec">
             <div>
                 <span class="tenos-title-chip">FLAGSHIP MODEL</span>
                 <h3><span class="outfit">TenOS-Ko-28B</span> — 한국어 특화 대형 언어 모델</h3>
@@ -2047,6 +2173,7 @@
             <div class="evo-card"><div class="evo-number outfit">09</div><h3 class="evo-title">스웜 AI</h3><p class="evo-desc">집단지성, 함께 학습하는 사회적 지능</p></div>
             <div class="evo-card highlight-card"><div class="evo-number outfit">10</div><h3 class="evo-title">TEN AI</h3><p class="evo-desc">활용과 실천의 지능, 인간 중심의 AI 생태계</p></div>
         </div>
+        <div class="evo-rail" aria-hidden="true"><span class="evo-rail-fill"></span></div>
         <p class="evolution-hint">← 좌우로 스크롤하여 전체 여정을 확인하세요 →</p>
     </section>
 
@@ -2170,7 +2297,7 @@
             </article>
         </div>
 
-        <div class="values-strip animate-on-scroll">
+        <div class="values-strip animate-on-scroll" data-fx-stagger=".value-chip">
             <div class="value-chip"><div class="ic">👤</div><div class="t">Human-Centric</div><div class="d">기술은 인간을 위해 존재합니다</div></div>
             <div class="value-chip"><div class="ic">⚙️</div><div class="t">Practical Innovation</div><div class="d">기술보다 실천, 결과보다 과정</div></div>
             <div class="value-chip"><div class="ic">🤝</div><div class="t">Co-Creation</div><div class="d">인간과 AI의 협력적 가치 창출</div></div>
@@ -2222,7 +2349,7 @@
         <div class="lectures-head animate-on-scroll">
             <div>
                 <p class="section-label">03 · CEO Lectures</p>
-                <h2>대표님 강의</h2>
+                <h2>정원훈 박사 강의</h2>
                 <p>'정원훈 박사의 챗GPT 연구소' 채널의 최신 강의가 매일 자동으로 업데이트됩니다. 카드를 클릭하면 사이트를 벗어나지 않고 팝업 플레이어에서 바로 시청할 수 있습니다.</p>
             </div>
             <a class="channel-btn" href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>
@@ -2392,7 +2519,7 @@
                 <h4 class="footer-title">플랫폼</h4>
                 <ul class="footer-links">
                     <li><a href="#academy">교육 아카데미</a></li>
-                    <li><a href="#lectures">대표님 강의</a></li>
+                    <li><a href="#lectures">정원훈 박사 강의</a></li>
                     <li><a href="#apps">TEN AI Apps</a></li>
                     <li><a href="#news">소식·Q&amp;A</a></li>
                     <li><a href="#membership">멤버십</a></li>
@@ -2440,6 +2567,8 @@
 
     <div class="toast" id="toast" role="status"></div>
 
+    <!-- 모션 레이어(anime.js + Motion) — 반드시 다른 모듈보다 먼저 실행 -->
+    <script type="module" src="/motion-fx.js"></script>
     <script type="module" src="/data-store.js"></script>
     <script type="module">
         /* =====================================================
@@ -2703,23 +2832,27 @@
         }, { rootMargin: '-40% 0px -55% 0px' });
         Object.keys(NAV_MAP).forEach(id => { const el = document.getElementById(id); if (el) sectionObserver.observe(el); });
 
-        /* ============ 스크롤 등장 애니메이션 ============ */
-        const revealObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
-        document.querySelectorAll('.animate-on-scroll').forEach(el => revealObserver.observe(el));
+        /* ============ 스크롤 등장 애니메이션 ============
+           motion-fx.js 가 부팅되면(fx-ready) 등장 연출을 그쪽이 전담한다.
+           아래 코드는 모션 레이어가 없을 때를 위한 기본 폴백. */
+        if (!document.documentElement.classList.contains('fx-ready')) {
+            const revealObserver = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+            document.querySelectorAll('.animate-on-scroll').forEach(el => revealObserver.observe(el));
 
-        // 스태거(순차) 등장
-        document.querySelectorAll('.stagger').forEach(parent => {
-            Array.from(parent.children).forEach((child, i) => {
-                child.style.transitionDelay = `${i * 0.08}s`;
+            // 스태거(순차) 등장
+            document.querySelectorAll('.stagger').forEach(parent => {
+                Array.from(parent.children).forEach((child, i) => {
+                    child.style.transitionDelay = `${i * 0.08}s`;
+                });
             });
-        });
+        }
 
         /* ============ 카운터 애니메이션 ============ */
         const counterObserver = new IntersectionObserver(entries => {
@@ -2806,6 +2939,11 @@
             document.querySelectorAll('[data-set]').forEach(el => {
                 const key = el.dataset.set;
                 if (!(key in s) || s[key] == null || s[key] === '') return;
+                // 값이 그대로면 손대지 않는다 — 모션 레이어(motion-fx.js)가 분할해 둔 글자 구조를 지키기 위함.
+                // 분할된 요소는 textContent 가 중복되므로 원본 텍스트를 data-fx-text 에서 읽는다.
+                const current = el.dataset.fxText != null ? el.dataset.fxText : el.textContent;
+                if (key !== 'heroSubtitle' && current === String(s[key])) return;
+                delete el.dataset.fxText;
                 if (key === 'heroSubtitle') {
                     el.innerHTML = escHtml(s[key]).replace(/\n/g, '<br>');
                 } else {

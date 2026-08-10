@@ -6,6 +6,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.6",
+    "animejs": "^4.5.0",
+    "motion": "^13.1.0",
     "vite": "^5.0.0"
   }
 }
