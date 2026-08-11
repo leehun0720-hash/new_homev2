@@ -12,8 +12,11 @@
    모션 강도는 두 단계입니다.
    · full : 전체 연출
    · soft : prefers-reduced-motion — "끄는" 게 아니라 "줄인다".
-            불투명도 위주의 차분한 등장만 남기고, 어지럼증을 유발하는
-            패럴랙스 · 무한 루프 · 커서 추적 · 자동 가로 스크롤은 뺀다.
+            이동 폭(최대 16px) · 진폭 · 속도를 낮춰 대부분의 연출을 유지하되,
+            어지럼증 유발이 큰 넷은 제외한다 —
+            히어로 패럴랙스 / 커서 추적 3D / 카드 틸트 · 마그네틱 버튼 /
+            내비 자동 숨김 · 타임라인 자동 가로 스크롤.
+            회전(rotate)은 soft 에서 항상 0 이다.
    ===================================================== */
 
 import { animate as mAnimate, scroll, inView, hover, press } from 'motion';
@@ -26,10 +29,14 @@ const $  = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
 const $1 = (sel, ctx = document) => ctx.querySelector(sel);
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-/* soft 모드에서는 이동·회전·확대를 0 으로 접고 시간만 짧게 가져간다 */
-const mv = v => (soft ? 0 : v);          // 이동/회전량
-const sc = v => (soft ? 1 : v);          // 배율
-const dur = v => Math.round(v * (soft ? 0.6 : 1));
+/* soft 모드에서는 폭을 줄이되 0 으로 만들지는 않는다.
+   움직임이 완전히 사라지면 "정적인 페이지"가 되어 버리므로,
+   시선이 따라갈 만큼은 남기고 진폭만 낮춘다. */
+const mv  = v => (soft ? Math.sign(v) * Math.min(Math.abs(v) * 0.35, 16) : v);  // 이동량 (최대 16px)
+const rot = v => (soft ? 0 : v);                                                // 회전은 soft 에서 제외
+const sc  = v => (soft ? 1 - (1 - v) * 0.3 : v);                                // 배율 변화 폭
+const amp = v => (soft ? v * 0.45 : v);                                         // 상시 모션 진폭
+const dur = v => Math.round(v * (soft ? 0.85 : 1));
 
 /* 섹션 머리말로 취급할 블록과, 그 안에서 글자 단위로 조립할 제목 */
 const HEADER_SEL = '.section-header, .partners-head, .lectures-head';
@@ -52,22 +59,22 @@ try {
 }
 
 function boot() {
-    /* 두 모드 공통 — 콘텐츠 등장 연출 */
+    /* 두 모드 공통 — 등장 연출과 잔잔한 상시 모션 (soft 는 진폭만 낮춘다) */
     scrollProgressBar();
     heroIntro();
+    heroAmbient();
+    liveMarquee();
     revealSystem();
     evolutionTimeline();
     dynamicCardEntrance();
     overlayMotion();
 
-    /* full 모드 전용 — 상시 모션 · 시선 추적 · 스크롤 연동 */
+    /* full 모드 전용 — 어지럼증 유발이 큰 연출 */
     if (soft) return;
-    heroAmbient();
-    heroScrollParallax();
-    navAutoHide();
-    liveMarquee();
-    magneticButtons();
-    cardTilt();
+    heroScrollParallax();   // 큰 폭의 패럴랙스
+    navAutoHide();          // 고정 요소가 화면 밖으로 미끄러짐
+    magneticButtons();      // 커서 추적
+    cardTilt();             // 3D 기울기
 }
 
 /* =====================================================
@@ -98,29 +105,24 @@ function heroIntro() {
 
     /* 제목을 단어 단위로 쪼개 물결처럼 올라오게 한다.
        단, 그라디언트 텍스트(.highlight)는 background-clip:text 가 깨지므로
-       쪼개지 않고 한 덩어리로 다루면서 그라디언트를 흐르게 한다.
-       soft 모드에서는 글자 단위 움직임 자체를 만들지 않는다. */
+       쪼개지 않고 한 덩어리로 다루면서 그라디언트를 흐르게 한다. */
     let titleParts = [];
     let highlight = null;
     if (title) {
         highlight = $1('.highlight', title);
         const plain = $('span', title).filter(s => s !== highlight && !highlight?.contains(s));
+        const sources = plain.length ? plain : (highlight ? [] : [title]);
 
-        if (soft) {
-            titleParts = plain.length ? [...plain, highlight].filter(Boolean) : [title];
-        } else {
-            const sources = plain.length ? plain : (highlight ? [] : [title]);
-            sources.forEach(el => {
-                // 분할 전 원본 텍스트를 남겨둔다 — 콘텐츠 갱신 로직이 구조를 덮어쓰지 않도록
-                el.dataset.fxText = el.textContent.trim();
-                try {
-                    const split = splitText(el, { words: true, chars: false, lines: false });
-                    if (split.words && split.words.length) titleParts.push(...split.words);
-                    else titleParts.push(el);
-                } catch { titleParts.push(el); }
-            });
-            if (highlight) titleParts.push(highlight);
-        }
+        sources.forEach(el => {
+            // 분할 전 원본 텍스트를 남겨둔다 — 콘텐츠 갱신 로직이 구조를 덮어쓰지 않도록
+            el.dataset.fxText = el.textContent.trim();
+            try {
+                const split = splitText(el, { words: true, chars: false, lines: false });
+                if (split.words && split.words.length) titleParts.push(...split.words);
+                else titleParts.push(el);
+            } catch { titleParts.push(el); }
+        });
+        if (highlight) titleParts.push(highlight);
         if (!titleParts.length) titleParts = [title];
         utils.set(title, { opacity: 1 });
     }
@@ -149,7 +151,7 @@ function heroIntro() {
             opacity: [0, 1],
             translateY: [mv(48), 0],
             duration: dur(1000),
-            delay: stagger(soft ? 90 : 52),
+            delay: stagger(dur(52)),
         }, dur(230));
     }
 
@@ -158,9 +160,9 @@ function heroIntro() {
             opacity: [0, 1],
             translateY: [mv(56), 0],
             translateX: (el, i) => [mv(i % 2 ? 34 : -34), 0],
-            rotateZ: (el, i) => [mv(i % 2 ? 4 : -4), 0],
+            rotateZ: (el, i) => [rot(i % 2 ? 4 : -4), 0],
             duration: dur(1100),
-            delay: stagger(soft ? 100 : 140),
+            delay: stagger(dur(140)),
         }, dur(420));
     }
 
@@ -169,11 +171,12 @@ function heroIntro() {
     if (statKids.length) tl.add(statKids, { opacity: [0, 1], translateY: [mv(20), 0], delay: stagger(dur(110)) }, dur(950));
     if (chip) tl.add(chip, { opacity: [0, 1], scale: [sc(0.6), 1], ease: soft ? 'out(3)' : 'outBack(2)', duration: dur(800) }, dur(1180));
 
-    /* 그라디언트 문구는 천천히 흐른다 — 정지된 화면에서도 살아있는 느낌 */
-    if (highlight && !soft) {
+    /* 그라디언트 문구는 천천히 흐른다 — 정지된 화면에서도 살아있는 느낌.
+       위치 이동이 아니라 색 변화라 soft 모드에서도 유지한다. */
+    if (highlight) {
         animate(highlight, {
             backgroundPositionX: ['0%', '200%'],
-            duration: 9000,
+            duration: soft ? 14000 : 9000,
             ease: 'linear',
             loop: true,
         });
@@ -181,37 +184,40 @@ function heroIntro() {
 }
 
 /* =====================================================
-   3. 히어로 상시 모션 — 오브 부유, 카드 호흡, 커서 패럴랙스 (full 전용)
+   3. 히어로 상시 모션 — 오브 부유, 카드 호흡 (soft 는 진폭 축소),
+      커서 패럴랙스 (full 전용)
    ===================================================== */
 function heroAmbient() {
     const hero = $1('.hero');
     if (!hero) return;
 
+    const slow = soft ? 1.5 : 1;   // soft 에서는 더 느리게
+
     const orb1 = $1('.hero-orb-1');
     const orb2 = $1('.hero-orb-2');
-    if (orb1) animate(orb1, { translateX: [0, 70], translateY: [0, 46], scale: [1, 1.14], duration: 9000, ease: 'inOutSine', loop: true, alternate: true });
-    if (orb2) animate(orb2, { translateX: [0, -58], translateY: [0, -40], scale: [1, 1.18], duration: 11500, ease: 'inOutSine', loop: true, alternate: true });
+    if (orb1) animate(orb1, { translateX: [0, amp(70)], translateY: [0, amp(46)], scale: [1, sc(1.14)], duration: 9000 * slow, ease: 'inOutSine', loop: true, alternate: true });
+    if (orb2) animate(orb2, { translateX: [0, amp(-58)], translateY: [0, amp(-40)], scale: [1, sc(1.18)], duration: 11500 * slow, ease: 'inOutSine', loop: true, alternate: true });
 
     /* 핸드북 카드 각각의 호흡 — 진입 시퀀스가 끝난 뒤 시작 */
     const floats = $('.hb-float');
     setTimeout(() => {
         floats.forEach((el, i) => {
             animate(el, {
-                translateY: [0, i % 2 ? -15 : -9],
-                rotateZ: [0, i % 2 ? 0.9 : -0.9],
-                duration: 3200 + i * 520,
+                translateY: [0, amp(i % 2 ? -15 : -9)],
+                rotateZ: [0, rot(i % 2 ? 0.9 : -0.9)],
+                duration: (3200 + i * 520) * slow,
                 ease: 'inOutSine',
                 loop: true,
                 alternate: true,
             });
         });
         const chip = $1('.hero-chip');
-        if (chip) animate(chip, { translateY: [0, -8], duration: 2600, ease: 'inOutSine', loop: true, alternate: true });
+        if (chip) animate(chip, { translateY: [0, amp(-8)], duration: 2600 * slow, ease: 'inOutSine', loop: true, alternate: true });
     }, 1900);
 
     /* 커서를 따라 기울어지는 3D 무대 (스택 전체를 움직여 카드 호흡과 충돌하지 않게) */
     const visual = $1('.hero-visual');
-    if (!visual || !window.matchMedia('(hover: hover)').matches) return;
+    if (soft || !visual || !window.matchMedia('(hover: hover)').matches) return;
 
     const stage = createAnimatable(visual, {
         x: 760, y: 760, rotateX: 900, rotateY: 900,
@@ -273,7 +279,7 @@ function navAutoHide() {
 }
 
 /* =====================================================
-   6. 마퀴 — 항상 흐르고, 스크롤 속도/방향에 반응 (full 전용)
+   6. 마퀴 — 항상 흐른다. full 모드에서는 스크롤 속도/방향에도 반응한다.
    ===================================================== */
 function liveMarquee() {
     const track = $1('#marqueeTrack');
@@ -282,11 +288,14 @@ function liveMarquee() {
     let offset = 0;
     let boost = 0;
     let onScreen = true;
-    const BASE = 0.5; // px / frame
+    const BASE = soft ? 0.28 : 0.5; // px / frame
 
-    scroll((progress, info) => {
-        boost = clamp(info.y.velocity / 110, -26, 26);
-    });
+    /* 스크롤 속도 연동은 예측하기 어려운 움직임이라 soft 에서는 뺀다 */
+    if (!soft) {
+        scroll((progress, info) => {
+            boost = clamp(info.y.velocity / 110, -26, 26);
+        });
+    }
 
     /* 화면 밖에서는 계산만 하고 DOM 은 건드리지 않는다 */
     const strip = track.closest('.marquee') || track;
@@ -312,18 +321,16 @@ function liveMarquee() {
    7. 스크롤 등장 시스템 — 섹션 헤더는 글자 단위로 조립
    ===================================================== */
 function revealSystem() {
-    /* 섹션 제목을 글자 단위로 미리 분할 (soft 모드에서는 통째로 등장) */
+    /* 섹션 제목을 글자 단위로 미리 분할 */
     const splits = new Map();
-    if (!soft) {
-        $(HEADER_SEL).forEach(header => {
-            const el = $1(HEADER_TITLE_SEL, header);
-            if (!el) return;
-            try {
-                const s = splitText(el, { chars: true, words: false, lines: false });
-                if (s.chars && s.chars.length) splits.set(el, s.chars);
-            } catch { /* 분할 실패 시 통째로 등장 */ }
-        });
-    }
+    $(HEADER_SEL).forEach(header => {
+        const el = $1(HEADER_TITLE_SEL, header);
+        if (!el) return;
+        try {
+            const s = splitText(el, { chars: true, words: false, lines: false });
+            if (s.chars && s.chars.length) splits.set(el, s.chars);
+        } catch { /* 분할 실패 시 통째로 등장 */ }
+    });
 
     $('.animate-on-scroll').forEach(el => {
         const isHeader = el.matches(HEADER_SEL);
@@ -350,13 +357,16 @@ function revealHeader(el, splits) {
 
     if (label) {
         utils.set(label, { opacity: 0 });
-        const params = { opacity: [0, 1], translateY: [mv(14), 0], duration: dur(750) };
-        if (!soft) params.letterSpacing = ['0.4em', '0.18em'];
-        tl.add(label, params, 0);
+        tl.add(label, {
+            opacity: [0, 1],
+            translateY: [mv(14), 0],
+            letterSpacing: [soft ? '0.26em' : '0.4em', '0.18em'],
+            duration: dur(750),
+        }, 0);
     }
     if (chars) {
         utils.set(chars, { opacity: 0 });
-        tl.add(chars, { opacity: [0, 1], translateY: [30, 0], scale: [0.86, 1], duration: 780, delay: stagger(18) }, 90);
+        tl.add(chars, { opacity: [0, 1], translateY: [mv(30), 0], scale: [sc(0.86), 1], duration: dur(780), delay: stagger(dur(18)) }, dur(90));
     } else if (title) {
         utils.set(title, { opacity: 0 });
         tl.add(title, { opacity: [0, 1], translateY: [mv(26), 0], duration: dur(800) }, dur(90));
@@ -457,7 +467,7 @@ function evolutionTimeline() {
             animate(cards, {
                 opacity: [0, 1],
                 translateY: [mv(44), 0],
-                rotateY: [mv(-24), 0],
+                rotateY: [rot(-24), 0],
                 duration: dur(900),
                 ease: 'out(3)',
                 delay: stagger(dur(65)),
@@ -570,7 +580,7 @@ function overlayMotion() {
             animate(box, {
                 opacity: [0, 1],
                 translateY: [mv(42), 0],
-                scale: soft ? 1 : [0.92, 1.012, 1],
+                scale: soft ? [0.97, 1] : [0.92, 1.012, 1],
                 duration: dur(700),
                 ease: 'out(3)',
             });

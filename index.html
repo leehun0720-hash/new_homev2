@@ -1885,9 +1885,9 @@
         .fx-on .hero-inner { perspective: 1200px; }
         .fx-on .hero-visual { transform-style: preserve-3d; will-change: transform; }
         .fx-on .hb-float, .fx-on .hero-chip { will-change: transform; }
-        /* JS가 transform 을 전담하는 구간에서만 CSS 호버 이동을 비운다 (soft 모드는 CSS 그대로) */
-        .fx-on:not(.fx-soft) .hb-float:hover, .fx-on:not(.fx-soft) .hero-chip:hover { transform: none; }
-        .fx-on:not(.fx-soft) .hb-float:hover { border-color: rgba(5, 112, 222, 0.45); }
+        /* 히어로 카드는 두 모드 모두 JS가 transform 을 전담한다 */
+        .fx-on .hb-float:hover, .fx-on .hero-chip:hover { transform: none; }
+        .fx-on .hb-float:hover { border-color: rgba(5, 112, 222, 0.45); }
 
         /* ---- 카드 3D 틸트 ---- */
         .fx-on:not(.fx-soft) .business-grid, .fx-on:not(.fx-soft) .partner-grid { perspective: 1400px; }
@@ -1898,8 +1898,8 @@
         .fx-on:not(.fx-soft) .btn-primary, .fx-on:not(.fx-soft) .btn-secondary { will-change: transform; }
         .fx-on:not(.fx-soft) .btn-primary:hover, .fx-on:not(.fx-soft) .btn-secondary:hover { transform: none; }
 
-        /* ---- 마퀴: JS가 구동 (스크롤 속도·방향에 반응) ---- */
-        .fx-on:not(.fx-soft) .marquee-track { animation: none; will-change: transform; }
+        /* ---- 마퀴: 두 모드 모두 JS가 구동 ---- */
+        .fx-on .marquee-track { animation: none; will-change: transform; }
 
         /* ---- AI 진화 타임라인 ---- */
         .fx-on .evolution-scroller {
