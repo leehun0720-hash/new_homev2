@@ -1829,6 +1829,65 @@
         /* 핸드북 커버의 LEVEL 칩: 어두운 칩 배경 위 흰색 글씨로 가독성 확보 */
         .hb-level { color: #ffffff; border-color: rgba(255, 255, 255, 0.35); }
 
+        /* ---- TenOS: K-AI 리더보드 실시간 순위 ---- */
+        .tenos-rank {
+            grid-column: 1 / -1;
+            margin-top: 1.6rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            position: relative;
+            z-index: 1;
+        }
+        .tenos-rank-head {
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+            text-decoration: none;
+            color: inherit;
+            margin-bottom: 1.1rem;
+        }
+        .tenos-rank-badge {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.1rem;
+            padding: 0.5rem 1.05rem;
+            border-radius: 14px;
+            background: rgba(0, 212, 255, 0.14);
+            border: 1px solid rgba(0, 212, 255, 0.45);
+            flex: 0 0 auto;
+        }
+        .tenos-rank-badge em { font-style: normal; font-size: 1.9rem; font-weight: 800; color: #00d4ff; line-height: 1; }
+        .tenos-rank-badge small { font-size: 0.9rem; font-weight: 700; color: #7ee8fa; }
+        .tenos-rank-meta { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; min-width: 0; }
+        .tenos-rank-meta strong { font-size: 1rem; font-weight: 700; color: #ffffff; }
+        .tenos-rank-meta small { font-size: 0.78rem; color: #8fa5c5; line-height: 1.5; }
+        .tenos-rank-head:hover .tenos-rank-meta strong { color: #00d4ff; }
+        .tenos-rank-score { text-align: right; flex: 0 0 auto; }
+        .tenos-rank-score em { display: block; font-style: normal; font-size: 1.3rem; font-weight: 800; color: #ffffff; line-height: 1.2; }
+        .tenos-rank-score small { font-size: 0.72rem; color: #8fa5c5; }
+
+        .tenos-bench { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.7rem; }
+        .bench-item { min-width: 0; }
+        .bench-name {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #8fa5c5;
+            margin-bottom: 0.3rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .bench-bar { display: block; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; margin-bottom: 0.35rem; }
+        .bench-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #00d4ff, #7a73ff); width: 0; transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+        .bench-score { display: block; font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 700; color: #ffffff; line-height: 1.3; }
+        .tenos-rank-note { margin-top: 0.9rem; font-size: 0.72rem; color: #67748e; }
+
+        @media (max-width: 720px) {
+            .tenos-bench { grid-template-columns: repeat(2, 1fr); }
+            .tenos-rank-head { flex-wrap: wrap; gap: 0.8rem; }
+            .tenos-rank-score { text-align: left; }
+        }
+
         /* =====================================================
            고객사 그리드 / 진행 프로젝트
            — 기존 카드 언어(흰 표면 + 얇은 보더 + Stripe 그림자)를 따른다
@@ -2284,6 +2343,24 @@
                     <div class="k">Agentic</div>
                     <div class="v">에이전트 오케스트레이션</div>
                 </div>
+            </div>
+            <!-- K-AI 리더보드 실시간 순위 (leaderboard.aihub.or.kr) -->
+            <div class="tenos-rank" id="tenosRank" hidden>
+                <a class="tenos-rank-head" href="https://leaderboard.aihub.or.kr/" target="_blank" rel="noopener">
+                    <span class="tenos-rank-badge outfit"><em id="tenosRankNum">–</em><small>위</small></span>
+                    <span class="tenos-rank-meta">
+                        <strong>K-AI 리더보드</strong>
+                        <small>과기정통부·NIA 공식 평가 · 총 <span id="tenosRankTotal">–</span>개 모델</small>
+                    </span>
+                    <span class="tenos-rank-score">
+                        <em class="outfit" id="tenosRankScore">–</em>
+                        <small>종합 점수</small>
+                    </span>
+                </a>
+                <div class="tenos-bench" id="tenosBench"></div>
+                <p class="tenos-rank-note">
+                    제출 모델 <span id="tenosRankModel">–</span> · 리더보드 실시간 조회
+                </p>
             </div>
         </div>
     </section>
@@ -3446,6 +3523,55 @@
             counters[1].dataset.counter = courseCount;
         }
 
+        /* =====================================================
+           K-AI 리더보드 실시간 순위 (과기정통부·NIA / leaderboard.aihub.or.kr)
+           — 공개 API 가 CORS 허용(Access-Control-Allow-Origin: *)이라
+             브라우저에서 직접 조회한다. 실패하면 패널을 감춘 채 둔다.
+           ===================================================== */
+        const KAI_LEADERBOARD_API = 'https://leaderboard.aihub.or.kr/proxy/api/leaderboard?size=200';
+        const KAI_MODEL_MATCH = /honey90\/TenOS-Ko-28B|^TenOS-Ko/i;
+
+        async function renderTenosRank() {
+            const panel = document.getElementById('tenosRank');
+            if (!panel) return;
+
+            const res = await fetch(KAI_LEADERBOARD_API, {
+                headers: { Accept: 'application/json' },
+                signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined,
+            });
+            if (!res.ok) throw new Error('leaderboard HTTP ' + res.status);
+            const data = await res.json();
+
+            const rows = Array.isArray(data.rows) ? data.rows : [];
+            const names = (data.benchmarks || []).map(b => b.name);
+            if (!rows.length) throw new Error('leaderboard 응답에 순위 데이터 없음');
+
+            const mine = rows.find(r => KAI_MODEL_MATCH.test(r.modelUrl || '') || KAI_MODEL_MATCH.test(r.mdlNm || ''));
+            if (!mine) throw new Error('TenOS 모델이 리더보드에 없음');
+
+            document.getElementById('tenosRankNum').textContent = mine.rank;
+            document.getElementById('tenosRankTotal').textContent = rows.length;
+            document.getElementById('tenosRankScore').textContent = Number(mine.totalScore).toFixed(3);
+            document.getElementById('tenosRankModel').textContent = mine.mdlNm || 'TenOS-Ko-28B';
+
+            const scores = mine.benchmarkScores || [];
+            const bench = document.getElementById('tenosBench');
+            bench.innerHTML = scores.map((v, i) => {
+                const pct = Math.max(0, Math.min(1, Number(v) || 0)) * 100;
+                return '<div class="bench-item">' +
+                       '<span class="bench-name">' + escHtml(names[i] || ('평가 ' + (i + 1))) + '</span>' +
+                       '<span class="bench-bar"><span class="bench-fill" data-w="' + pct.toFixed(1) + '"></span></span>' +
+                       '<span class="bench-score">' + Number(v).toFixed(3) + '</span>' +
+                       '</div>';
+            }).join('');
+
+            panel.hidden = false;
+            // 막대는 패널이 보이는 시점에 채운다 (감속 모드에서는 즉시)
+            const fill = () => bench.querySelectorAll('.bench-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) fill();
+            else requestAnimationFrame(() => requestAnimationFrame(fill));
+        }
+
         /* ----- 초기 로드 ----- */
         (async function initDynamic() {
             try { await applySettings(); } catch (e) { console.warn('설정 적용 실패', e); }
@@ -3466,6 +3592,9 @@
             try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
             try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
         })();
+
+        // 외부 리더보드는 독립적으로 조회한다 — 지연되거나 실패해도 본문 로딩과 무관
+        renderTenosRank().catch(e => console.warn('K-AI 리더보드 순위 조회 실패', e));
     </script>
 </body>
 </html>
