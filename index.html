@@ -831,7 +831,8 @@
             transition: gap 0.25s ease;
         }
         .partner-link:hover { gap: 0.7rem; }
-        @media (max-width: 1024px) { .partner-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .partner-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 680px) { .partner-grid { grid-template-columns: 1fr; } }
 
         /* ============ Academy / Handbook ============ */
         .academy {
@@ -1829,6 +1830,139 @@
         .hb-level { color: #ffffff; border-color: rgba(255, 255, 255, 0.35); }
 
         /* =====================================================
+           고객사 그리드 / 진행 프로젝트
+           — 기존 카드 언어(흰 표면 + 얇은 보더 + Stripe 그림자)를 따른다
+           ===================================================== */
+        .client-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .client-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            padding: 1.25rem 1.3rem;
+            background: var(--gradient-card);
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--cyan-glow);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .client-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lift);
+            border-color: var(--line-strong);
+            border-left-color: var(--cyan-glow);
+        }
+        .client-card.is-plain { border-left-color: var(--line-strong); cursor: default; }
+        .client-card.is-plain:hover { transform: none; box-shadow: var(--shadow-card); }
+        .client-name {
+            font-size: 1rem; font-weight: 700;
+            color: var(--white);
+            line-height: 1.4;
+        }
+        .client-name em {
+            font-family: 'Outfit', sans-serif;
+            font-style: normal;
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--cyan-glow);
+            margin-left: 0.15rem;
+        }
+        .client-field { font-size: 0.78rem; color: var(--gray-400); line-height: 1.5; }
+
+        /* ---- 진행 프로젝트 ---- */
+        .projects {
+            background:
+                radial-gradient(ellipse 55% 45% at 10% 5%, rgba(5, 112, 222, 0.05) 0%, transparent 60%),
+                var(--navy-light);
+        }
+        .project-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.3rem;
+        }
+        .project-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1.5rem 1.6rem;
+            background: var(--gradient-card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lift);
+            border-color: var(--line-strong);
+        }
+        .project-card.highlight-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, var(--deep-navy) 100%);
+            border-color: rgba(5, 112, 222, 0.4);
+        }
+        .project-top {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.9rem;
+        }
+        .project-num {
+            font-size: 1.6rem; font-weight: 800;
+            color: rgba(5, 112, 222, 0.32);
+            line-height: 1;
+        }
+        .project-card.highlight-card .project-num { color: var(--cyan-glow); }
+        .project-tag {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 0.22rem 0.7rem;
+            border-radius: 999px;
+        }
+        .project-title { font-size: 1.1rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.5rem; }
+        .project-desc { font-size: 0.86rem; color: var(--gray-400); line-height: 1.7; flex: 1; margin-bottom: 1.1rem; }
+        .project-link {
+            align-self: flex-start;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-size: 0.83rem; font-weight: 700;
+            color: var(--cyan-glow);
+            text-decoration: none;
+            transition: gap 0.25s ease;
+        }
+        .project-link:hover { gap: 0.7rem; }
+        .project-meta {
+            align-self: flex-start;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.76rem; font-weight: 600;
+            color: var(--gray-600);
+            padding: 0.2rem 0.7rem;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+        }
+
+        @media (max-width: 1100px) {
+            .project-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 900px) {
+            .client-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 620px) {
+            .project-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 520px) {
+            .client-grid { grid-template-columns: 1fr; }
+            .client-name { font-size: 0.95rem; }
+        }
+
+        /* =====================================================
            Motion Layer — anime.js v4 + Motion (motion.dev)
            .js-anim  : JS가 살아있음 (진입 전 숨김 상태를 맡는다)
            .fx-on    : motion-fx.js 부팅 성공 (모션 전용 스타일)
@@ -2261,8 +2395,8 @@
 
         <!-- 파트너사 -->
         <div class="partners-head animate-on-scroll">
-            <h3>함께하는 파트너</h3>
-            <p>AI 개발부터 ESG 실천까지, 각 분야 전문 기업들과 협력합니다</p>
+            <h3>제휴업체</h3>
+            <p>AI 개발부터 ESG 실천, 주차 인프라와 회계·경영자문까지 각 분야 전문 기업들과 협력합니다</p>
         </div>
         <div class="partner-grid stagger animate-on-scroll">
             <article class="partner-card">
@@ -2276,6 +2410,16 @@
                 <a class="partner-link" href="https://vidraft.net/index.html" target="_blank" rel="noopener">웹사이트 방문 →</a>
             </article>
             <article class="partner-card">
+                <span class="partner-role tag-biz">ESG 파트너</span>
+                <h4 class="partner-name">리본디어스<small>사단법인 · 트리헌드레드</small></h4>
+                <p class="partner-desc">
+                    "나무를 심어 지구를 지킵니다." ESG 경영을 실천하는 기업의 제품을 판매하고 그 수익을
+                    나무 심기에 사용하는 친환경 소셜 벤처. '1인당 100그루 나무 심기' 캠페인으로
+                    지구 온난화 대응에 기여하고 있습니다.
+                </p>
+                <a class="partner-link" href="https://reborntheearth.org/" target="_blank" rel="noopener">웹사이트 방문 →</a>
+            </article>
+            <article class="partner-card">
                 <span class="partner-role tag-vibe">AI 개발 파트너</span>
                 <h4 class="partner-name">Prototie<small>프로토타이</small></h4>
                 <p class="partner-desc">
@@ -2286,15 +2430,55 @@
                 <a class="partner-link" href="https://prototie.net/" target="_blank" rel="noopener">웹사이트 방문 →</a>
             </article>
             <article class="partner-card">
-                <span class="partner-role tag-biz">ESG 파트너</span>
-                <h4 class="partner-name">트리헌드레드<small>사단법인 리본디어스</small></h4>
+                <span class="partner-role tag-genai">주차 인프라 파트너</span>
+                <h4 class="partner-name">TOOZ SYSTEM<small>투즈시스템</small></h4>
                 <p class="partner-desc">
-                    ESG 경영을 실천하는 기업의 제품을 판매하고, 그 수익을 나무 심기에 사용하는
-                    친환경 소셜 벤처. '1인당 100그루 나무 심기' 캠페인으로 지구 온난화 대응에
-                    기여하고 있습니다.
+                    주차장 운영사업과 주차 설비 전문 기업. 무인정산기·주차권발행기·자동차단기·차번인식기 등
+                    현장 인프라를 직접 구축·운영하며, QRAI 주차 서비스의 하드웨어 기반을 함께 만들어갑니다.
                 </p>
-                <a class="partner-link" href="https://www.treehundred.com" target="_blank" rel="noopener">웹사이트 방문 →</a>
+                <a class="partner-link" href="http://tooz.co.kr" target="_blank" rel="noopener">웹사이트 방문 →</a>
             </article>
+            <article class="partner-card">
+                <span class="partner-role tag-genai">회계·경영자문 파트너</span>
+                <h4 class="partner-name">RSM Korea<small>신한회계법인</small></h4>
+                <p class="partner-desc">
+                    1970년 설립되어 현존하는 국내 회계법인 중 최고의 역사를 가진 글로벌 회계법인.
+                    한·미 공인회계사를 포함한 300여 명의 임직원이 감사·세무·경영자문 서비스를 제공합니다.
+                </p>
+                <a class="partner-link" href="https://www.rsm.global/korea/ko/insamal" target="_blank" rel="noopener">웹사이트 방문 →</a>
+            </article>
+        </div>
+
+        <!-- 고객사 -->
+        <div class="partners-head animate-on-scroll">
+            <h3>고객사</h3>
+            <p>공공기관·협동조합·제조·인프라 기업과 AI 전환 과제를 함께 수행합니다</p>
+        </div>
+        <div class="client-grid animate-on-scroll" data-fx-stagger=".client-card">
+            <a class="client-card" href="https://www.nonghyup.com/main/psniMain.do" target="_blank" rel="noopener">
+                <span class="client-name">농협</span>
+                <span class="client-field">금융·유통 협동조합</span>
+            </a>
+            <a class="client-card" href="https://www.kbiz.or.kr/ko/index/index.do" target="_blank" rel="noopener">
+                <span class="client-name">중소기업중앙회</span>
+                <span class="client-field">중소기업 정책·지원</span>
+            </a>
+            <a class="client-card" href="http://www.ksic.co.kr/" target="_blank" rel="noopener">
+                <span class="client-name">한국문구공업협동조합</span>
+                <span class="client-field">문구 산업 협동조합</span>
+            </a>
+            <a class="client-card" href="https://sdwksqmr.gensparkspace.com/" target="_blank" rel="noopener">
+                <span class="client-name">한국그린켐</span>
+                <span class="client-field">글로벌 화학·산업재 트레이딩</span>
+            </a>
+            <a class="client-card" href="https://2isys.com/kr/" target="_blank" rel="noopener">
+                <span class="client-name">투아이시스 <em>2iSYS</em></span>
+                <span class="client-field">AI·머신비전 철도 인프라 진단</span>
+            </a>
+            <div class="client-card is-plain">
+                <span class="client-name">계산산업</span>
+                <span class="client-field">제조</span>
+            </div>
         </div>
 
         <div class="values-strip animate-on-scroll" data-fx-stagger=".value-chip">
@@ -2304,6 +2488,89 @@
             <div class="value-chip"><div class="ic">📖</div><div class="t">Continuous Learning</div><div class="d">배우고 나누며 성장하는 문화</div></div>
             <div class="value-chip"><div class="ic">🛡️</div><div class="t">Trustworthy AI</div><div class="d">안전하고 검증된 AI 솔루션</div></div>
             <div class="value-chip"><div class="ic">🔍</div><div class="t">Transparency</div><div class="d">데이터와 의사결정의 투명성</div></div>
+        </div>
+    </section>
+
+    <!-- ============ 진행 프로젝트 ============ -->
+    <section class="projects">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">Ongoing Projects</p>
+            <h2 class="section-title">진행 프로젝트</h2>
+            <p class="section-desc">2026년 12월까지 진행 중인 AI 전환 과제들</p>
+        </div>
+        <div class="project-grid stagger animate-on-scroll">
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">01</span>
+                    <span class="project-tag tag-biz">ESG</span>
+                </div>
+                <h3 class="project-title">AI ESG 플랫폼</h3>
+                <p class="project-desc">사단법인 리본디어스의 숲 조성 사업과 텐에이아이의 AI 기술을 결합한 그린 AX 파트너십. 심는 사람과 증명하는 기술을 잇습니다.</p>
+                <a class="project-link" href="https://tenxtree.vercel.app/" target="_blank" rel="noopener">tenxtree 바로가기 →</a>
+            </article>
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">02</span>
+                    <span class="project-tag tag-biz">ESG</span>
+                </div>
+                <h3 class="project-title">RE100</h3>
+                <p class="project-desc">재생에너지 100% 전환 대응 과제 1건을 수행합니다.</p>
+                <span class="project-meta">1건 진행</span>
+            </article>
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">03</span>
+                    <span class="project-tag tag-vibe">Consulting</span>
+                </div>
+                <h3 class="project-title">AIDC 컨설팅</h3>
+                <p class="project-desc">AI 데이터센터 구축 전략 수립과 기술 자문을 제공합니다.</p>
+                <span class="project-meta">1건 진행</span>
+            </article>
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">04</span>
+                    <span class="project-tag tag-genai">Service</span>
+                </div>
+                <h3 class="project-title">QRAI</h3>
+                <p class="project-desc">QR과 AI를 결합한 주차 서비스(Parking Service). 제휴사 TOOZ SYSTEM의 주차 인프라 위에서 개발합니다.</p>
+                <span class="project-meta">Parking Service</span>
+            </article>
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">05</span>
+                    <span class="project-tag tag-genai">Service</span>
+                </div>
+                <h3 class="project-title">PM-AI</h3>
+                <p class="project-desc">부동산·자산 관리(Property) 영역의 AI 전환(AX) 프로젝트입니다.</p>
+                <span class="project-meta">Property AI / AX</span>
+            </article>
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">06</span>
+                    <span class="project-tag tag-vibe">Public</span>
+                </div>
+                <h3 class="project-title">GVPTT Project</h3>
+                <p class="project-desc">지방자치단체를 대상으로 한 제안서 AI 서비스. RAG 기반으로 근거 있는 문서를 생성합니다.</p>
+                <span class="project-meta">제안서 AI + RAG</span>
+            </article>
+            <article class="project-card highlight-card">
+                <div class="project-top">
+                    <span class="project-num outfit">07</span>
+                    <span class="project-tag tag-vibe">Foundation</span>
+                </div>
+                <h3 class="project-title">TenOS</h3>
+                <p class="project-desc">한국어 특화 LLM 자체 개발. Qwen · Gemma · Darwin · AETHER를 기반으로 모델을 고도화합니다.</p>
+                <span class="project-meta">Qwen · Gemma · Darwin · AETHER</span>
+            </article>
+            <article class="project-card">
+                <div class="project-top">
+                    <span class="project-num outfit">08</span>
+                    <span class="project-tag tag-biz">ESG</span>
+                </div>
+                <h3 class="project-title">AI 탄소측정 프로젝트</h3>
+                <p class="project-desc">3만 명 규모 페스티벌의 탄소배출량을 측정·집계·리포팅합니다. ISO 14064-1 · GHG Protocol 기준.</p>
+                <a class="project-link" href="https://festival-carbon-tracker.vercel.app/" target="_blank" rel="noopener">Carbon Tracker 바로가기 →</a>
+            </article>
         </div>
     </section>
 
