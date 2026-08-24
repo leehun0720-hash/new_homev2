@@ -9,7 +9,7 @@
     <title>TEN AI | 인간의 지혜와 실천이 만나는 10번째 인공지능</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --deep-navy: #0a1628;
@@ -36,14 +36,14 @@
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             background: var(--deep-navy);
             color: var(--white);
             line-height: 1.7;
             overflow-x: hidden;
         }
 
-        .outfit { font-family: 'Outfit', sans-serif; }
+        .outfit { font-family: 'Outfit', system-ui, -apple-system, sans-serif; }
         .container { max-width: var(--container-max); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
 
         ::selection { background: rgba(0, 212, 255, 0.35); }
@@ -99,7 +99,7 @@
             color: var(--gray-200);
             text-decoration: none;
             white-space: nowrap;
-            font-size: 0.95rem; font-weight: 500;
+            font-size: 0.95rem; font-weight: 400;
             transition: color 0.3s ease;
             position: relative;
             padding: 0.25rem 0;
@@ -121,7 +121,7 @@
             color: var(--cyan-glow);
             border: 1px solid rgba(0, 212, 255, 0.45);
             border-radius: 999px;
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.9rem; font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -212,7 +212,7 @@
             background: rgba(0, 212, 255, 0.08);
             border: 1px solid rgba(0, 212, 255, 0.25);
             border-radius: 999px;
-            font-size: 0.85rem; font-weight: 500;
+            font-size: 0.85rem; font-weight: 400;
             color: var(--cyan-soft);
             margin-bottom: 1.75rem;
             opacity: 0;
@@ -251,12 +251,12 @@
         .hero-subtitle {
             font-size: clamp(1.02rem, 1.6vw, 1.2rem);
             color: var(--gray-400);
-            font-weight: 300;
+            font-weight: 400;
             margin-bottom: 2.5rem;
             opacity: 0;
             animation: riseIn 0.8s ease 0.55s forwards;
         }
-        .hero-subtitle strong { color: var(--gray-200); font-weight: 500; }
+        .hero-subtitle strong { color: var(--gray-200); font-weight: 400; }
 
         .hero-cta-group {
             display: flex; gap: 1rem; flex-wrap: wrap;
@@ -269,7 +269,7 @@
             background: var(--gradient-cyan);
             color: var(--deep-navy);
             border: none; border-radius: 999px;
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 1rem; font-weight: 700;
             text-decoration: none;
             cursor: pointer;
@@ -284,8 +284,8 @@
             color: var(--white);
             border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 999px;
-            font-family: 'Noto Sans KR', sans-serif;
-            font-size: 1rem; font-weight: 600;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
+            font-size: 1rem; font-weight: 700;
             text-decoration: none;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -299,9 +299,9 @@
             animation: riseIn 0.7s ease 1s forwards;
         }
         .hero-stat .num {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: clamp(1.6rem, 3vw, 2.2rem);
-            font-weight: 800;
+            font-weight: 900;
             color: var(--cyan-glow);
             line-height: 1.2;
         }
@@ -355,8 +355,8 @@
             border: 1px solid rgba(0, 212, 255, 0.4);
             border-radius: 999px;
             padding: 0.6rem 1.2rem;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.85rem; font-weight: 600;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.85rem; font-weight: 700;
             color: var(--cyan-soft);
             box-shadow: 0 10px 34px rgba(0, 212, 255, 0.22);
             transition: transform 0.4s ease;
@@ -385,8 +385,8 @@
             to { transform: translateX(-50%); }
         }
         .marquee-item {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.95rem; font-weight: 600;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.95rem; font-weight: 700;
             color: var(--gray-400);
             display: inline-flex; align-items: center; gap: 3rem;
         }
@@ -397,7 +397,7 @@
         section { padding: var(--section-padding) 5%; position: relative; }
         .section-header { text-align: center; max-width: 720px; margin: 0 auto 3.5rem; }
         .section-label {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.85rem; font-weight: 700;
             letter-spacing: 0.18em;
             text-transform: uppercase;
@@ -411,7 +411,7 @@
             line-height: 1.3;
             margin-bottom: 1rem;
         }
-        .section-desc { font-size: 1.05rem; color: var(--gray-400); font-weight: 300; }
+        .section-desc { font-size: 1.05rem; color: var(--gray-400); font-weight: 400; }
 
         .animate-on-scroll {
             opacity: 0;
@@ -547,9 +547,9 @@
         .logo-callout-kicker,
         .logo-callout-copy { display: block; }
         .logo-callout-kicker {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.58rem;
-            font-weight: 800;
+            font-weight: 900;
             line-height: 1.2;
             letter-spacing: 0.11em;
             color: var(--callout-color);
@@ -557,7 +557,7 @@
         .logo-callout-copy {
             margin-top: 0.18rem;
             font-size: 0.68rem;
-            font-weight: 600;
+            font-weight: 700;
             line-height: 1.35;
             color: #425466;
         }
@@ -588,16 +588,16 @@
             justify-content: space-between;
             gap: 1rem;
             margin-bottom: 0.75rem;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.76rem;
             font-weight: 700;
             letter-spacing: 0.16em;
             color: #0570de;
         }
         .logo-philosophy-label-ko {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.68rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.08em;
             color: #67748e;
         }
@@ -616,9 +616,9 @@
         .logo-meaning-key {
             display: block;
             margin-bottom: 0.25rem;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 1.02rem;
-            font-weight: 800;
+            font-weight: 900;
             color: #0a2540;
         }
         .logo-meaning-item:nth-child(2) .logo-meaning-key { color: #0570de; }
@@ -651,7 +651,7 @@
             content: 'TenOS';
             position: absolute;
             right: -1rem; bottom: -2.6rem;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 9rem; font-weight: 900;
             color: rgba(0, 212, 255, 0.05);
             pointer-events: none;
@@ -659,7 +659,7 @@
         }
         .tenos-title-chip {
             display: inline-flex; align-items: center; gap: 0.5rem;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.8rem; font-weight: 700;
             letter-spacing: 0.12em;
             color: var(--cyan-glow);
@@ -680,7 +680,7 @@
             transition: border-color 0.3s ease, transform 0.3s ease;
         }
         .tenos-spec:hover { border-color: rgba(0, 212, 255, 0.45); transform: translateY(-3px); }
-        .tenos-spec .k { font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--cyan-glow); }
+        .tenos-spec .k { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1.35rem; font-weight: 900; color: var(--cyan-glow); }
         .tenos-spec .v { font-size: 0.82rem; color: var(--gray-400); }
 
         /* ============ Evolution (horizontal scroll) ============ */
@@ -713,7 +713,7 @@
             background: linear-gradient(135deg, rgba(0, 212, 255, 0.16) 0%, rgba(10, 22, 40, 0.95) 100%);
             border-color: rgba(0, 212, 255, 0.5);
         }
-        .evo-number { font-size: 1.9rem; font-weight: 800; color: rgba(0, 212, 255, 0.5); line-height: 1; margin-bottom: 0.8rem; }
+        .evo-number { font-size: 1.9rem; font-weight: 900; color: rgba(0, 212, 255, 0.5); line-height: 1; margin-bottom: 0.8rem; }
         .evo-card.highlight-card .evo-number { color: var(--cyan-glow); }
         .evo-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.4rem; }
         .evo-desc { font-size: 0.84rem; color: var(--gray-400); line-height: 1.6; }
@@ -745,8 +745,8 @@
             font-size: 1.5rem;
             margin-bottom: 1.2rem;
         }
-        .biz-title { font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.35rem; }
-        .biz-subtitle { font-size: 0.86rem; color: var(--cyan-soft); margin-bottom: 0.8rem; font-weight: 500; }
+        .biz-title { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .biz-subtitle { font-size: 0.86rem; color: var(--cyan-soft); margin-bottom: 0.8rem; font-weight: 400; }
         .biz-desc { font-size: 0.9rem; color: var(--gray-400); margin-bottom: 1.1rem; }
         .biz-features { list-style: none; }
         .biz-features li {
@@ -780,7 +780,7 @@
         }
         .value-chip:hover { border-color: rgba(0, 212, 255, 0.35); background: rgba(21, 34, 56, 0.85); transform: translateY(-4px); }
         .value-chip .ic { font-size: 1.6rem; margin-bottom: 0.6rem; }
-        .value-chip .t { font-family: 'Outfit', sans-serif; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .value-chip .t { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem; }
         .value-chip .d { font-size: 0.74rem; color: var(--gray-400); line-height: 1.55; }
 
         /* ============ Partners ============ */
@@ -795,7 +795,7 @@
             letter-spacing: -0.02em;
             margin-bottom: 0.4rem;
         }
-        .partners-head p { font-size: 0.92rem; color: var(--gray-400); font-weight: 300; }
+        .partners-head p { font-size: 0.92rem; color: var(--gray-400); font-weight: 400; }
         .partner-grid {
             max-width: var(--container-max);
             margin: 0 auto;
@@ -819,8 +819,8 @@
             border-radius: 999px;
             margin-bottom: 0.9rem;
         }
-        .partner-name { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .partner-name small { font-family: 'Noto Sans KR', sans-serif; font-size: 0.8rem; font-weight: 500; color: var(--gray-600); margin-left: 0.4rem; }
+        .partner-name { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .partner-name small { font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif; font-size: 0.8rem; font-weight: 400; color: var(--gray-600); margin-left: 0.4rem; }
         .partner-desc { font-size: 0.87rem; color: var(--gray-400); line-height: 1.7; flex: 1; margin-bottom: 1.2rem; }
         .partner-link {
             align-self: flex-start;
@@ -856,8 +856,8 @@
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 999px;
             color: var(--gray-200);
-            font-family: 'Noto Sans KR', sans-serif;
-            font-size: 0.9rem; font-weight: 600;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
+            font-size: 0.9rem; font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -875,7 +875,7 @@
             background: rgba(10, 22, 40, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: var(--gray-200);
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.82rem; font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -919,7 +919,7 @@
             content: attr(data-deco);
             position: absolute;
             right: 0.6rem; top: -1.4rem;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 5.2rem; font-weight: 900;
             opacity: 0.14;
             line-height: 1;
@@ -929,8 +929,8 @@
         .cover-genai { background: linear-gradient(135deg, rgba(139, 92, 246, 0.32), rgba(10, 22, 40, 0.2)); }
         .cover-biz { background: linear-gradient(135deg, rgba(255, 182, 61, 0.26), rgba(10, 22, 40, 0.2)); }
         .hb-level {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.75rem; font-weight: 800;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.75rem; font-weight: 900;
             letter-spacing: 0.08em;
             background: rgba(10, 22, 40, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -941,7 +941,7 @@
         .hb-meta { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.7rem; flex-wrap: wrap; }
         .hb-course-tag { font-size: 0.74rem; font-weight: 700; padding: 0.22rem 0.7rem; border-radius: 999px; }
         .hb-access {
-            font-size: 0.72rem; font-weight: 600;
+            font-size: 0.72rem; font-weight: 700;
             display: inline-flex; align-items: center; gap: 0.3rem;
             padding: 0.22rem 0.7rem;
             border-radius: 999px;
@@ -956,7 +956,7 @@
             display: inline-flex; align-items: center; gap: 0.5rem;
             padding: 0.6rem 1.3rem;
             border-radius: 999px;
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.86rem; font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -997,7 +997,7 @@
         }
         .lectures-head .section-label { margin-bottom: 0.9rem; }
         .lectures-head h2 { font-size: clamp(1.8rem, 3.6vw, 2.7rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1.3; margin-bottom: 0.8rem; }
-        .lectures-head p { color: var(--gray-400); font-weight: 300; max-width: 560px; }
+        .lectures-head p { color: var(--gray-400); font-weight: 400; max-width: 560px; }
         .channel-btn {
             display: inline-flex; align-items: center; gap: 0.6rem;
             padding: 0.85rem 1.7rem;
@@ -1057,8 +1057,8 @@
         .lecture-thumb .dur {
             position: absolute; right: 0.7rem; bottom: 0.7rem;
             background: rgba(0, 0, 0, 0.72);
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.72rem; font-weight: 600;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.72rem; font-weight: 700;
             padding: 0.18rem 0.55rem;
             border-radius: 5px;
         }
@@ -1180,7 +1180,7 @@
         .app-card:hover .app-overlay { opacity: 1; }
         .app-body { padding: 1.5rem 1.6rem 1.7rem; }
         .app-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.55rem; }
-        .app-name { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; }
+        .app-name { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1.2rem; font-weight: 700; }
         .app-badge {
             font-size: 0.7rem; font-weight: 700;
             padding: 0.24rem 0.7rem;
@@ -1256,7 +1256,7 @@
             overflow-y: auto;
         }
         .post-modal-body .news-meta { margin-bottom: 1rem; }
-        .post-modal-body h3 { font-size: 1.35rem; font-weight: 800; line-height: 1.45; margin-bottom: 1.1rem; }
+        .post-modal-body h3 { font-size: 1.35rem; font-weight: 900; line-height: 1.45; margin-bottom: 1.1rem; }
         .post-modal-body .content { font-size: 0.95rem; color: var(--gray-200); line-height: 1.85; white-space: pre-wrap; }
 
         /* ============ Q&A ============ */
@@ -1281,7 +1281,7 @@
             display: flex; flex-direction: column; gap: 0.9rem;
             position: sticky; top: 96px;
         }
-        .qna-form h3, .qna-list-wrap h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.3rem; }
+        .qna-form h3, .qna-list-wrap h3 { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.3rem; }
         .qna-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
         .qna-form input, .qna-form textarea {
             width: 100%;
@@ -1290,7 +1290,7 @@
             border-radius: 10px;
             padding: 0.85rem 1.05rem;
             color: var(--white);
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.9rem;
             transition: border-color 0.3s ease;
         }
@@ -1315,8 +1315,8 @@
             padding: 1.15rem 1.35rem;
             background: none; border: none;
             color: var(--white);
-            font-family: 'Noto Sans KR', sans-serif;
-            font-size: 0.95rem; font-weight: 600;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
+            font-size: 0.95rem; font-weight: 700;
             text-align: left;
             cursor: pointer;
         }
@@ -1326,8 +1326,8 @@
             border-radius: 50%;
             background: rgba(0, 212, 255, 0.12);
             color: var(--cyan-glow);
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800; font-size: 0.85rem;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-weight: 900; font-size: 0.85rem;
             display: flex; align-items: center; justify-content: center;
         }
         .qna-item-q .q-text { flex: 1; line-height: 1.55; }
@@ -1349,8 +1349,8 @@
             border-radius: 50%;
             background: var(--gradient-cyan);
             color: var(--deep-navy);
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800; font-size: 0.85rem;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-weight: 900; font-size: 0.85rem;
             display: flex; align-items: center; justify-content: center;
         }
         .qna-item-a .a-body { font-size: 0.89rem; color: var(--gray-400); line-height: 1.75; white-space: pre-wrap; }
@@ -1392,7 +1392,7 @@
         .tier-icon.mem { background: rgba(0, 212, 255, 0.12); }
         .tier-icon.enr { background: rgba(255, 182, 61, 0.13); }
         .tier-row .t { font-weight: 700; font-size: 0.98rem; margin-bottom: 0.2rem; }
-        .tier-row .t small { font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--gray-600); margin-left: 0.4rem; letter-spacing: 0.05em; }
+        .tier-row .t small { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-weight: 700; font-size: 0.72rem; color: var(--gray-600); margin-left: 0.4rem; letter-spacing: 0.05em; }
         .tier-row .d { font-size: 0.86rem; color: var(--gray-400); line-height: 1.65; }
 
         .login-panel {
@@ -1403,14 +1403,14 @@
             backdrop-filter: blur(8px);
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
         }
-        .login-panel h3 { font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+        .login-panel h3 { font-size: 1.35rem; font-weight: 900; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
         .login-panel > p { font-size: 0.9rem; color: var(--gray-400); margin-bottom: 1.75rem; }
         .social-btn {
             width: 100%;
             display: flex; align-items: center; justify-content: center; gap: 0.7rem;
             padding: 0.95rem 1rem;
             border-radius: 12px;
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.95rem; font-weight: 700;
             border: none;
             cursor: pointer;
@@ -1437,7 +1437,7 @@
             border-radius: 10px;
             padding: 0.85rem 1.1rem;
             color: var(--white);
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.9rem;
             transition: border-color 0.3s ease;
         }
@@ -1463,7 +1463,7 @@
             border-radius: 9px;
             background: transparent;
             color: var(--gray-400);
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto Sans KR', 'Pretendard', 'Malgun Gothic', system-ui, sans-serif;
             font-size: 0.92rem; font-weight: 700;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -1502,7 +1502,7 @@
         }
         .cta-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
         .cta h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); font-weight: 900; margin-bottom: 1.4rem; letter-spacing: -0.02em; line-height: 1.35; }
-        .cta p { font-size: 1.1rem; color: var(--gray-400); margin-bottom: 2.5rem; font-weight: 300; }
+        .cta p { font-size: 1.1rem; color: var(--gray-400); margin-bottom: 2.5rem; font-weight: 400; }
         .cta .hero-cta-group { justify-content: center; opacity: 1; animation: none; }
 
         footer {
@@ -1518,7 +1518,7 @@
             gap: 3rem;
         }
         .footer-brand p { color: var(--gray-400); font-size: 0.92rem; margin-top: 1rem; max-width: 300px; }
-        .footer-title { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; }
+        .footer-title { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; }
         .footer-links { list-style: none; }
         .footer-links li { margin-bottom: 0.7rem; }
         .footer-links a { color: var(--gray-400); text-decoration: none; font-size: 0.88rem; transition: color 0.3s ease; }
@@ -1532,7 +1532,7 @@
             flex-wrap: wrap; gap: 1rem;
         }
         .footer-copyright { color: var(--gray-600); font-size: 0.84rem; }
-        .footer-slogan { font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--cyan-glow); font-weight: 500; }
+        .footer-slogan { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 0.9rem; color: var(--cyan-glow); font-weight: 400; }
 
         /* Toast */
         .toast {
@@ -1543,7 +1543,7 @@
             border: 1px solid rgba(0, 212, 255, 0.4);
             border-radius: 999px;
             padding: 0.85rem 1.7rem;
-            font-size: 0.9rem; font-weight: 500;
+            font-size: 0.9rem; font-weight: 400;
             z-index: 1300;
             transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
             box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
@@ -1650,7 +1650,7 @@
             --gray-100: #f6f9fc;
             --gray-200: #3c4257;
             --gray-400: #546b8c;
-            --gray-600: #8792a2;
+            --gray-600: #5a6472;   /* AA 통과 (흰 배경 5.74:1) */
             /* 포인트: 흰 배경 가독용 블루 계열 */
             --cyan-glow: #0570de;
             --cyan-soft: #0b7bc2;
@@ -1856,21 +1856,21 @@
             border: 1px solid rgba(0, 212, 255, 0.45);
             flex: 0 0 auto;
         }
-        .tenos-rank-badge em { font-style: normal; font-size: 1.9rem; font-weight: 800; color: #00d4ff; line-height: 1; }
+        .tenos-rank-badge em { font-style: normal; font-size: 1.9rem; font-weight: 900; color: #00d4ff; line-height: 1; }
         .tenos-rank-badge small { font-size: 0.9rem; font-weight: 700; color: #7ee8fa; }
         .tenos-rank-meta { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; min-width: 0; }
         .tenos-rank-meta strong { font-size: 1rem; font-weight: 700; color: #ffffff; }
         .tenos-rank-meta small { font-size: 0.78rem; color: #8fa5c5; line-height: 1.5; }
         .tenos-rank-head:hover .tenos-rank-meta strong { color: #00d4ff; }
         .tenos-rank-score { text-align: right; flex: 0 0 auto; }
-        .tenos-rank-score em { display: block; font-style: normal; font-size: 1.3rem; font-weight: 800; color: #ffffff; line-height: 1.2; }
+        .tenos-rank-score em { display: block; font-style: normal; font-size: 1.3rem; font-weight: 900; color: #ffffff; line-height: 1.2; }
         .tenos-rank-score small { font-size: 0.72rem; color: #8fa5c5; }
 
         .tenos-bench { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.7rem; }
         .bench-item { min-width: 0; }
         .bench-name {
             display: block;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.68rem; font-weight: 700;
             letter-spacing: 0.02em;
             color: #8fa5c5;
@@ -1879,13 +1879,73 @@
         }
         .bench-bar { display: block; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; margin-bottom: 0.35rem; }
         .bench-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #00d4ff, #7a73ff); width: 0; transition: width 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
-        .bench-score { display: block; font-family: 'Outfit', sans-serif; font-size: 0.82rem; font-weight: 700; color: #ffffff; line-height: 1.3; }
-        .tenos-rank-note { margin-top: 0.9rem; font-size: 0.72rem; color: #67748e; }
+        .bench-score { display: block; font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 0.82rem; font-weight: 700; color: #ffffff; line-height: 1.3; }
+        .tenos-rank-note { margin-top: 0.9rem; font-size: 0.72rem; color: #9aa8bf; }
 
         @media (max-width: 720px) {
             .tenos-bench { grid-template-columns: repeat(2, 1fr); }
             .tenos-rank-head { flex-wrap: wrap; gap: 0.8rem; }
             .tenos-rank-score { text-align: left; }
+        }
+
+        /* =====================================================
+           접근성 · 저영향 표면 (2026 지속가능/포용 디자인)
+           ===================================================== */
+        /* 키보드 사용자를 위한 본문 바로가기 — 포커스 시에만 나타난다 */
+        .skip-link {
+            position: absolute;
+            left: 1rem; top: -100px;
+            z-index: 2000;
+            padding: 0.85rem 1.5rem;
+            background: #0a2540;
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 0 0 10px 10px;
+            transition: top 0.2s ease;
+        }
+        .skip-link:focus { top: 0; }
+
+        /* 포커스 링을 모든 대화형 요소에 일관되게 — 저시력·키보드 사용자 기준 */
+        a:focus-visible, button:focus-visible,
+        input:focus-visible, textarea:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid #0a2540;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        .evolution-scroller:focus-visible { outline-offset: 4px; }
+
+        /* 화면에는 숨기고 화면 낭독기에는 읽히는 라벨 */
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px; height: 1px;
+            margin: -1px; padding: 0;
+            overflow: hidden;
+            clip: rect(0 0 0 0); clip-path: inset(50%);
+            white-space: nowrap; border: 0;
+        }
+
+        /* 폼 라벨: placeholder 에만 의존하지 않도록 눈에 보이는 라벨을 둔다 */
+        .field { display: flex; flex-direction: column; gap: 0.35rem; }
+        .field > label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--gray-200);
+        }
+        .field-hint { font-size: 0.74rem; color: var(--gray-600); }
+
+        /* 필수 입력 표시 — 색에만 의존하지 않게 기호 + 텍스트 병기 */
+        .req { color: #b3261e; font-weight: 700; }
+
+        /* ---- 저영향 표면: 그림자 대신 테두리 ----
+           다중 레이어 그림자와 큰 blur 는 매 프레임 합성 비용이 든다.
+           1px 실선 테두리로 대체하면 렌더 비용이 줄고 경계도 더 또렷해진다. */
+        :root {
+            --shadow-card: 0 1px 2px rgba(10, 37, 64, 0.06);
+            --shadow-lift: 0 4px 12px rgba(10, 37, 64, 0.10);
+            --line: #d5dee8;
+            --line-strong: #9fb0c4;
         }
 
         /* =====================================================
@@ -1927,7 +1987,7 @@
             line-height: 1.4;
         }
         .client-name em {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-style: normal;
             font-size: 0.86rem;
             font-weight: 700;
@@ -1974,13 +2034,13 @@
             margin-bottom: 0.9rem;
         }
         .project-num {
-            font-size: 1.6rem; font-weight: 800;
+            font-size: 1.6rem; font-weight: 900;
             color: rgba(5, 112, 222, 0.32);
             line-height: 1;
         }
         .project-card.highlight-card .project-num { color: var(--cyan-glow); }
         .project-tag {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
             font-size: 0.7rem; font-weight: 700;
             letter-spacing: 0.06em;
             padding: 0.22rem 0.7rem;
@@ -1999,8 +2059,8 @@
         .project-link:hover { gap: 0.7rem; }
         .project-meta {
             align-self: flex-start;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.76rem; font-weight: 600;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.76rem; font-weight: 700;
             color: var(--gray-600);
             padding: 0.2rem 0.7rem;
             border: 1px solid var(--line);
@@ -2136,6 +2196,59 @@
         }
 
         .fx-soft nav.nav-hidden { transform: none; }
+        /* =====================================================
+           고대비 팔레트 교정 (WCAG 2.2 AA)
+           — 측정으로 확인된 미달 항목만 실제 배경 위에서 4.5:1(큰 글자 3:1)
+             이상이 되도록 전경색을 낮춘다. 색 이외의 단서(아이콘·텍스트)도 유지.
+           ===================================================== */
+        :root {
+            /* 버튼 배경을 그라디언트 → 단색으로: 밝은 끝단에서 흰 글씨가 2.4:1 로
+               떨어지던 문제를 없애고, 합성 비용도 줄인다 (C40 식 플랫 색면) */
+            --gradient-cyan: #0570de;
+        }
+
+        /* 분류 칩 — 옅은 배경 위 진한 글씨 */
+        .tag-vibe,  .hb-course-tag.tag-vibe,  .partner-role.tag-vibe,
+        .app-badge.tag-vibe,  .project-tag.tag-vibe   { background: #e3f0fd; color: #0b4a86; }
+        .tag-genai, .hb-course-tag.tag-genai, .partner-role.tag-genai,
+        .app-badge.tag-genai, .project-tag.tag-genai  { background: #ecebfc; color: #443596; }
+        .tag-biz,   .hb-course-tag.tag-biz,   .partner-role.tag-biz,
+        .app-badge.tag-biz,   .project-tag.tag-biz    { background: #fdefdb; color: #7a4310; }
+
+        /* 열람 권한 배지 — 아이콘(🌐 👥 🔒)을 함께 두어 색에만 의존하지 않게 */
+        .access-public   { background: #e2f7ee; color: #0a6046; }
+        .access-member   { background: #e3f0fd; color: #0b4a86; }
+        .access-enrolled { background: #fdefdb; color: #7a4310; }
+
+        /* 소식 분류 */
+        .news-cat-notice { background: #e3f0fd; color: #0b4a86; }
+        .news-cat-news   { background: #ecebfc; color: #443596; }
+        .news-cat-edu    { background: #fdefdb; color: #7a4310; }
+        .news-pin        { color: #0a6046; }
+
+        /* 큰 장식 숫자 — 내용을 담고 있으므로 3:1 이상 확보 */
+        .evo-number    { color: #5f7a9c; }
+        .project-num   { color: #5f7a9c; }
+
+        /* 로고 해설 캡션 */
+        .logo-callout-kicker { color: #2b4a6b; }
+        .logo-callout-ai .logo-callout-kicker { color: #1d5f80; }
+        .logo-callout-a  .logo-callout-kicker { color: #0b4a86; }
+        .logo-callout-copy { color: #33475e; }
+
+        /* 유튜브 채널 버튼 */
+        .channel-btn { color: #ffffff; background: #b3140f; border-color: #b3140f; }
+        .channel-btn:hover { background: #8f100c; border-color: #8f100c; }
+
+        /* 강의 재생시간 배지 — 어두운 오버레이 위에는 흰 글씨 */
+        .lecture-thumb .dur { color: #ffffff; }
+
+        /* 옅은 파랑 배경 위 글씨 보강 */
+        .biz-subtitle { color: #0b5a8f; }
+        .level-chip.active { color: #0b4a86; border-color: #0b4a86; }
+        .hb-open.unlocked { color: #0b4a86; border-color: rgba(11, 74, 134, 0.45); }
+        .hb-open.unlocked:hover { background: #0570de; color: #ffffff; }
+
     </style>
     <script>
         /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
@@ -2149,11 +2262,13 @@
     </script>
 </head>
 <body>
+    <a class="skip-link" href="#home">본문 바로가기</a>
+
     <!-- ============ Navigation ============ -->
     <nav id="nav" aria-label="주 메뉴">
         <a href="#home" class="logo" aria-label="TenAI 홈">
             <span class="brand-logo-frame">
-                <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM">
+                <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
             </span>
         </a>
         <ul class="nav-links">
@@ -2186,6 +2301,7 @@
         <button class="nav-login" data-login>로그인 / 회원가입</button>
     </div>
 
+    <main id="main">
     <!-- ============ Hero ============ -->
     <header class="hero" id="home">
         <div class="hero-bg" aria-hidden="true">
@@ -2273,7 +2389,7 @@
         <div class="philosophy-content">
             <div class="philosophy-brand-panel">
                 <div class="philosophy-logo-frame">
-                    <img src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM 공식 로고">
+                    <img src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM 공식 로고" width="1040" height="440" loading="lazy" decoding="async">
                     <div class="logo-callout logo-callout-ten">
                         <span class="logo-callout-line" aria-hidden="true"></span>
                         <span class="logo-callout-kicker">HUMAN BASE</span>
@@ -2735,10 +2851,19 @@
             <form class="qna-form animate-on-scroll" id="qnaForm">
                 <h3>질문 남기기</h3>
                 <div class="qna-form-row">
-                    <input type="text" id="qName" placeholder="이름 (또는 닉네임)" maxlength="40" aria-label="이름">
-                    <input type="email" id="qEmail" placeholder="이메일 (선택 — 답변 알림용)" maxlength="80" aria-label="이메일">
+                    <span class="field">
+                        <label for="qName">이름 <span class="field-hint">(또는 닉네임)</span></label>
+                        <input type="text" id="qName" placeholder="예: 홍길동" maxlength="40">
+                    </span>
+                    <span class="field">
+                        <label for="qEmail">이메일 <span class="field-hint">(선택 · 답변 알림용)</span></label>
+                        <input type="email" id="qEmail" placeholder="name@example.com" maxlength="80">
+                    </span>
                 </div>
-                <textarea id="qQuestion" placeholder="궁금한 내용을 자유롭게 적어주세요" maxlength="2000" required aria-label="질문 내용"></textarea>
+                <span class="field">
+                    <label for="qQuestion">질문 내용 <span class="req" aria-hidden="true">*</span><span class="visually-hidden">(필수 입력)</span></label>
+                    <textarea id="qQuestion" placeholder="궁금한 내용을 자유롭게 적어주세요" maxlength="2000" required></textarea>
+                </span>
                 <button type="submit" class="btn-primary" style="justify-content:center;">
                     질문 등록하기
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -2800,17 +2925,17 @@
                     </div>
 
                     <form id="memberLoginForm" class="login-fields">
-                        <input type="email" id="mlEmail" placeholder="이메일" autocomplete="username" required aria-label="이메일">
-                        <input type="password" id="mlPass" placeholder="비밀번호" autocomplete="current-password" required aria-label="비밀번호">
+                        <span class="field"><label for="mlEmail">이메일</label><input type="email" id="mlEmail" placeholder="name@example.com" autocomplete="username" required></span>
+                        <span class="field"><label for="mlPass">비밀번호</label><input type="password" id="mlPass" autocomplete="current-password" required></span>
                         <button type="submit" class="btn-primary" style="border:none; width:100%; justify-content:center;">로그인</button>
                     </form>
 
                     <form id="memberSignupForm" class="login-fields" hidden>
-                        <input type="email" id="msEmail" placeholder="이메일 *" autocomplete="username" required aria-label="이메일">
-                        <input type="password" id="msPass" placeholder="비밀번호 * (6자 이상)" autocomplete="new-password" minlength="6" required aria-label="비밀번호">
-                        <input type="text" id="msAddress" placeholder="주소 (시/구 정도만 간단히)" maxlength="200" aria-label="주소">
-                        <input type="text" id="msCompany" placeholder="회사명" maxlength="100" aria-label="회사명">
-                        <input type="text" id="msPosition" placeholder="직급" maxlength="60" aria-label="직급">
+                        <span class="field"><label for="msEmail">이메일 <span class="req" aria-hidden="true">*</span><span class="visually-hidden">(필수 입력)</span></label><input type="email" id="msEmail" placeholder="name@example.com" autocomplete="username" required></span>
+                        <span class="field"><label for="msPass">비밀번호 <span class="req" aria-hidden="true">*</span><span class="visually-hidden">(필수 입력)</span> <span class="field-hint">6자 이상</span></label><input type="password" id="msPass" autocomplete="new-password" minlength="6" required></span>
+                        <span class="field"><label for="msAddress">주소 <span class="field-hint">(선택 · 시/구 정도만)</span></label><input type="text" id="msAddress" placeholder="예: 서울시 서초구" maxlength="200"></span>
+                        <span class="field"><label for="msCompany">회사명 <span class="field-hint">(선택)</span></label><input type="text" id="msCompany" maxlength="100"></span>
+                        <span class="field"><label for="msPosition">직급 <span class="field-hint">(선택)</span></label><input type="text" id="msPosition" maxlength="60"></span>
                         <button type="submit" class="btn-primary" style="border:none; width:100%; justify-content:center;">회원가입</button>
                     </form>
 
@@ -2849,12 +2974,14 @@
     </section>
 
     <!-- ============ Footer ============ -->
+    </main>
+
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
                 <a href="#home" class="logo" aria-label="TenAI 홈">
                     <span class="brand-logo-frame">
-                        <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM">
+                        <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
                     </span>
                 </a>
                 <p>인간의 지혜와 실천이 만나는 10번째 인공지능. 활용 중심의 AI, 실천형 인공지능 생태계를 구축합니다.</p>
@@ -3148,11 +3275,60 @@
         // 모바일 메뉴
         const menuBtn = document.getElementById('menuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
+        /* =====================================================
+           키보드 전용 흐름 — 오버레이 포커스 관리
+           오버레이가 열리면 포커스를 안으로 옮기고 Tab 을 가둔다.
+           닫으면 원래 있던 곳으로 되돌린다. 뒤 배경은 inert 로 잠근다.
+           ===================================================== */
+        const FOCUSABLE_SEL = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        let fxLastFocused = null;
+
+        function openOverlay(container) {
+            fxLastFocused = document.activeElement;
+            const main = document.getElementById('main');
+            if (main && 'inert' in HTMLElement.prototype) main.inert = true;
+
+            /* 오버레이는 visibility 전환이 끝나야 포커스를 받을 수 있다.
+               전환 종료 신호를 기다리되, 놓칠 경우를 대비해 타임아웃도 둔다. */
+            const focusFirst = () => {
+                if (container.contains(document.activeElement)) return true;
+                const items = Array.from(container.querySelectorAll(FOCUSABLE_SEL))
+                    .filter(el => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden');
+                if (!items.length) return false;
+                items[0].focus();
+                return container.contains(document.activeElement);
+            };
+            if (!focusFirst()) {
+                const onEnd = () => { if (focusFirst()) container.removeEventListener('transitionend', onEnd); };
+                container.addEventListener('transitionend', onEnd);
+                setTimeout(() => { focusFirst(); container.removeEventListener('transitionend', onEnd); }, 450);
+            }
+
+            container._fxTrap = e => {
+                if (e.key !== 'Tab') return;
+                const list = Array.from(container.querySelectorAll(FOCUSABLE_SEL)).filter(el => el.offsetParent !== null);
+                if (!list.length) return;
+                const first = list[0], last = list[list.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            };
+            container.addEventListener('keydown', container._fxTrap);
+        }
+
+        function closeOverlay(container) {
+            if (container._fxTrap) { container.removeEventListener('keydown', container._fxTrap); container._fxTrap = null; }
+            const main = document.getElementById('main');
+            if (main && 'inert' in HTMLElement.prototype) main.inert = false;
+            if (fxLastFocused && document.contains(fxLastFocused)) { try { fxLastFocused.focus(); } catch (e) {} }
+            fxLastFocused = null;
+        }
+
         function closeMobileMenu() {
             menuBtn.classList.remove('open');
             mobileMenu.classList.remove('open');
             menuBtn.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            closeOverlay(mobileMenu);
         }
         menuBtn.addEventListener('click', () => {
             const opening = !mobileMenu.classList.contains('open');
@@ -3160,6 +3336,7 @@
             mobileMenu.classList.toggle('open', opening);
             menuBtn.setAttribute('aria-expanded', String(opening));
             document.body.style.overflow = opening ? 'hidden' : '';
+            if (opening) openOverlay(mobileMenu); else closeOverlay(mobileMenu);
         });
         mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
 
@@ -3340,14 +3517,21 @@
             document.getElementById('postModalContent').textContent = p.content || '';
             postModal.classList.add('open');
             document.body.style.overflow = 'hidden';
+            openOverlay(postModal);
         });
         function closePostModal() {
+            if (!postModal.classList.contains('open')) return;
             postModal.classList.remove('open');
             document.body.style.overflow = '';
+            closeOverlay(postModal);
         }
         document.getElementById('postModalClose').addEventListener('click', closePostModal);
         postModal.addEventListener('click', e => { if (e.target === postModal) closePostModal(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePostModal(); });
+        document.addEventListener('keydown', e => {
+            if (e.key !== 'Escape') return;
+            closePostModal();
+            if (mobileMenu.classList.contains('open')) closeMobileMenu();
+        });
 
         /* ----- Q&A ----- */
         async function renderPublicQna() {
