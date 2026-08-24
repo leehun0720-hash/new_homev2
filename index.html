@@ -2514,14 +2514,346 @@
         .logo-callout-a .logo-callout-kicker { color: #8f3d0c; }
         .logo-callout-copy { color: #5c3312; }
 
-        /* 푸터 로고: 어두운 색면 위에서도 읽히도록 받침면을 준다.
-           브랜드 마크 자체는 그대로 둔다. */
-        .footer-brand .brand-logo-frame {
-            background: var(--brand-cream);
-            border-radius: 12px;
-            padding: 0.6rem 0.9rem;
-            box-sizing: content-box;
+        /* 푸터 로고는 라임 단색본을 쓰므로 받침면이 필요 없다 */
+
+        /* =====================================================
+           DESIGN v3 — Editorial Rules, not Cards
+           ---------------------------------------------------
+           둥근 카드 격자를 걷어내고 괘선(hairline) 기반 편집 레이아웃으로.
+             · 상자 대신 선   · 가운데 대신 왼쪽   · 균일 대신 대비
+             · 장식 대신 활자 · 정렬된 격자 대신 어긋난 단
+           ===================================================== */
+
+        /* ---- 1. 모서리를 각지게: 둥근 타일 인상을 지운다 ---- */
+        :root { --radius-md: 0px; --radius-lg: 0px; }
+
+        /* ---- 2. 섹션 머리말: 왼쪽 정렬 + 여백에 라벨을 흘린다 ---- */
+        .section-header, .partners-head, .lectures-head {
+            text-align: left;
+            max-width: var(--container-max);
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 2.4rem;
+            padding-top: 1.4rem;
+            border-top: 2px solid currentColor;
+            display: grid;
+            grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+            gap: 0 clamp(1rem, 4vw, 3rem);
+            align-items: start;
         }
+        .section-label {
+            grid-column: 1;
+            grid-row: 1 / span 3;
+            font-size: 0.7rem;
+            letter-spacing: 0.16em;
+            line-height: 1.5;
+            margin: 0.5rem 0 0;
+            opacity: 0.75;
+        }
+        .section-title, .partners-head h3, .lectures-head h2 {
+            grid-column: 2;
+            font-size: clamp(2.1rem, 5.6vw, 4.1rem);
+            line-height: 1.02;
+            letter-spacing: -0.035em;
+            margin: 0 0 0.9rem;
+            max-width: 18ch;
+        }
+        .section-desc, .partners-head p, .lectures-head p {
+            grid-column: 2;
+            max-width: 46ch;
+            font-size: 0.95rem;
+            line-height: 1.75;
+            margin: 0;
+        }
+        .lectures-head { grid-template-columns: minmax(0, 9rem) minmax(0, 1fr) auto; }
+        .lectures-head > div { grid-column: 2; display: contents; }
+        .lectures-head .channel-btn { grid-column: 3; grid-row: 1; align-self: center; }
+        @media (max-width: 760px) {
+            .section-header, .partners-head, .lectures-head { grid-template-columns: 1fr; }
+            .section-label, .section-title, .section-desc,
+            .partners-head h3, .partners-head p,
+            .lectures-head h2, .lectures-head p { grid-column: 1; }
+            .section-label { grid-row: auto; margin-bottom: 0.7rem; }
+        }
+
+        /* ---- 3. 사업영역: 상자 → 괘선으로 나뉜 3단 행 ---- */
+        .business-grid { grid-template-columns: 1fr; gap: 0; }
+        .biz-card {
+            background: none;
+            border: 0;
+            border-top: 1px solid var(--line-strong);
+            border-radius: 0;
+            padding: 1.9rem 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 0.9fr);
+            gap: 0 clamp(1rem, 3.5vw, 3rem);
+            align-items: start;
+            counter-increment: bizrow;
+        }
+        .biz-card:last-child { border-bottom: 1px solid var(--line-strong); }
+        .biz-card:hover { border-color: var(--brand-ink); background: none; }
+        .business-grid { counter-reset: bizrow; }
+        .biz-title {
+            grid-column: 1; grid-row: 1;
+            font-size: clamp(1.3rem, 2.4vw, 1.85rem);
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+        .biz-title::before {
+            content: counter(bizrow, decimal-leading-zero);
+            display: block;
+            font-family: 'Outfit', system-ui, sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            opacity: 0.5;
+            margin-bottom: 0.5rem;
+        }
+        .biz-subtitle { grid-column: 1; grid-row: 2; margin: 0.5rem 0 0; font-size: 0.84rem; }
+        .biz-desc { grid-column: 2; grid-row: 1 / span 2; margin: 0; font-size: 0.95rem; line-height: 1.8; }
+        .biz-features { grid-column: 3; grid-row: 1 / span 2; }
+        .biz-features li { padding-left: 0; font-size: 0.84rem; }
+        .biz-features li::before { display: none; }
+        @media (max-width: 880px) {
+            .biz-card { grid-template-columns: 1fr; gap: 0.8rem 0; }
+            .biz-title, .biz-subtitle, .biz-desc, .biz-features { grid-column: 1; grid-row: auto; }
+        }
+
+        /* ---- 4. 핵심가치: 타일 → 활자 띠 ---- */
+        .values-strip {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            border-top: 1px solid var(--line-strong);
+        }
+        .value-chip {
+            background: none; border: 0; border-radius: 0;
+            border-bottom: 1px solid var(--line-strong);
+            border-right: 1px solid var(--line-strong);
+            text-align: left;
+            padding: 1.5rem clamp(1rem, 2.5vw, 2rem) 1.6rem 0;
+        }
+        .value-chip:nth-child(3n) { border-right: 0; padding-right: 0; }
+        .value-chip:hover { background: none; border-color: var(--line-strong); }
+        .value-chip .t { font-size: 1.02rem; letter-spacing: -0.01em; margin-bottom: 0.45rem; }
+        .value-chip .d { font-size: 0.82rem; }
+        @media (max-width: 700px) {
+            .values-strip { grid-template-columns: 1fr; }
+            .value-chip { border-right: 0; padding-right: 0; }
+        }
+
+        /* ---- 5. 제휴업체: 이름을 크게 왼쪽에, 설명은 오른쪽에 ---- */
+        .partner-grid { grid-template-columns: 1fr; gap: 0; }
+        .partner-card {
+            background: none; border: 0; border-radius: 0;
+            border-top: 1px solid var(--line-strong);
+            padding: 1.8rem 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
+            gap: 0 clamp(1rem, 3.5vw, 3rem);
+            align-items: start;
+        }
+        .partner-card:last-child { border-bottom: 1px solid var(--line-strong); }
+        .partner-card:hover { border-color: var(--brand-ink); background: none; }
+        .partner-name {
+            grid-column: 1; grid-row: 1;
+            font-size: clamp(1.35rem, 2.6vw, 2rem);
+            letter-spacing: -0.025em;
+            margin: 0;
+        }
+        .partner-name small { display: block; margin: 0.3rem 0 0; font-size: 0.78rem; }
+        .partner-role {
+            grid-column: 1; grid-row: 2;
+            align-self: start; margin: 0.7rem 0 0;
+            background: none !important;
+            padding: 0;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+        }
+        .partner-desc { grid-column: 2; grid-row: 1 / span 2; margin: 0; font-size: 0.92rem; line-height: 1.8; }
+        .partner-link { grid-column: 3; grid-row: 1; white-space: nowrap; }
+        @media (max-width: 880px) {
+            .partner-card { grid-template-columns: 1fr; gap: 0.7rem 0; }
+            .partner-name, .partner-role, .partner-desc, .partner-link { grid-column: 1; grid-row: auto; }
+        }
+
+        /* ---- 6. 고객사: 색인(index) 목록 ---- */
+        .client-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0 clamp(1.5rem, 5vw, 4rem);
+            border-top: 1px solid var(--line-strong);
+        }
+        .client-card {
+            background: none; border: 0; border-radius: 0;
+            border-bottom: 1px solid var(--line-strong);
+            border-left: 0;
+            padding: 1.05rem 0;
+            flex-direction: row;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .client-card:hover { background: none; border-color: var(--brand-ink); transform: none; }
+        .client-card.is-plain:hover { border-color: var(--line-strong); }
+        .client-name { font-size: 1.05rem; letter-spacing: -0.015em; }
+        .client-field { font-size: 0.76rem; text-align: right; flex: 0 1 auto; }
+        @media (max-width: 700px) { .client-grid { grid-template-columns: 1fr; } }
+
+        /* ---- 7. 진행 프로젝트: 여백에 큰 번호를 흘린 색인 ---- */
+        .project-grid { grid-template-columns: 1fr; gap: 0; border-top: 2px solid currentColor; }
+        .project-card {
+            background: none; border: 0; border-radius: 0;
+            border-bottom: 1px solid var(--line-strong);
+            padding: 1.5rem 0;
+            display: grid;
+            grid-template-columns: minmax(0, 4.5rem) minmax(0, 1fr) minmax(0, 1.4fr) auto;
+            gap: 0 clamp(0.8rem, 3vw, 2.4rem);
+            align-items: baseline;
+        }
+        .project-card:hover { background: none; border-color: var(--brand-ink); }
+        .project-top { display: contents; }
+        .project-num {
+            grid-column: 1; grid-row: 1;
+            font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+            line-height: 0.9;
+            opacity: 0.55;
+        }
+        .project-tag {
+            grid-column: 1; grid-row: 2;
+            justify-self: start;
+            background: none !important;
+            padding: 0;
+            font-size: 0.66rem;
+            letter-spacing: 0.12em;
+        }
+        .project-title { grid-column: 2; grid-row: 1 / span 2; font-size: clamp(1.15rem, 2.2vw, 1.6rem); letter-spacing: -0.02em; margin: 0; }
+        .project-desc { grid-column: 3; grid-row: 1 / span 2; margin: 0; font-size: 0.88rem; line-height: 1.75; }
+        .project-link, .project-meta { grid-column: 4; grid-row: 1; white-space: nowrap; align-self: center; }
+        .project-meta { border: 0; padding: 0; font-size: 0.72rem; }
+        .project-card.highlight-card {
+            background: none;
+            border-bottom-color: var(--brand-ink);
+        }
+        .project-card.highlight-card .project-title,
+        .project-card.highlight-card .project-desc,
+        .project-card.highlight-card .project-num,
+        .project-card.highlight-card .project-meta { color: inherit; }
+        .project-card.highlight-card .project-title { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+        @media (max-width: 940px) {
+            .project-card { grid-template-columns: 3.2rem 1fr; gap: 0.4rem 1rem; }
+            .project-title { grid-column: 2; grid-row: 1; }
+            .project-desc { grid-column: 2; grid-row: 2; }
+            .project-link, .project-meta { grid-column: 2; grid-row: 3; justify-self: start; }
+            .project-tag { grid-row: 2; }
+        }
+
+        /* ---- 8. AI 진화: 상자 없는 세로 괘선 패널 ---- */
+        .evo-card {
+            background: none !important;
+            border: 0;
+            border-left: 1px solid var(--brand-ink);
+            border-radius: 0;
+            padding: 0.2rem 1.1rem 0 1.1rem;
+        }
+        .evo-card:hover { background: none; border-color: var(--brand-ink); transform: none; }
+        .evo-number { font-size: clamp(2rem, 4vw, 3rem); line-height: 0.9; margin-bottom: 0.9rem; opacity: 0.5; }
+        .evo-card.highlight-card { border-left-width: 4px; }
+        .evo-card.highlight-card .evo-title,
+        .evo-card.highlight-card .evo-desc,
+        .evo-card.highlight-card .evo-number { color: inherit; }
+        .evo-card.highlight-card .evo-number { opacity: 1; }
+
+        /* ---- 9. 남은 카드(핸드북·강의·앱·소식·Q&A·멤버십)도 각지게 ---- */
+        .handbook-card, .lecture-card, .app-card, .news-card,
+        .qna-item, .tier-row, .qna-form, .login-panel, .academy-note,
+        .video-modal-box, .philosophy-brand-panel, .logo-philosophy {
+            border-radius: 0;
+        }
+        .handbook-card:hover, .lecture-card:hover, .app-card:hover, .news-card:hover {
+            transform: none;
+        }
+        .hb-open, .btn-primary, .btn-secondary, .nav-login, .course-tab,
+        .channel-btn, .partner-link, .project-link, .hero-badge, .tenos-title-chip,
+        .hb-level, .hb-course-tag, .hb-access, .news-cat, .app-badge, .modal-close,
+        .auth-tab, .social-btn, .toast, .level-chip {
+            border-radius: 0;
+        }
+        .level-chip { width: auto; min-width: 42px; padding: 0 0.9rem; }
+
+        /* ---- 10. 히어로: 비대칭 + 겹치는 카드 더미 ---- */
+        .hero-inner { grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr); align-items: end; }
+        .hero h1 { max-width: 15ch; }
+        .hero-subtitle { max-width: 42ch; }
+        .hero-stats {
+            border-top: 2px solid var(--brand-ink);
+            padding-top: 1.2rem;
+            gap: clamp(1.6rem, 5vw, 4rem);
+        }
+        .hero-stat .num { font-size: clamp(2rem, 4.4vw, 3.2rem); line-height: 1; letter-spacing: -0.03em; }
+        .hero-stat .label { font-size: 0.76rem; letter-spacing: 0.04em; }
+        .hb-float {
+            border-radius: 0;
+            border: 1px solid var(--brand-ink);
+            background: var(--brand-cream);
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        .hb-float-1 { left: -6%; width: min(300px, 76%); }
+        .hb-float-2 { right: -10%; top: 30%; }
+        .hb-float-3 { bottom: 0; left: 2%; }
+        .hero-chip {
+            border-radius: 0;
+            background: var(--brand-ink);
+            color: var(--brand-cream);
+            border-color: var(--brand-ink);
+            box-shadow: none;
+        }
+        @media (max-width: 1024px) {
+            .hero-inner { grid-template-columns: 1fr; align-items: start; }
+            .hb-float-1 { left: 0; }
+            .hb-float-2 { right: 0; }
+        }
+
+        /* ---- 11. 활자 디테일 ---- */
+        .marquee { padding: 0.85rem 0; border-top: 0; }
+        .evolution-hint { text-align: left; max-width: var(--container-max); margin: 0.8rem auto 0; font-size: 0.76rem; letter-spacing: 0.02em; }
+        .evo-rail { border-radius: 0; }
+        .evo-rail-fill { border-radius: 0; }
+        .scroll-progress { height: 4px; }
+        blockquote { letter-spacing: -0.025em; }
+
+
+        /* ---- v3 대비 보정: 색면 위 편집 요소 ----
+           타일 배경이 사라지면서 전경색이 그대로 색면 위에 놓인다.
+           오렌지·라임 각각에서 다시 계산한 값으로 고정한다.
+           (opacity 로 흐리게 하던 큰 숫자는 실측 1.16:1 까지 떨어졌다) */
+        .projects .project-num { color: #6b3410; opacity: 1; }
+        .projects .project-tag { color: #5c3312; }
+        .projects .project-desc { color: #5c3312; }
+        .projects .project-link { color: #4a2a0e; }
+        .projects .project-meta { color: #5c3312; }
+        .projects .project-title { color: #3a1d08; }
+        .project-card.highlight-card .project-num { color: #4a2a0e; }
+
+        .evolution .evo-number { color: #5c6b2e; opacity: 1; }
+        .evolution .evo-title { color: #3a1d08; }
+        .evolution .evo-desc { color: #3f2a10; }
+        .evolution .evo-card { border-left-color: #4a5a24; }
+        .evolution .evo-card.highlight-card .evo-number { color: #3f2a10; }
+
+        .lectures .lecture-cat, .qna .qna-item-q { color: #3f2a10; }
+
+        /* 크림 위 여백 라벨 */
+        .section-label { color: #6b4b2a; opacity: 1; }
+        .projects .section-label, .cta .section-label { color: #5c3312; opacity: 1; }
+        .evolution .section-label, .lectures .section-label, .qna .section-label { color: #3f2a10; opacity: 1; }
+        .biz-title::before { color: #6b4b2a; opacity: 1; }
+        .partner-role { color: #6b4b2a; }
+
+        /* 소셜 로그인 버튼 글씨 — 흰/노란 바탕 위 4.5:1 확보 */
+        .social-btn, .social-btn.google, .social-btn.kakao { color: #3a1d08; }
+
+        /* 미연동 소셜 버튼: 흐리게 두되 글씨는 읽히는 선까지만 (0.55 → 3.66:1 실패) */
+        .social-btn[data-social] { opacity: 0.8; }
+        .social-btn[data-social]:hover { opacity: 1; }
     </style>
     <script>
         /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
@@ -2541,7 +2873,7 @@
     <nav id="nav" aria-label="주 메뉴">
         <a href="#home" class="logo" aria-label="TenAI 홈">
             <span class="brand-logo-frame">
-                <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
+                <img class="brand-logo-image" src="/brand/TenAI_ink.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
             </span>
         </a>
         <ul class="nav-links">
@@ -2662,7 +2994,7 @@
         <div class="philosophy-content">
             <div class="philosophy-brand-panel">
                 <div class="philosophy-logo-frame">
-                    <img src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM 공식 로고" width="1040" height="440" loading="lazy" decoding="async">
+                    <img src="/brand/TenAI_ink.png" alt="TenAI AX HUB PLATFORM 공식 로고" width="1040" height="440" loading="lazy" decoding="async">
                     <div class="logo-callout logo-callout-ten">
                         <span class="logo-callout-line" aria-hidden="true"></span>
                         <span class="logo-callout-kicker">HUMAN BASE</span>
@@ -3213,11 +3545,11 @@
                     </form>
 
                     <div class="login-divider">간편 로그인 (준비 중)</div>
-                    <button class="social-btn google" data-social="구글">
+                    <button class="social-btn google" data-social="구글" aria-disabled="true">
                         <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                         구글로 계속하기
                     </button>
-                    <button class="social-btn kakao" data-social="카카오">
+                    <button class="social-btn kakao" data-social="카카오" aria-disabled="true">
                         <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#191600" d="M12 3C6.48 3 2 6.48 2 10.8c0 2.76 1.84 5.18 4.6 6.56-.2.74-.74 2.7-.85 3.12-.13.52.19.51.4.37.17-.11 2.65-1.8 3.72-2.53.69.1 1.4.15 2.13.15 5.52 0 10-3.48 10-7.67C22 6.48 17.52 3 12 3z"/></svg>
                         카카오로 계속하기
                     </button>
@@ -3254,7 +3586,7 @@
             <div class="footer-brand">
                 <a href="#home" class="logo" aria-label="TenAI 홈">
                     <span class="brand-logo-frame">
-                        <img class="brand-logo-image" src="/brand/TenAI_Primary_Transparent.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
+                        <img class="brand-logo-image" src="/brand/TenAI_lime.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" loading="lazy" decoding="async">
                     </span>
                 </a>
                 <p>인간의 지혜와 실천이 만나는 10번째 인공지능. 활용 중심의 AI, 실천형 인공지능 생태계를 구축합니다.</p>
@@ -3284,7 +3616,7 @@
                     <li><a href="mailto:leesh@tenai.kr" data-mail>leesh@tenai.kr</a></li>
                     <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
                     <li><a href="#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
-                    <li><a href="admin.html" style="opacity:0.55;">관리자 콘솔</a></li>
+                    <li><a href="admin.html" style="opacity:0.85;">관리자 콘솔</a></li>
                 </ul>
             </div>
         </div>
