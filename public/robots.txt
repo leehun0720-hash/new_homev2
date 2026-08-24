@@ -1,0 +1,9 @@
+# https://tenai.kr/ — robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin
+
+# 관리자 콘솔은 색인 대상이 아닙니다.
+
+Sitemap: https://tenai.kr/sitemap.xml

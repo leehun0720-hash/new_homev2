@@ -1,0 +1,16 @@
+{
+  "name": "TEN AI — AX HUB PLATFORM",
+  "short_name": "TEN AI",
+  "description": "한국어 특화 LLM TenOS-Ko-28B와 실천형 AI 리터러시 교육 플랫폼",
+  "lang": "ko-KR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbf5e9",
+  "theme_color": "#f98b5e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
