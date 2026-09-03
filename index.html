@@ -156,6 +156,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://i.ytimg.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -3002,6 +3003,127 @@
         /* 미연동 소셜 버튼: 흐리게 두되 글씨는 읽히는 선까지만 (0.55 → 3.66:1 실패) */
         .social-btn[data-social] { opacity: 0.8; }
         .social-btn[data-social]:hover { opacity: 1; }
+
+        /* =====================================================
+           썸네일 — 가짜 목업 대신 실제 자료와 브랜드 마크
+           ---------------------------------------------------
+           강의: YouTube 실제 썸네일. 링크가 없을 때만 브랜드 면.
+           앱  : 스크린샷이 없으므로 분류별 색면 + 로고 마크.
+           ===================================================== */
+
+        /* ---- 강의 ---- */
+        .lecture-thumb {
+            position: relative;
+            overflow: hidden;
+            background: var(--brand-ink);
+        }
+        .lecture-shot {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;   /* hqdefault 의 4:3 여백을 잘라낸다 */
+            display: block;
+        }
+        .lecture-thumb.is-blank {
+            background: var(--brand-ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lecture-thumb.is-blank .thumb-mark {
+            width: 58%;
+            max-width: 168px;
+            height: auto;
+            opacity: 0.9;
+        }
+        .lecture-thumb.is-blank .thumb-note {
+            position: absolute;
+            left: 0.9rem;
+            top: 0.8rem;
+            font-family: 'Outfit', system-ui, sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--brand-lime);
+        }
+
+        /* 재생 버튼 — 라임 원 + 잉크 삼각형 */
+        .lecture-thumb .play {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 52px;
+            height: 52px;
+            border-radius: 999px;
+            background: var(--brand-lime);
+            border: 2px solid var(--brand-ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.25s ease, background 0.25s ease;
+        }
+        .lecture-thumb .play svg { fill: var(--brand-ink); margin-left: 3px; }
+        .lecture-card:hover .lecture-thumb .play { transform: translate(-50%, -50%) scale(1.08); }
+        .lecture-thumb.is-blank .play { background: var(--brand-lime); }
+
+        /* 재생시간 — 잉크 칩 위 크림 글씨 */
+        .lecture-thumb .dur {
+            position: absolute;
+            right: 0.6rem;
+            bottom: 0.6rem;
+            background: var(--brand-ink);
+            color: var(--brand-cream);
+            border-radius: 0;
+            padding: 0.18rem 0.45rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        /* ---- 앱 쇼케이스 ---- */
+        .app-thumb {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 168px;
+        }
+        .app-thumb.tint-tag-vibe  { background: #fde3d3; }
+        .app-thumb.tint-tag-genai { background: #e6f7d2; }
+        .app-thumb.tint-tag-biz   { background: #f3ead9; }
+        .app-thumb .thumb-mark {
+            width: 42%;
+            max-width: 210px;
+            height: auto;
+            opacity: 0.92;
+            transition: transform 0.35s ease;
+        }
+        .app-card:hover .app-thumb .thumb-mark { transform: scale(1.06); }
+
+        /* 사용법 오버레이 — 마우스를 올렸을 때만 */
+        .app-overlay {
+            position: absolute;
+            inset: 0;
+            background: var(--brand-ink);
+            color: var(--brand-cream);
+            display: flex;
+            align-items: center;
+            padding: 1.1rem;
+            font-size: 0.84rem;
+            line-height: 1.7;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .app-card:hover .app-overlay,
+        .app-card:focus-within .app-overlay { opacity: 1; }
+
+        /* 이전 다크 팔레트 목업 잔재 제거 */
+        .app-mockup, .mock-dots, .mock-line { display: none !important; }
+
     </style>
     <script>
         /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
@@ -3926,11 +4048,16 @@
                     ? `href="${escHtml(youtubeUrl)}" target="_blank" rel="noopener noreferrer"`
                     : 'type="button" data-missing-video="true"';
                 const actionLabel = youtubeUrl ? 'YouTube에서 새 창으로 보기' : 'YouTube 링크 미등록';
+                const thumb = ytThumbUrl(youtubeUrl);
                 return `
                 <${tag} class="lecture-card visible" ${attrs} aria-label="${escHtml(v.title)} - ${actionLabel}">
-                    <div class="lecture-thumb" style="background: linear-gradient(135deg, ${v.grad1 || '#0e7490'}, ${v.grad2 || '#164e63'});">
+                    <div class="lecture-thumb${thumb ? '' : ' is-blank'}">
+                        ${thumb
+                            ? `<img class="lecture-shot" src="${thumb}" alt="" loading="lazy" decoding="async" width="480" height="360">`
+                            : `<img class="thumb-mark" src="/brand/TenAI_cream.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
+                               <span class="thumb-note">${escHtml(v.cat || 'TEN AI 강의')}</span>`}
                         <div class="play"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-                        <span class="dur outfit">${v.dur || ''}</span>
+                        ${v.dur ? `<span class="dur outfit">${escHtml(v.dur)}</span>` : ''}
                     </div>
                     <div class="lecture-body">
                         <div class="lecture-cat">${escHtml(v.cat)}</div>
@@ -3954,14 +4081,8 @@
             }
             grid.innerHTML = APPS.map(a => `
             <article class="app-card visible">
-                <div class="app-thumb" style="background: radial-gradient(ellipse 80% 90% at 50% 110%, rgba(0,212,255,0.18) 0%, transparent 60%), var(--navy-soft);">
-                    <div class="app-mockup" aria-hidden="true">
-                        <div class="mock-dots"><i></i><i></i><i></i></div>
-                        <div class="mock-line cy"></div>
-                        <div class="mock-line w85"></div>
-                        <div class="mock-line w60"></div>
-                        <div class="mock-line w85"></div>
-                    </div>
+                <div class="app-thumb tint-${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">
+                    <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
                     <div class="app-overlay">${escHtml(a.how)}</div>
                 </div>
                 <div class="app-body">
@@ -4200,6 +4321,11 @@
             } catch {
                 return '';
             }
+        };
+        // 검증을 마친 watch URL 에서 영상 ID 만 다시 꺼낸다 (썸네일 주소용)
+        const ytThumbUrl = watchUrl => {
+            const m = watchUrl && watchUrl.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+            return m ? `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg` : '';
         };
         const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
         window.SITE_SETTINGS = null;
