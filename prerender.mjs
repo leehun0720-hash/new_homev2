@@ -43,6 +43,19 @@ function readEnv() {
     key = key || pickKey(o);
     if (url && key) break;
   }
+  if (url && key) return { url, key };
+
+  // 마지막 출처 — supabase-config.js 의 window.SUPABASE_CONFIG.
+  // .env 는 저장소에 없으므로 Netlify 빌드에서는 실제로 여기서 읽힌다.
+  if (existsSync('supabase-config.js')) {
+    const src = readFileSync('supabase-config.js', 'utf8');
+    const u = src.match(/url\s*:\s*["']([^"']+)["']/);
+    const k = src.match(/anonKey\s*:\s*["']([^"']+)["']/);
+    if (u && k && !/^YOUR_/.test(u[1]) && !/^YOUR_/.test(k[1])) {
+      url = url || u[1];
+      key = key || k[1];
+    }
+  }
   return { url, key };
 }
 
@@ -198,7 +211,8 @@ const bail = msg => { console.log(`[prerender] 건너뜀 — ${msg}`); process.e
 
 if (!existsSync(DIST)) bail(`${DIST} 없음`);
 const { url, key } = readEnv();
-if (!url || !key) bail('Supabase 접속 정보 없음 (환경변수 미설정)');
+if (!url || !key) bail('Supabase 접속 정보 없음 (env·supabase-config.js 모두 미확인)');
+console.log('[prerender] 접속 대상 ' + url.replace(/^(https:\/\/[a-z0-9]{6})[a-z0-9]*/, '$1***'));
 
 let data;
 try {
