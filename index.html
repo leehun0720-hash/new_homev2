@@ -3124,6 +3124,122 @@
         /* 이전 다크 팔레트 목업 잔재 제거 */
         .app-mockup, .mock-dots, .mock-line { display: none !important; }
 
+
+        /* =====================================================
+           회사소개서 밴드 — 딥브라운 색면, 괘선 편집 구조
+           ===================================================== */
+        .profile-band {
+            background: var(--brand-deep);
+            padding: var(--section-padding) 2rem;
+        }
+        .profile-inner {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+            gap: 0 clamp(1rem, 4vw, 3rem);
+            align-items: start;
+            border-top: 2px solid var(--brand-lime);
+            padding-top: 1.6rem;
+        }
+        .profile-label { grid-column: 1; grid-row: 1 / span 2; }
+        .profile-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            line-height: 1.5;
+            color: var(--brand-lime);
+            margin-top: 0.35rem;
+        }
+        .profile-title {
+            grid-column: 2;
+            grid-row: 1;
+            font-size: clamp(1.9rem, 4.2vw, 3.4rem);
+            font-weight: 900;
+            line-height: 1.06;
+            letter-spacing: -0.03em;
+            color: var(--brand-cream);
+            margin: 0 0 1.1rem;
+        }
+        .profile-body { grid-column: 2; }
+        .profile-desc {
+            max-width: 52ch;
+            font-size: 0.98rem;
+            line-height: 1.85;
+            color: #d8c6ad;
+            margin: 0;
+        }
+        .profile-desc strong { color: var(--brand-cream); font-weight: 700; }
+
+        .profile-facts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0 clamp(1.6rem, 4vw, 3.2rem);
+            margin: 1.5rem 0 0;
+            padding-top: 1.1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+        }
+        .profile-facts div { display: flex; flex-direction: column; gap: 0.3rem; }
+        .profile-facts dt {
+            font-family: 'Outfit', system-ui, sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: #a8917a;
+        }
+        .profile-facts dd {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--brand-cream);
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1.7rem;
+        }
+        .profile-band .btn-primary {
+            background: var(--brand-lime);
+            color: var(--brand-ink);
+            border: 1px solid var(--brand-lime);
+        }
+        .profile-band .btn-primary:hover { background: #b6ef82; border-color: #b6ef82; }
+        .profile-band .btn-secondary {
+            background: transparent;
+            color: var(--brand-cream);
+            border: 1px solid #8d7a63;
+        }
+        .profile-band .btn-secondary:hover {
+            background: var(--brand-cream);
+            color: var(--brand-ink);
+            border-color: var(--brand-cream);
+        }
+        .profile-size {
+            font-family: 'Outfit', system-ui, sans-serif;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            opacity: 0.75;
+            margin-left: 0.15rem;
+        }
+        .profile-note {
+            margin: 1.1rem 0 0;
+            max-width: 52ch;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: #a8917a;
+        }
+
+        @media (max-width: 760px) {
+            .profile-inner { grid-template-columns: 1fr; }
+            .profile-label, .profile-title, .profile-body { grid-column: 1; }
+            .profile-label { grid-row: auto; margin: 0 0 0.7rem; }
+            .profile-title { grid-row: auto; }
+        }
+
     </style>
     <script>
         /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
@@ -3833,6 +3949,44 @@
     </section>
 
     <!-- ============ CTA ============ -->
+    <!-- 회사소개서 -->
+    <section class="profile-band" id="profile">
+        <div class="profile-inner animate-on-scroll">
+            <span class="profile-label outfit">COMPANY PROFILE 2026</span>
+            <h2 class="profile-title">회사소개서</h2>
+            <div class="profile-body">
+                <p class="profile-desc">
+                    사업 영역과 기술 역량, 현장 솔루션 3종과 수행 실적을 담았습니다.
+                    <strong>웹폰트·이미지·외부 요청 없이 단일 파일로 만들어</strong>
+                    1회 열람 전송량이 약 30KB입니다.
+                </p>
+                <dl class="profile-facts">
+                    <div><dt>구성</dt><dd>38쪽 · 6개 장</dd></div>
+                    <div><dt>기준</dt><dd>ISO 14064-1 · GHG Protocol</dd></div>
+                    <div><dt>갱신</dt><dd>2026년 9월</dd></div>
+                </dl>
+                <div class="profile-actions">
+                    <a class="btn-primary profile-view"
+                       href="https://claude.ai/code/artifact/dd0b9e24-3041-4051-9246-a52e8ef10911"
+                       target="_blank" rel="noopener noreferrer">
+                        온라인으로 보기
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a class="btn-secondary profile-dl"
+                       href="/docs/TenAI-Company-Profile-2026.pdf"
+                       download="TenAI_회사소개서_2026.pdf"
+                       type="application/pdf">
+                        PDF 내려받기
+                        <span class="profile-size">2.3&nbsp;MB</span>
+                    </a>
+                </div>
+                <p class="profile-note">
+                    온라인 열람은 내려받기보다 전송량이 적습니다. 인쇄나 첨부가 필요할 때만 PDF를 받으시길 권합니다.
+                </p>
+            </div>
+        </div>
+    </section>
+
     <section class="cta" id="contact">
         <div class="cta-bg" aria-hidden="true"></div>
         <div class="cta-content animate-on-scroll">
@@ -3877,6 +4031,7 @@
                     <li><a href="#about">소개 &amp; 철학</a></li>
                     <li><a href="#about">TenOS-Ko-28B</a></li>
                     <li><a href="#about">사업영역</a></li>
+                    <li><a href="#profile">회사소개서</a></li>
                     <li><a href="#contact">파트너십 문의</a></li>
                 </ul>
             </div>

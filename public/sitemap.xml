@@ -3,12 +3,18 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://tenai.kr/</loc>
-    <lastmod>2026-08-24</lastmod>
+    <lastmod>2026-09-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://tenai.kr/brand/og-cover.jpg</image:loc>
       <image:title>TEN AI — AI를 배우는 시대에서, AI로 배우는 시대로</image:title>
     </image:image>
+  </url>
+  <url>
+    <loc>https://tenai.kr/docs/TenAI-Company-Profile-2026.pdf</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
