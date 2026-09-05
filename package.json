@@ -1,8 +1,9 @@
 {
   "scripts": {
     "dev": "vite --port 8080",
-    "build": "vite build",
-    "preview": "vite preview --port 8080"
+    "build": "vite build && node prerender.mjs",
+    "preview": "vite preview --port 8080",
+    "prerender": "node prerender.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.6",
