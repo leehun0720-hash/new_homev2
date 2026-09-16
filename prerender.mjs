@@ -86,12 +86,20 @@ const ACCESS_META = {
   enrolled: { label: '수강생 전용', cls: 'access-enrolled', icon: '🔒' },
 };
 const CAT_CLS = { '공지': 'news-cat-notice', '뉴스': 'news-cat-news', '교육': 'news-cat-edu' };
-const APP_BADGE_CLS = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
-/* data-store.js 의 APP_CATEGORIES 와 같은 id·이름을 쓴다 */
-const APP_CAT_NAME = {
-  automation: '업무 자동화', document: '문서·글쓰기', data: '데이터·분석', esg: '탄소·ESG',
-  edu: '교육·학습', gov: '정부지원·공모', biz: '경영·금융', tool: '유틸리티',
+/* data-store.js 의 APP_CATEGORIES 와 같은 id·이름·색조를 쓴다.
+   배지는 곧 분류다 — 자유입력 배지는 표기가 갈려(util·UTIL·유틸리티) 없앴다. */
+const APP_CAT = {
+  automation: { name: '업무 자동화',   tone: 'tag-vibe'  },
+  document:   { name: '문서·글쓰기',   tone: 'tag-biz'   },
+  data:       { name: '데이터·분석',   tone: 'tag-vibe'  },
+  esg:        { name: '탄소·ESG',     tone: 'tag-genai' },
+  edu:        { name: '교육·학습',     tone: 'tag-genai' },
+  gov:        { name: '정부지원·공모', tone: 'tag-biz'   },
+  biz:        { name: '경영·금융',     tone: 'tag-biz'   },
+  tool:       { name: '유틸리티',      tone: 'tag-vibe'  },
 };
+const catName = id => (APP_CAT[id] || {}).name || '';
+const catTone = id => (APP_CAT[id] || {}).tone || 'tag-biz';
 
 const fmtDate = ts => ts
   ? new Date(Number(ts)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -180,7 +188,7 @@ function newAppsHtml(rows, limit) {
                 <span class="board-flag">${NEW_FLAG_HTML}</span>
                 <div class="board-item-head">
                     <h4 class="board-item-name">${esc(a.name)}</h4>
-                    <span class="app-badge ${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">${esc(a.badge)}</span>
+                    ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${esc(catName(a.category))}</span>` : ''}
                 </div>
                 <p class="board-item-desc">${esc(a.oneliner)}</p>
                 <p class="board-item-date">${Number(a.released_at) ? '공개일 · ' + fmtDate(a.released_at) : '공개 준비 중'}</p>
@@ -198,7 +206,7 @@ function appHtml(rows, limit) {
   };
   return cut(rows, limit).map(a => `
             <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
-                <div class="app-thumb tint-${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">
+                <div class="app-thumb tint-${catTone(a.category)}">
                     ${isNewApp(a) ? NEW_FLAG_HTML : ''}
                     <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
                     <div class="app-overlay">${esc(a.how)}</div>
@@ -206,9 +214,8 @@ function appHtml(rows, limit) {
                 <div class="app-body">
                     <div class="app-head">
                         <h3 class="app-name">${esc(a.name)}</h3>
-                        <span class="app-badge ${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">${esc(a.badge)}</span>
+                        ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${esc(catName(a.category))}</span>` : ''}
                     </div>
-                    ${APP_CAT_NAME[a.category] ? `<p class="app-cat-line">${esc(APP_CAT_NAME[a.category])}</p>` : ''}
                     <p class="app-oneliner">${esc(a.oneliner)}</p>
                     <div class="app-actions">
                         <a class="app-btn launch" href="${safeUrl(a.launch_url)}" ${a.launch_url ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>

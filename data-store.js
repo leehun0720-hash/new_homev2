@@ -396,15 +396,18 @@ const SEED_LECTURES = [
 ];
 /* 앱 분류 — 쇼케이스 필터 칩과 관리자 콘솔 선택지가 이 목록 하나를 공유한다.
    늘리려면 여기에 한 줄 추가하면 양쪽에 함께 반영된다. */
+/* tone 은 카드 배지와 썸네일 색조다. 브랜드 3색을 성격별로 나눠 쓴다.
+   의미는 배지 '이름'이 지고, 색은 리듬만 준다 — 8색을 새로 만들면
+   편집형 색면이라는 이 사이트의 성격이 흐트러진다. */
 const APP_CATEGORIES = [
-    { id: 'automation', name: '업무 자동화' },
-    { id: 'document',   name: '문서·글쓰기' },
-    { id: 'data',       name: '데이터·분석' },
-    { id: 'esg',        name: '탄소·ESG' },
-    { id: 'edu',        name: '교육·학습' },
-    { id: 'gov',        name: '정부지원·공모' },
-    { id: 'biz',        name: '경영·금융' },
-    { id: 'tool',       name: '유틸리티' }
+    { id: 'automation', name: '업무 자동화',   tone: 'tag-vibe'  },
+    { id: 'document',   name: '문서·글쓰기',   tone: 'tag-biz'   },
+    { id: 'data',       name: '데이터·분석',   tone: 'tag-vibe'  },
+    { id: 'esg',        name: '탄소·ESG',     tone: 'tag-genai' },
+    { id: 'edu',        name: '교육·학습',     tone: 'tag-genai' },
+    { id: 'gov',        name: '정부지원·공모', tone: 'tag-biz'   },
+    { id: 'biz',        name: '경영·금융',     tone: 'tag-biz'   },
+    { id: 'tool',       name: '유틸리티',      tone: 'tag-vibe'  }
 ];
 
 const SEED_APPS = [

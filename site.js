@@ -248,7 +248,7 @@ function renderNewApps() {
         <span class="board-flag">${NEW_FLAG_HTML}</span>
         <div class="board-item-head">
             <h4 class="board-item-name">${escHtml(a.name)}</h4>
-            <span class="app-badge ${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">${escHtml(a.badge)}</span>
+            ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${escHtml(catName(a.category))}</span>` : ''}
         </div>
         <p class="board-item-desc">${escHtml(a.oneliner)}</p>
         <p class="board-item-date">${a.releasedAt ? '공개일 · ' + fmtDate(a.releasedAt) : '공개 준비 중'}</p>
@@ -283,7 +283,11 @@ onId('newAppsBoard', 'click', e => {
      - 띄어쓰기를 무시한 비교도 함께 한다 ('탄소리서치' ↔ '탄소 리서치')
    검색 대상은 이름·한 줄 소개·작동 원리·배지·분류 이름·등록 키워드다. */
 const APP_CATS = (window.TenStore && window.TenStore.APP_CATEGORIES) || [];
-const catName = id => (APP_CATS.find(c => c.id === id) || {}).name || '';
+const catOf   = id => APP_CATS.find(c => c.id === id) || null;
+const catName = id => (catOf(id) || {}).name || '';
+// 배지·썸네일 색은 분류에서 나온다. 화이트리스트라 임의 클래스가 끼어들 수 없다.
+const CAT_TONE = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
+const catTone = id => CAT_TONE[(catOf(id) || {}).tone] || 'tag-biz';
 
 // 쉼표·가운뎃점·괄호 같은 구분기호는 낱말 경계로 본다.
 // '탄소, 배출량' 과 '탄소·ESG' 가 두 낱말로 쪼개져야 '탄소 ESG' 로도 찾힌다.
@@ -292,7 +296,7 @@ const normQuery = v => String(v == null ? '' : v).toLowerCase()
     .replace(SEP_RE, ' ').replace(/\s+/g, ' ').trim();
 const squash    = v => normQuery(v).replace(/ /g, '');
 
-const appFields = a => [a.name, a.oneliner, a.how, a.badge, a.keywords, catName(a.category)].map(normQuery);
+const appFields = a => [a.name, a.oneliner, a.how, a.keywords, catName(a.category)].map(normQuery);
 
 /* 붙여 쓴 한글 검색어('탄소리서치')가 띄어 쓴 데이터('탄소 리서치')에도 걸리게
    띄어쓰기를 지운 보조 비교를 함께 한다. 다만 두 가지를 지킨다.
@@ -435,7 +439,7 @@ function renderApps() {
 
     grid.innerHTML = items.map(a => `
     <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
-        <div class="app-thumb tint-${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">
+        <div class="app-thumb tint-${catTone(a.category)}">
             ${isNewApp(a) ? NEW_FLAG_HTML : ''}
             <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
             <div class="app-overlay">${escHtml(a.how)}</div>
@@ -443,9 +447,8 @@ function renderApps() {
         <div class="app-body">
             <div class="app-head">
                 <h3 class="app-name">${escHtml(a.name)}</h3>
-                <span class="app-badge ${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">${escHtml(a.badge)}</span>
+                ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${escHtml(catName(a.category))}</span>` : ''}
             </div>
-            ${catName(a.category) ? `<p class="app-cat-line">${escHtml(catName(a.category))}</p>` : ''}
             <p class="app-oneliner">${escHtml(a.oneliner)}</p>
             <div class="app-actions">
                 <a class="app-btn launch" href="${safeUrl(a.launch)}" ${a.launch ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>
@@ -460,8 +463,6 @@ function renderApps() {
     </article>
     `).join('');
 }
-// 배지 색상 클래스 화이트리스트 (임의 클래스/속성 주입 차단)
-const APP_BADGE_CLS = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
 
 // 실행/GitHub 링크 미설정 앱: 인라인 onclick 대신 이벤트 위임 (JS 인젝션 차단)
 onId('appsGrid', 'click', e => {

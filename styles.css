@@ -3556,15 +3556,6 @@ blockquote { letter-spacing: -0.025em; }
     color: #6b4b2a;
 }
 
-/* ---- 카드 위의 분류 표시 ---- */
-.app-cat-line {
-    margin: 0 0 0.45rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #8a6a47;
-}
-
 /* ---- 문장 안에서 버튼처럼 쓰는 링크 ---- */
 .link-btn {
     background: none;

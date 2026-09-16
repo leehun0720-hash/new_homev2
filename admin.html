@@ -565,24 +565,16 @@
                     <h2 id="appFormTitle">새 앱 등록</h2>
                     <p class="sub">사이트의 'TEN AI Apps' 쇼케이스에 노출됩니다. 실행/GitHub 주소를 비워두면 '준비 중' 안내가 표시됩니다.<br>
                     <strong>NEW 표시</strong>를 켜거나 <strong>공개일</strong>이 최근 30일 이내이면 홈페이지 상단 '신규앱 안내판'에도 함께 걸립니다.<br>
-                    <strong>분류</strong>와 <strong>검색 키워드</strong>는 방문자가 쇼케이스에서 앱을 찾을 때 쓰입니다.</p>
+                    <strong>분류</strong>가 카드 배지로 그대로 표시되고 쇼케이스 필터가 됩니다. 배지 색상은 분류에 따라 자동으로 정해집니다.</p>
                     <input type="hidden" id="appId">
-                    <div class="field-row-3">
+                    <div class="field-row">
                         <div class="field">
                             <label for="appName">앱 이름</label>
                             <input type="text" id="appName" placeholder="예: 서울LAW봇">
                         </div>
                         <div class="field">
-                            <label for="appBadge">배지 텍스트</label>
-                            <input type="text" id="appBadge" placeholder="예: Legal AI">
-                        </div>
-                        <div class="field">
-                            <label for="appBadgeCls">배지 색상</label>
-                            <select id="appBadgeCls">
-                                <option value="tag-vibe">블루</option>
-                                <option value="tag-genai">퍼플</option>
-                                <option value="tag-biz">앰버</option>
-                            </select>
+                            <label for="appCategory">분류 (카드 배지 &amp; 쇼케이스 필터)</label>
+                            <select id="appCategory"></select>
                         </div>
                     </div>
                     <div class="field">
@@ -593,15 +585,9 @@
                         <label for="appHow">작동 원리 (마우스 오버 시 표시)</label>
                         <textarea id="appHow" placeholder="카드에 마우스를 올렸을 때 나타나는 설명"></textarea>
                     </div>
-                    <div class="field-row">
-                        <div class="field">
-                            <label for="appCategory">분류 (쇼케이스 필터)</label>
-                            <select id="appCategory"></select>
-                        </div>
-                        <div class="field">
-                            <label for="appKeywords">검색 키워드 (쉼표로 구분)</label>
-                            <input type="text" id="appKeywords" placeholder="예: 탄소, 배출량, 계산기, carbon, LCA">
-                        </div>
+                    <div class="field">
+                        <label for="appKeywords">검색 키워드 (쉼표로 구분)</label>
+                        <input type="text" id="appKeywords" placeholder="예: 탄소, 배출량, 계산기, carbon, LCA">
                     </div>
                     <p class="sub" style="margin:-0.6rem 0 1.2rem;">
                         앱 이름에 없는 말로도 찾게 해 줍니다. 방문자가 쓸 법한 단어를 넉넉히 적어 주세요 —
@@ -1203,15 +1189,14 @@
                     <div class="item-top">
                         <div>
                             <div class="item-title">
-                                <span class="chip chip-notice">${esc(a.badge || '앱')}</span>
+                                <span class="chip chip-notice">${esc(catLabel(a.category))}</span>
                                 <span class="chip ${a.launch ? 'chip-answered' : 'chip-private'}">${a.launch ? '실행 연결됨' : '실행 준비 중'}</span>
                                 ${isNewApp(a) ? '<span class="chip chip-answered">NEW 안내판 노출</span>' : ''}
                                 ${esc(a.name)}
                             </div>
                             <div class="item-meta">${esc(a.oneliner || '')}</div>
                             <div class="item-meta" style="margin-top:0.25rem;">
-                                분류 ${esc(catLabel(a.category))}
-                                · 키워드 ${a.keywords ? esc(a.keywords) : '<span style="opacity:0.6;">없음 — 검색에 덜 걸립니다</span>'}
+                                키워드 ${a.keywords ? esc(a.keywords) : '<span style="opacity:0.6;">없음 — 검색에 덜 걸립니다</span>'}
                             </div>
                         </div>
                         <div class="item-actions">
@@ -1224,8 +1209,7 @@
         }
 
         function resetAppForm() {
-            $('appId').value = ''; $('appName').value = ''; $('appBadge').value = '';
-            $('appBadgeCls').value = 'tag-vibe'; $('appOneliner').value = '';
+            $('appId').value = ''; $('appName').value = ''; $('appOneliner').value = '';
             $('appHow').value = ''; $('appLaunch').value = ''; $('appGithub').value = '';
             $('appIsNew').checked = false; $('appReleased').value = todayInput();
             $('appCategory').value = ''; $('appKeywords').value = '';
@@ -1240,8 +1224,6 @@
                 await TenStore.saveApp({
                     id: $('appId').value || null,
                     name,
-                    badge: $('appBadge').value.trim(),
-                    badgeCls: $('appBadgeCls').value,
                     oneliner: $('appOneliner').value.trim(),
                     how: $('appHow').value.trim(),
                     launch: $('appLaunch').value.trim(),
@@ -1263,8 +1245,7 @@
                 const items = await TenStore.listApps();
                 const a = items.find(x => x.id === d.appedit);
                 if (!a) return;
-                $('appId').value = a.id; $('appName').value = a.name; $('appBadge').value = a.badge || '';
-                $('appBadgeCls').value = a.badgeCls || 'tag-vibe'; $('appOneliner').value = a.oneliner || '';
+                $('appId').value = a.id; $('appName').value = a.name; $('appOneliner').value = a.oneliner || '';
                 $('appHow').value = a.how || ''; $('appLaunch').value = a.launch || ''; $('appGithub').value = a.github || '';
                 $('appIsNew').checked = a.isNew === true; $('appReleased').value = tsToDateInput(a.releasedAt);
                 $('appCategory').value = a.category || ''; $('appKeywords').value = a.keywords || '';
