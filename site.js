@@ -292,13 +292,25 @@ const normQuery = v => String(v == null ? '' : v).toLowerCase()
     .replace(SEP_RE, ' ').replace(/\s+/g, ' ').trim();
 const squash    = v => normQuery(v).replace(/ /g, '');
 
-function appHaystack(a) {
-    return normQuery([a.name, a.oneliner, a.how, a.badge, a.keywords, catName(a.category)].join(' '));
-}
+const appFields = a => [a.name, a.oneliner, a.how, a.badge, a.keywords, catName(a.category)].map(normQuery);
+
+/* 붙여 쓴 한글 검색어('탄소리서치')가 띄어 쓴 데이터('탄소 리서치')에도 걸리게
+   띄어쓰기를 지운 보조 비교를 함께 한다. 다만 두 가지를 지킨다.
+
+   1. 필드마다 따로 본다. 전부 이어 붙이면 앞 필드 끝과 뒤 필드 앞이 붙어
+      없던 낱말이 생긴다.
+   2. 한글이 든 두 글자 이상 검색어에만 쓴다. 영문에 쓰면 낱말 사이가 붙어
+      'festival carbon' → 'festivalcarbon' 이 되고 'lca' 가 걸린다.
+      영문은 원래 비교(hay.includes)로 충분하다 — 'runiq' 는 'runiqzip' 에 걸린다. */
+const HANGUL_RE = /[가-힣]/;
 function appMatches(a, terms) {
     if (!terms.length) return true;
-    const hay = appHaystack(a), flat = squash(hay);
-    return terms.every(t => hay.includes(t) || flat.includes(squash(t)));
+    const fields = appFields(a);
+    const hay = fields.join(' ');
+    const flat = fields.map(squash);
+    return terms.every(t =>
+        hay.includes(t) ||
+        (HANGUL_RE.test(t) && t.length >= 2 && flat.some(f => f.includes(squash(t)))));
 }
 
 let appQuery = '', appCat = 'all';
