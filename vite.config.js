@@ -6,9 +6,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html'),
-        tenai: resolve(__dirname, 'tenai-website.html')
+        main:       resolve(__dirname, 'index.html'),
+        about:      resolve(__dirname, 'about.html'),
+        business:   resolve(__dirname, 'business.html'),
+        education:  resolve(__dirname, 'education.html'),
+        apps:       resolve(__dirname, 'apps.html'),
+        news:       resolve(__dirname, 'news.html'),
+        membership: resolve(__dirname, 'membership.html'),
+        admin:      resolve(__dirname, 'admin.html'),
+        tenai:      resolve(__dirname, 'tenai-website.html')
       }
     }
   }

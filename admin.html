@@ -563,24 +563,18 @@
             <section class="panel" id="panel-apps">
                 <div class="card">
                     <h2 id="appFormTitle">새 앱 등록</h2>
-                    <p class="sub">사이트의 'TEN AI Apps' 쇼케이스에 노출됩니다. 실행/GitHub 주소를 비워두면 '준비 중' 안내가 표시됩니다.</p>
+                    <p class="sub">사이트의 'TEN AI Apps' 쇼케이스에 노출됩니다. 실행/GitHub 주소를 비워두면 '준비 중' 안내가 표시됩니다.<br>
+                    <strong>NEW 표시</strong>를 켜거나 <strong>공개일</strong>이 최근 30일 이내이면 홈페이지 상단 '신규앱 안내판'에도 함께 걸립니다.<br>
+                    <strong>분류</strong>가 카드 배지로 그대로 표시되고 쇼케이스 필터가 됩니다. 배지 색상은 분류에 따라 자동으로 정해집니다.</p>
                     <input type="hidden" id="appId">
-                    <div class="field-row-3">
+                    <div class="field-row">
                         <div class="field">
                             <label for="appName">앱 이름</label>
                             <input type="text" id="appName" placeholder="예: 서울LAW봇">
                         </div>
                         <div class="field">
-                            <label for="appBadge">배지 텍스트</label>
-                            <input type="text" id="appBadge" placeholder="예: Legal AI">
-                        </div>
-                        <div class="field">
-                            <label for="appBadgeCls">배지 색상</label>
-                            <select id="appBadgeCls">
-                                <option value="tag-vibe">블루</option>
-                                <option value="tag-genai">퍼플</option>
-                                <option value="tag-biz">앰버</option>
-                            </select>
+                            <label for="appCategory">분류 (카드 배지 &amp; 쇼케이스 필터)</label>
+                            <select id="appCategory"></select>
                         </div>
                     </div>
                     <div class="field">
@@ -591,6 +585,14 @@
                         <label for="appHow">작동 원리 (마우스 오버 시 표시)</label>
                         <textarea id="appHow" placeholder="카드에 마우스를 올렸을 때 나타나는 설명"></textarea>
                     </div>
+                    <div class="field">
+                        <label for="appKeywords">검색 키워드 (쉼표로 구분)</label>
+                        <input type="text" id="appKeywords" placeholder="예: 탄소, 배출량, 계산기, carbon, LCA">
+                    </div>
+                    <p class="sub" style="margin:-0.6rem 0 1.2rem;">
+                        앱 이름에 없는 말로도 찾게 해 줍니다. 방문자가 쓸 법한 단어를 넉넉히 적어 주세요 —
+                        줄임말, 영문 표기, 관련 업무 용어까지 넣으면 검색에 잘 걸립니다.
+                    </p>
                     <div class="field-row">
                         <div class="field">
                             <label for="appLaunch">실행(App Launch) URL</label>
@@ -599,6 +601,16 @@
                         <div class="field">
                             <label for="appGithub">GitHub URL</label>
                             <input type="text" id="appGithub" placeholder="https:// (비우면 준비 중 안내)">
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="appReleased">공개일 (신규앱 안내판 정렬 기준)</label>
+                            <input type="date" id="appReleased">
+                        </div>
+                        <div class="field checkbox-line" style="align-items:flex-end; padding-bottom:0.5rem;">
+                            <input type="checkbox" id="appIsNew">
+                            <label for="appIsNew" style="margin:0;">신규앱 안내판에 NEW 로 고정 노출</label>
                         </div>
                     </div>
                     <div style="display:flex; gap:0.6rem;">
@@ -1132,7 +1144,44 @@
         });
 
         /* ===== 7) 앱 관리 ===== */
+        /* 공개일 입력(YYYY-MM-DD) ↔ 저장값(ms) 변환.
+           로컬 자정 기준으로 맞춰 사이트에 표시되는 날짜와 어긋나지 않게 한다. */
+        const pad2 = n => String(n).padStart(2, '0');
+        const tsToDateInput = ts => {
+            const n = Number(ts) || 0;
+            if (!n) return '';
+            const d = new Date(n);
+            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+        };
+        const dateInputToTs = v => {
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || '').trim());
+            if (!m) return 0;
+            return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
+        };
+        const todayInput = () => tsToDateInput(Date.now());
+
+        // 홈페이지(index.html)의 신규앱 판정과 같은 규칙 — 30일 창 + 관리자 고정
+        const NEW_APP_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+        const isNewApp = a => {
+            if (a.isNew === true) return true;
+            const at = Number(a.releasedAt) || 0;
+            return at > 0 && Date.now() - at <= NEW_APP_WINDOW_MS;
+        };
+
+        /* 분류 선택지는 data-store.js 의 APP_CATEGORIES 하나에서 온다 —
+           사이트 필터 칩과 목록이 어긋나지 않게 */
+        const APP_CATS = (window.TenStore && window.TenStore.APP_CATEGORIES) || [];
+        const catLabel = id => (APP_CATS.find(c => c.id === id) || {}).name || '미분류';
+        (function fillCategorySelect() {
+            const sel = $('appCategory');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">미분류</option>' +
+                APP_CATS.map(c => '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>').join('');
+        })();
+
         async function renderAppAdmin() {
+            // 새 앱 등록 폼은 오늘 날짜로 시작한다 — 공개일을 비워 둔 채 저장하는 실수를 막는다
+            if (!$('appId').value && !$('appReleased').value) $('appReleased').value = todayInput();
             const items = await TenStore.listApps();
             $('appCount').textContent = '총 ' + items.length + '개';
             $('appList').innerHTML = items.length ? items.map(a => `
@@ -1140,11 +1189,15 @@
                     <div class="item-top">
                         <div>
                             <div class="item-title">
-                                <span class="chip chip-notice">${esc(a.badge || '앱')}</span>
+                                <span class="chip chip-notice">${esc(catLabel(a.category))}</span>
                                 <span class="chip ${a.launch ? 'chip-answered' : 'chip-private'}">${a.launch ? '실행 연결됨' : '실행 준비 중'}</span>
+                                ${isNewApp(a) ? '<span class="chip chip-answered">NEW 안내판 노출</span>' : ''}
                                 ${esc(a.name)}
                             </div>
                             <div class="item-meta">${esc(a.oneliner || '')}</div>
+                            <div class="item-meta" style="margin-top:0.25rem;">
+                                키워드 ${a.keywords ? esc(a.keywords) : '<span style="opacity:0.6;">없음 — 검색에 덜 걸립니다</span>'}
+                            </div>
                         </div>
                         <div class="item-actions">
                             <button class="btn btn-ghost btn-sm" data-appedit="${a.id}">수정</button>
@@ -1156,9 +1209,10 @@
         }
 
         function resetAppForm() {
-            $('appId').value = ''; $('appName').value = ''; $('appBadge').value = '';
-            $('appBadgeCls').value = 'tag-vibe'; $('appOneliner').value = '';
+            $('appId').value = ''; $('appName').value = ''; $('appOneliner').value = '';
             $('appHow').value = ''; $('appLaunch').value = ''; $('appGithub').value = '';
+            $('appIsNew').checked = false; $('appReleased').value = todayInput();
+            $('appCategory').value = ''; $('appKeywords').value = '';
             $('appFormTitle').textContent = '새 앱 등록';
         }
         $('resetAppBtn').addEventListener('click', resetAppForm);
@@ -1170,12 +1224,14 @@
                 await TenStore.saveApp({
                     id: $('appId').value || null,
                     name,
-                    badge: $('appBadge').value.trim(),
-                    badgeCls: $('appBadgeCls').value,
                     oneliner: $('appOneliner').value.trim(),
                     how: $('appHow').value.trim(),
                     launch: $('appLaunch').value.trim(),
-                    github: $('appGithub').value.trim()
+                    github: $('appGithub').value.trim(),
+                    isNew: $('appIsNew').checked,
+                    releasedAt: dateInputToTs($('appReleased').value),
+                    category: $('appCategory').value,
+                    keywords: $('appKeywords').value.trim()
                 });
                 resetAppForm();
                 await renderAppAdmin();
@@ -1189,9 +1245,10 @@
                 const items = await TenStore.listApps();
                 const a = items.find(x => x.id === d.appedit);
                 if (!a) return;
-                $('appId').value = a.id; $('appName').value = a.name; $('appBadge').value = a.badge || '';
-                $('appBadgeCls').value = a.badgeCls || 'tag-vibe'; $('appOneliner').value = a.oneliner || '';
+                $('appId').value = a.id; $('appName').value = a.name; $('appOneliner').value = a.oneliner || '';
                 $('appHow').value = a.how || ''; $('appLaunch').value = a.launch || ''; $('appGithub').value = a.github || '';
+                $('appIsNew').checked = a.isNew === true; $('appReleased').value = tsToDateInput(a.releasedAt);
+                $('appCategory').value = a.category || ''; $('appKeywords').value = a.keywords || '';
                 $('appFormTitle').textContent = '앱 수정';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }

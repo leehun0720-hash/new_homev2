@@ -394,22 +394,49 @@ const SEED_LECTURES = [
     { id: 'l3', cat: 'AI 경영 전략',        title: 'AI 경영 전략 강의 — 우리 회사에 AI 심는 법',     dur: '21:08', videoId: '', grad1: '#b45309', grad2: '#7c2d12', createdAt: 3 },
     { id: 'l4', cat: '프롬프트 엔지니어링', title: '프롬프트 엔지니어링 스킬업 — 좋은 질문의 기술',  dur: '16:33', videoId: '', grad1: '#0f766e', grad2: '#134e4a', createdAt: 4 }
 ];
+/* 앱 분류 — 쇼케이스 필터 칩과 관리자 콘솔 선택지가 이 목록 하나를 공유한다.
+   늘리려면 여기에 한 줄 추가하면 양쪽에 함께 반영된다. */
+/* tone 은 카드 배지와 썸네일 색조다. 브랜드 3색을 성격별로 나눠 쓴다.
+   의미는 배지 '이름'이 지고, 색은 리듬만 준다 — 8색을 새로 만들면
+   편집형 색면이라는 이 사이트의 성격이 흐트러진다. */
+const APP_CATEGORIES = [
+    { id: 'automation', name: '업무 자동화',   tone: 'tag-vibe'  },
+    { id: 'document',   name: '문서·글쓰기',   tone: 'tag-biz'   },
+    { id: 'data',       name: '데이터·분석',   tone: 'tag-vibe'  },
+    { id: 'esg',        name: '탄소·ESG',     tone: 'tag-genai' },
+    { id: 'edu',        name: '교육·학습',     tone: 'tag-genai' },
+    { id: 'gov',        name: '정부지원·공모', tone: 'tag-biz'   },
+    { id: 'biz',        name: '경영·금융',     tone: 'tag-biz'   },
+    { id: 'tool',       name: '유틸리티',      tone: 'tag-vibe'  }
+];
+
 const SEED_APPS = [
-    { id: 'a1', name: '서울LAW봇',      badge: 'Legal AI',      badgeCls: 'tag-vibe',  oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇', how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.', launch: '', github: '', createdAt: 1 },
-    { id: 'a2', name: '블록ESG',        badge: 'ESG Analytics', badgeCls: 'tag-genai', oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구', how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.', launch: '', github: '', createdAt: 2 },
-    { id: 'a3', name: 'TEN AI Hub',     badge: 'Platform',      badgeCls: 'tag-biz',   oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브', how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.', launch: '', github: '', createdAt: 3 },
-    { id: 'a4', name: 'Prompt Library', badge: 'Toolkit',       badgeCls: 'tag-vibe',  oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리', how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.', launch: '', github: '', createdAt: 4 }
+    { id: 'a1', name: '서울LAW봇',      badge: 'Legal AI',      badgeCls: 'tag-vibe',  oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇', how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.', launch: '', github: '', category: 'gov',      keywords: '법률, 판례, 법령, 변호사, 리걸, legal', isNew: false, releasedAt: 0, createdAt: 1 },
+    { id: 'a2', name: '블록ESG',        badge: 'ESG Analytics', badgeCls: 'tag-genai', oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구', how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.', launch: '', github: '', category: 'esg',      keywords: 'ESG, 지속가능경영, 공시, 탄소, 리포트', isNew: false, releasedAt: 0, createdAt: 2 },
+    { id: 'a3', name: 'TEN AI Hub',     badge: 'Platform',      badgeCls: 'tag-biz',   oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브', how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.', launch: '', github: '', category: 'edu',      keywords: '허브, 커뮤니티, 템플릿, 툴킷, 교육', isNew: true,  releasedAt: Date.now() - 86400000 * 3,  createdAt: 3 },
+    { id: 'a4', name: 'Prompt Library', badge: 'Toolkit',       badgeCls: 'tag-vibe',  oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리', how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.', launch: '', github: '', category: 'document', keywords: '프롬프트, 템플릿, 라이브러리, 글쓰기', isNew: true,  releasedAt: Date.now() - 86400000 * 12, createdAt: 4 }
 ];
 
 /* row ↔ JS 매핑 정의: [JS키, DB컬럼] */
 const HB_MAP  = [['title','title'],['course_tag','course_tag'],['level_tier','level_tier'],['access_level','access_level'],['desc','description'],['link','link_url'],['linkTarget','link_target'],['createdAt','created_at']];
 const LEC_MAP = [['cat','category'],['title','title'],['dur','duration'],['videoId','video_id'],['grad1','grad1'],['grad2','grad2'],['createdAt','created_at']];
-const APP_MAP = [['name','name'],['badge','badge'],['badgeCls','badge_cls'],['oneliner','oneliner'],['how','how'],['launch','launch_url'],['github','github_url'],['createdAt','created_at']];
+const APP_MAP = [['name','name'],['badge','badge'],['badgeCls','badge_cls'],['oneliner','oneliner'],['how','how'],['launch','launch_url'],['github','github_url'],['isNew','is_new'],['releasedAt','released_at'],['category','category'],['keywords','keywords'],['createdAt','created_at']];
 
 function makeContentApi(table, lsKey, seed, map) {
+    // 숫자·불리언 컬럼은 DB 표현이 흔들려도(문자열 'true', null 등) 같은 타입으로 맞춘다
+    const NUM_COLS  = ['created_at', 'level_tier', 'released_at'];
+    const BOOL_COLS = ['is_new'];
+    // 마이그레이션 전에는 컬럼이 없어 undefined 가 온다 — 빈 문자열로 맞춰 둔다
+    const TEXT_COLS = ['category', 'keywords'];
     const fromRow = r => {
         const o = { id: r.id };
-        map.forEach(([js, col]) => { o[js] = col === 'created_at' || col === 'level_tier' ? Number(r[col]) : r[col]; });
+        map.forEach(([js, col]) => {
+            const v = r[col];
+            if (NUM_COLS.includes(col))       o[js] = Number(v) || 0;
+            else if (BOOL_COLS.includes(col)) o[js] = v === true || v === 'true';
+            else if (TEXT_COLS.includes(col)) o[js] = v == null ? '' : String(v);
+            else                              o[js] = v;
+        });
         return o;
     };
     const toRow = item => {
@@ -477,6 +504,7 @@ window.TenStore = {
     mode,
     modeLabel: mode === 'supabase' ? 'Supabase 연결됨' : '로컬 모드 (브라우저 저장)',
     DEFAULT_SETTINGS,
+    APP_CATEGORIES,
     getSettings, saveSettings,
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
