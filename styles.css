@@ -2570,6 +2570,14 @@ textarea:focus-visible, [tabindex]:focus-visible { outline-color: var(--brand-in
     .partners-head h3, .partners-head p,
     .lectures-head h2, .lectures-head p { grid-column: 1; }
     .section-label { grid-row: auto; margin-bottom: 0.7rem; }
+    /* 채널 버튼도 1단으로 — 3번째 칸에 남으면 암시적 칸이 생겨 화면을 밀어낸다 */
+    .lectures-head .channel-btn {
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: start;
+        margin-top: 1rem;
+        max-width: 100%;
+    }
 }
 
 /* ---- 3. 사업영역: 상자 → 괘선으로 나뉜 3단 행 ---- */
@@ -3456,3 +3464,14 @@ blockquote { letter-spacing: -0.025em; }
 /* ---- 머리말 바로 뒤 섹션: 위 여백을 줄이고 색면이 겹치지 않게 ---- */
 .page-head + section { padding-top: clamp(2.4rem, 5vw, 3.8rem); }
 .page-head + .new-apps { background: var(--brand-cream); }
+
+/* ---- 모바일 탭 영역 — CTA 링크가 손가락으로 눌리도록 ---- */
+@media (max-width: 760px) {
+    .board-link, .partner-link, .project-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+    .board-foot { gap: 0.4rem 1rem; }
+    .section-more { margin-top: 1.4rem; }
+}
