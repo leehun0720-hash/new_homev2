@@ -2,7 +2,12 @@
 -- TEN AI — 앱에 '신규(NEW) 표시' + '분류·검색 키워드' 컬럼 추가
 -- ---------------------------------------------------------------------
 -- 실행 방법
---   Supabase 대시보드 > SQL Editor > New query > 아래 전체 붙여넣기 > Run
+--   아래 주소를 열면 이 프로젝트의 SQL Editor 새 쿼리 창이 바로 열린다.
+--     https://supabase.com/dashboard/project/pjulgdlbgaobyvnfjzhe/sql/new
+--   이 파일 전체를 붙여넣고 Run 을 누르면 끝이다.
+--
+--   결과를 눈으로 보려면 테이블 편집기에서 apps 를 열면 된다.
+--     https://supabase.com/dashboard/project/pjulgdlbgaobyvnfjzhe/editor
 --
 -- 이 SQL 이 하는 일
 --   apps 테이블에 컬럼 네 개와 인덱스 두 개를 더한다. 기존 데이터는
@@ -13,6 +18,22 @@
 -- 홈페이지의 '신규앱 안내판'은 아래 두 값으로 노출 대상을 정한다.
 --   1) is_new 가 true 인 앱         → 항상 NEW
 --   2) released_at 이 최근 30일 이내 → 관리자가 잊어도 자동으로 NEW
+--
+-- 데이터에 무엇이 반영되나
+--   apps 테이블은 지금 컬럼 9개(id, name, badge, badge_cls, oneliner, how,
+--   launch_url, github_url, created_at)에 앱 16개가 들어 있다.
+--   실행하면 컬럼 4개가 '기본값을 채운 채로' 더해진다. 기존 16개 행의
+--   기존 값은 하나도 바뀌지 않는다.
+--
+--     컬럼          더해질 때의 값     뜻
+--     is_new        false            아직 NEW 로 지정한 앱 없음
+--     released_at   0                공개일 미지정
+--     category      '' (빈 문자열)    미분류
+--     keywords      '' (빈 문자열)    검색 키워드 없음
+--
+--   즉 실행 직후에는 화면상 달라지는 것이 없다. 관리자 콘솔에서 앱마다
+--   값을 넣는 순간부터 안내판과 검색에 반영된다.
+--   (분류·키워드를 한 번에 채우려면 supabase-app-categories.sql 참고)
 --
 -- 실행 전까지 안내판은 '새로 공개된 앱이 없습니다'로 조용히 비어 있고,
 -- 검색은 이름·한 줄 소개만으로 동작한다. 사이트는 어느 쪽이든 정상이다.
