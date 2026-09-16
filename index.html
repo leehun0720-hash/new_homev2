@@ -3232,6 +3232,299 @@
         /* 이전 다크 팔레트 목업 잔재 제거 */
         .app-mockup, .mock-dots, .mock-line { display: none !important; }
 
+        /* =====================================================
+           신규앱 안내판 (New App Notice Board)
+           -----------------------------------------------------
+           게시판 은유 — 잉크색 머리띠 + 괘선으로 나뉜 행.
+           카드가 아니라 '붙여 놓은 공지'처럼 읽히게 한다.
+           ===================================================== */
+        .new-apps { background: var(--brand-orange); }
+        .new-apps .section-title,
+        .new-apps .section-header { color: var(--brand-ink); }
+        .new-apps .section-label { color: var(--brand-ink); opacity: 0.72; }
+        .new-apps .section-desc { color: #5c3312; }
+
+        /* --- 내비게이션의 신규앱 점: 새 앱이 있을 때만 켠다 --- */
+        .nav-new { position: relative; display: inline-flex; align-items: center; gap: 0.32rem; }
+        .nav-new-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--brand-accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .nav-new.has-new .nav-new-dot { opacity: 1; animation: newFlagPulse 1.7s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+            .nav-new.has-new .nav-new-dot { animation: none; }
+        }
+
+        /* --- NEW 표식: 어디에 붙어도 같은 모양 --- */
+        .new-flag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.24rem 0.62rem;
+            background: var(--brand-ink);
+            color: var(--brand-lime);
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            line-height: 1;
+            border-radius: 0;
+            white-space: nowrap;
+        }
+        .new-flag-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--brand-lime);
+            animation: newFlagPulse 1.7s ease-in-out infinite;
+        }
+        @keyframes newFlagPulse {
+            0%, 100% { opacity: 1;    transform: scale(1); }
+            50%      { opacity: 0.32; transform: scale(0.62); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .new-flag-dot { animation: none; }
+        }
+        /* --- 안내판 몸체 --- */
+        .board {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            background: var(--brand-cream);
+            border: 2px solid var(--brand-ink);
+        }
+        .board-head {
+            display: flex;
+            align-items: baseline;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            padding: 1.05rem clamp(1.1rem, 3vw, 2rem);
+            background: var(--brand-ink);
+            color: var(--brand-cream);
+        }
+        .board-title {
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: clamp(1rem, 2.2vw, 1.3rem);
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            margin: 0;
+            color: var(--brand-lime);
+        }
+        .board-sub {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #c9b49b;
+            margin-left: auto;
+        }
+        .board-body { display: flex; flex-direction: column; }
+        .board-item {
+            display: grid;
+            grid-template-columns: minmax(0, 7rem) minmax(0, 1fr) auto;
+            gap: 0.4rem clamp(1rem, 3vw, 2rem);
+            align-items: center;
+            padding: 1.25rem clamp(1.1rem, 3vw, 2rem);
+            border-top: 1px solid var(--line);
+        }
+        .board-item:first-child { border-top: 0; }
+        .board-item:hover { background: #fff; }
+        .board-flag { grid-column: 1; grid-row: 1 / span 3; align-self: start; padding-top: 0.15rem; }
+        .board-item-head {
+            grid-column: 2;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.3rem;
+        }
+        .board-item-name {
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin: 0;
+            color: var(--brand-ink);
+        }
+        .board-item-desc {
+            grid-column: 2;
+            margin: 0 0 0.4rem;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #6b4b2a;
+            max-width: 52ch;
+        }
+        .board-item-date {
+            grid-column: 2;
+            margin: 0;
+            font-size: 0.76rem;
+            letter-spacing: 0.04em;
+            color: #8a6a47;
+        }
+        .board-item-actions {
+            grid-column: 3;
+            grid-row: 1 / span 3;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-self: center;
+        }
+        .board-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding: 1rem clamp(1.1rem, 3vw, 2rem);
+            border-top: 2px solid var(--brand-ink);
+            background: #fff;
+        }
+        .board-foot-note { margin: 0; font-size: 0.8rem; color: #6b4b2a; }
+        .board-link {
+            font-weight: 800;
+            font-size: 0.86rem;
+            color: var(--brand-ink);
+            text-decoration: none;
+            border-bottom: 2px solid var(--brand-ink);
+            padding-bottom: 2px;
+        }
+        .board-link:hover { color: var(--brand-accent); border-bottom-color: var(--brand-accent); }
+        .board-empty {
+            padding: 3rem clamp(1.1rem, 3vw, 2rem);
+            text-align: center;
+            font-size: 0.92rem;
+            color: #6b4b2a;
+        }
+        @media (max-width: 760px) {
+            .board-item {
+                grid-template-columns: 1fr;
+                gap: 0.45rem;
+            }
+            .board-flag, .board-item-head, .board-item-desc,
+            .board-item-date, .board-item-actions { grid-column: 1; grid-row: auto; }
+            .board-item-actions { margin-top: 0.6rem; }
+            .board-sub { margin-left: 0; width: 100%; }
+        }
+
+        /* --- 앱 버튼: 밝은 색면 위에서 테두리가 사라지지 않게 --- */
+        .app-btn.gh {
+            background: transparent;
+            color: var(--brand-ink);
+            border: 1px solid var(--brand-ink);
+        }
+        .app-btn.gh:hover {
+            background: var(--brand-ink);
+            border-color: var(--brand-ink);
+            color: var(--brand-cream);
+        }
+        .app-btn.launch:hover { transform: none; box-shadow: none; background: var(--brand-accent); }
+
+        /* --- 쇼케이스 카드에도 같은 표식을 --- */
+        .app-card.is-new { border-color: var(--brand-ink); }
+        .app-card .new-flag {
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 2;
+        }
+
+        /* =====================================================
+           뉴스 & 홍보 — 유튜브 · 핸드북 · 신규앱 세 창구
+           딥브라운 색면 위 라임 괘선. 소식 게시판 바로 앞에 둔다.
+           ===================================================== */
+        .promo { background: var(--brand-deep); }
+        .promo .section-header { color: var(--brand-cream); border-top-color: var(--brand-lime); }
+        .promo .section-label { color: var(--brand-lime); opacity: 1; }
+        .promo .section-title { color: var(--brand-cream); }
+        .promo .section-desc { color: #c9b49b; }
+        .promo-grid {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            border: 1px solid rgba(200, 249, 155, 0.32);
+        }
+        .promo-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+            padding: clamp(1.5rem, 3vw, 2.2rem);
+            border-left: 1px solid rgba(200, 249, 155, 0.32);
+            text-decoration: none;
+            color: var(--brand-cream);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .promo-card:first-child { border-left: 0; }
+        .promo-kicker {
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: var(--brand-lime);
+        }
+        .promo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 46px; height: 46px;
+            margin: 0.5rem 0 0.3rem;
+            border: 1px solid rgba(200, 249, 155, 0.45);
+            color: var(--brand-lime);
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        .promo-title {
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+        .promo-desc {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.75;
+            color: #c9b49b;
+            flex: 1;
+        }
+        .promo-meta {
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--brand-lime);
+            padding-top: 0.9rem;
+            border-top: 1px solid rgba(200, 249, 155, 0.28);
+        }
+        .promo-go {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: var(--brand-cream);
+        }
+        .promo-card:hover { background: var(--brand-lime); color: var(--brand-ink); }
+        .promo-card:hover .promo-kicker,
+        .promo-card:hover .promo-go { color: var(--brand-ink); }
+        .promo-card:hover .promo-desc { color: #3f2a10; }
+        .promo-card:hover .promo-meta { color: var(--brand-ink); border-top-color: rgba(58, 29, 8, 0.32); }
+        .promo-card:hover .promo-icon {
+            background: var(--brand-ink);
+            border-color: var(--brand-ink);
+            color: var(--brand-lime);
+        }
+        .promo-card .new-flag {
+            position: absolute;
+            top: 0; right: 0;
+            background: var(--brand-lime);
+            color: var(--brand-ink);
+        }
+        .promo-card .new-flag .new-flag-dot { background: var(--brand-ink); }
+        .promo-card:hover .new-flag { background: var(--brand-ink); color: var(--brand-lime); }
+        .promo-card:hover .new-flag .new-flag-dot { background: var(--brand-lime); }
+        @media (max-width: 920px) {
+            .promo-grid { grid-template-columns: 1fr; }
+            .promo-card { border-left: 0; border-top: 1px solid rgba(200, 249, 155, 0.32); }
+            .promo-card:first-child { border-top: 0; }
+        }
 
         /* =====================================================
            회사소개서 밴드 — 딥브라운 색면, 괘선 편집 구조
@@ -3374,8 +3667,8 @@
             <li><a href="#about">소개 &amp; 철학</a></li>
             <li><a href="#academy">교육 아카데미</a></li>
             <li><a href="#lectures">정원훈 박사 강의</a></li>
-            <li><a href="#apps">쇼케이스</a></li>
-            <li><a href="#news">소식·Q&amp;A</a></li>
+            <li><a class="nav-new" href="#new-apps">신규앱<span class="nav-new-dot" aria-hidden="true"></span><span class="visually-hidden">(새 소식 있음)</span></a></li>
+            <li><a href="#promo">뉴스·홍보</a></li>
             <li><a href="#membership">멤버십</a></li>
         </ul>
         <div class="nav-right">
@@ -3394,8 +3687,8 @@
         <a href="#about">소개 &amp; 철학</a>
         <a href="#academy">교육 아카데미</a>
         <a href="#lectures">정원훈 박사 강의</a>
-        <a href="#apps">쇼케이스</a>
-        <a href="#news">소식·Q&amp;A</a>
+        <a href="#new-apps">신규앱 안내판</a>
+        <a href="#promo">뉴스 &amp; 홍보</a>
         <a href="#membership">멤버십</a>
         <button class="nav-login" data-login>로그인 / 회원가입</button>
     </div>
@@ -3943,30 +4236,96 @@
         <div class="lecture-grid" id="lectureGrid"></div>
     </section>
 
-    <!-- ============ 4. Apps Showcase ============ -->
+    <!-- ============ 4. 신규앱 안내판 ============ -->
+    <section class="new-apps" id="new-apps">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">04 · New Release</p>
+            <h2 class="section-title">신규앱 안내판</h2>
+            <p class="section-desc">TEN AI가 새로 공개한 앱을 가장 먼저 알려드립니다. 관리자 콘솔에서 신규로 등록되거나 공개일이 최근 30일 이내인 앱은 <strong>NEW</strong> 표시와 함께 이 안내판에 자동으로 걸립니다.</p>
+        </div>
+
+        <div class="board animate-on-scroll">
+            <div class="board-head">
+                <h3 class="board-title">NEW APP NOTICE</h3>
+                <p class="board-sub" id="newAppsCount">신규앱을 불러오는 중…</p>
+            </div>
+            <div class="board-body" id="newAppsBoard" aria-live="polite"></div>
+            <div class="board-foot">
+                <p class="board-foot-note">새 앱 소식은 뉴스 &amp; 홍보 섹션과 유튜브 채널에서도 함께 안내됩니다.</p>
+                <a class="board-link" href="#apps">전체 앱 쇼케이스 보기 →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 5. Apps Showcase ============ -->
     <section class="apps" id="apps">
         <div class="section-header animate-on-scroll">
-            <p class="section-label">04 · TEN AI Apps</p>
+            <p class="section-label">05 · TEN AI Apps</p>
             <h2 class="section-title">쇼케이스 — 직접 만든 AI</h2>
             <p class="section-desc">TEN AI가 직접 개발한 전문가용 AI 애플리케이션. 카드에 마우스를 올려 작동 원리를 확인하고, 바로 실행해 보세요</p>
         </div>
         <div class="apps-grid" id="appsGrid"></div>
     </section>
 
-    <!-- ============ 5. News (게시물) ============ -->
+    <!-- ============ 6. News & Promotion ============ -->
+    <section class="promo" id="promo">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">06 · News &amp; Promotion</p>
+            <h2 class="section-title">뉴스 &amp; 홍보</h2>
+            <p class="section-desc">TEN AI의 소식이 가장 먼저 닿는 세 곳입니다. 유튜브 강의, 교육 핸드북, 그리고 새로 공개되는 앱을 한자리에서 확인하세요.</p>
+        </div>
+
+        <div class="promo-grid">
+            <a class="promo-card animate-on-scroll" href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>
+                <span class="promo-kicker">Channel 01 · YouTube</span>
+                <span class="promo-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg>
+                </span>
+                <h3 class="promo-title">유튜브</h3>
+                <p class="promo-desc">'정원훈 박사의 챗GPT 연구소' 채널. ChatGPT 실무부터 AI 경영 전략까지, 현장에서 바로 쓰는 강의를 공개합니다.</p>
+                <span class="promo-meta" id="promoLectureMeta">채널 강의 업데이트 중</span>
+                <span class="promo-go">채널 방문하기 →</span>
+            </a>
+
+            <a class="promo-card animate-on-scroll" href="#academy">
+                <span class="promo-kicker">Channel 02 · Handbook</span>
+                <span class="promo-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4.5A2.5 2.5 0 016.5 2H20v15H6.5A2.5 2.5 0 004 19.5z"/><path d="M4 19.5A2.5 2.5 0 016.5 17H20v5H6.5A2.5 2.5 0 014 19.5z"/><path d="M8 7h8M8 11h5"/></svg>
+                </span>
+                <h3 class="promo-title">핸드북</h3>
+                <p class="promo-desc">바이브코딩 · 생성형 AI 실무 · AI 경영 전략을 과정별·레벨별로 정리한 교육 핸드북. 공개 교재는 로그인 없이 열람됩니다.</p>
+                <span class="promo-meta" id="promoHandbookMeta">핸드북 목록 준비 중</span>
+                <span class="promo-go">핸드북 탐색기 열기 →</span>
+            </a>
+
+            <a class="promo-card animate-on-scroll" href="#new-apps">
+                <span class="new-flag" id="promoNewFlag" hidden><span class="new-flag-dot"></span>NEW</span>
+                <span class="promo-kicker">Channel 03 · New App</span>
+                <span class="promo-icon" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M17.5 14v7M14 17.5h7"/></svg>
+                </span>
+                <h3 class="promo-title">신규앱</h3>
+                <p class="promo-desc">TEN AI가 직접 만들어 공개하는 실무형 AI 앱. 새로 나온 앱은 신규앱 안내판에서 바로 실행해 볼 수 있습니다.</p>
+                <span class="promo-meta" id="promoAppMeta">신규앱 확인 중</span>
+                <span class="promo-go">신규앱 안내판 보기 →</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ============ 7. News (게시물) ============ -->
     <section class="news" id="news">
         <div class="section-header animate-on-scroll">
-            <p class="section-label">05 · News &amp; Board</p>
+            <p class="section-label">07 · News &amp; Board</p>
             <h2 class="section-title">소식</h2>
             <p class="section-desc">TEN AI의 공지사항, 교육 일정, 새로운 소식을 전해드립니다</p>
         </div>
         <div class="news-grid" id="newsGrid" aria-live="polite"></div>
     </section>
 
-    <!-- ============ 6. Q&A ============ -->
+    <!-- ============ 8. Q&A ============ -->
     <section class="qna" id="qna">
         <div class="section-header animate-on-scroll">
-            <p class="section-label">06 · Q&amp;A</p>
+            <p class="section-label">08 · Q&amp;A</p>
             <h2 class="section-title">무엇이든 물어보세요</h2>
             <p class="section-desc">AI 교육 과정, 핸드북, AX·AIDC 컨설팅에 대해 궁금한 점을 남겨주시면 답변해 드립니다</p>
         </div>
@@ -4000,11 +4359,11 @@
         </div>
     </section>
 
-    <!-- ============ 7. Membership ============ -->
+    <!-- ============ 9. Membership ============ -->
     <section class="membership" id="membership">
         <div class="membership-inner">
             <div class="animate-on-scroll">
-                <p class="section-label">07 · Membership</p>
+                <p class="section-label">09 · Membership</p>
                 <h2 class="section-title" style="text-align:left;">멤버십 &amp; 내 강의실</h2>
                 <p class="section-desc" style="text-align:left;">구글·카카오 원클릭 가입으로 나만의 학습 공간을 만들고, 수강 단계에 맞는 핸드북 권한을 받아보세요.</p>
                 <div class="tier-list">
@@ -4359,6 +4718,94 @@
             if (card) showToast('이 강의의 YouTube 링크가 아직 등록되지 않았습니다.');
         });
 
+        /* ============ 뉴스 & 홍보 — 세 창구 현황 ============
+           유튜브·핸드북·신규앱 카드의 수치를 실제 데이터로 맞춘다.
+           데이터가 아직 없으면 숫자 대신 안내 문구를 남긴다. */
+        function updatePromoMeta() {
+            const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+
+            const playable = LECTURES.filter(v => youtubeWatchUrl(v.videoId)).length;
+            set('promoLectureMeta', LECTURES.length
+                ? `강의 ${LECTURES.length}편${playable ? ` · 바로 시청 ${playable}편` : ''}`
+                : '채널 강의 업데이트 중');
+
+            const openHb = HANDBOOKS.filter(h => h.access_level === 'public').length;
+            set('promoHandbookMeta', HANDBOOKS.length
+                ? `핸드북 ${HANDBOOKS.length}권${openHb ? ` · 공개 교재 ${openHb}권` : ''}`
+                : '핸드북 목록 준비 중');
+
+            const fresh = APPS.filter(isNewApp).length;
+            set('promoAppMeta', fresh
+                ? `신규 공개 ${fresh}개 · 전체 ${APPS.length}개`
+                : (APPS.length ? `공개된 앱 ${APPS.length}개` : '신규앱 준비 중'));
+        }
+
+        /* ============ 신규앱 판정 ============
+           관리자가 NEW 로 지정했거나(isNew), 공개일이 최근 30일 이내면 신규로 본다.
+           담당자가 배지를 내리는 것을 잊어도 안내판이 자동으로 정리된다. */
+        const NEW_APP_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+        const isNewApp = a => {
+            if (a.isNew === true) return true;
+            const at = Number(a.releasedAt) || 0;
+            return at > 0 && Date.now() - at <= NEW_APP_WINDOW_MS;
+        };
+        // 안내판 정렬: 공개일이 최신인 순, 공개일이 없으면 등록 역순
+        const newAppOrder = (a, b) =>
+            (Number(b.releasedAt) || 0) - (Number(a.releasedAt) || 0) ||
+            (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+        const NEW_FLAG_HTML = '<span class="new-flag"><span class="new-flag-dot"></span>NEW</span>';
+
+        /* ============ 신규앱 안내판 ============ */
+        function renderNewApps() {
+            const board = document.getElementById('newAppsBoard');
+            const count = document.getElementById('newAppsCount');
+            const items = APPS.filter(isNewApp).sort(newAppOrder);
+
+            count.textContent = items.length
+                ? `새로 공개된 앱 ${items.length}개 · 최근 30일 기준`
+                : '현재 새로 공개된 앱이 없습니다';
+
+            // 내비게이션 점과 홍보 카드의 NEW 표식을 같은 판정으로 켠다
+            document.querySelectorAll('.nav-new').forEach(el => el.classList.toggle('has-new', items.length > 0));
+            const promoFlag = document.getElementById('promoNewFlag');
+            if (promoFlag) promoFlag.hidden = items.length === 0;
+
+            if (!items.length) {
+                board.innerHTML = '<div class="board-empty">새 앱이 공개되면 이곳에 가장 먼저 안내됩니다.<br>지난 앱은 아래 쇼케이스에서 모두 확인하실 수 있습니다.</div>';
+                return;
+            }
+
+            board.innerHTML = items.map(a => `
+            <article class="board-item">
+                <span class="board-flag">${NEW_FLAG_HTML}</span>
+                <div class="board-item-head">
+                    <h4 class="board-item-name">${escHtml(a.name)}</h4>
+                    <span class="app-badge ${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">${escHtml(a.badge)}</span>
+                </div>
+                <p class="board-item-desc">${escHtml(a.oneliner)}</p>
+                <p class="board-item-date">${a.releasedAt ? '공개일 · ' + fmtDate(a.releasedAt) : '공개 준비 중'}</p>
+                <div class="board-item-actions">
+                    <a class="app-btn launch" href="${safeUrl(a.launch, '#apps')}" ${a.launch ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>
+                        ⚡ 바로 실행
+                    </a>
+                    <a class="app-btn gh" href="${safeUrl(a.github, '#apps')}" ${a.github ? 'target="_blank" rel="noopener"' : 'data-nolink="github"'}>
+                        GitHub 보러가기
+                    </a>
+                </div>
+            </article>
+            `).join('');
+        }
+
+        // 링크 미설정 앱 안내 — 안내판에도 쇼케이스와 같은 위임 처리를 건다
+        document.getElementById('newAppsBoard').addEventListener('click', e => {
+            const btn = e.target.closest('[data-nolink]');
+            if (!btn) return;
+            e.preventDefault();
+            showToast(btn.dataset.nolink === 'launch'
+                ? '해당 앱은 정식 배포 후 실행 링크가 연결됩니다.'
+                : 'GitHub 저장소는 오픈소스 공개 후 연결됩니다.');
+        });
+
         /* ============ 앱 쇼케이스 ============ */
         function renderApps() {
             const grid = document.getElementById('appsGrid');
@@ -4367,8 +4814,9 @@
                 return;
             }
             grid.innerHTML = APPS.map(a => `
-            <article class="app-card visible">
+            <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
                 <div class="app-thumb tint-${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">
+                    ${isNewApp(a) ? NEW_FLAG_HTML : ''}
                     <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
                     <div class="app-overlay">${escHtml(a.how)}</div>
                 </div>
@@ -4501,8 +4949,13 @@
         });
         mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
 
-        // 현재 섹션 하이라이트 (qna는 소식·Q&A 메뉴에 매핑)
-        const NAV_MAP = { about: '#about', academy: '#academy', lectures: '#lectures', apps: '#apps', news: '#news', qna: '#news', membership: '#membership' };
+        // 현재 섹션 하이라이트 (쇼케이스는 신규앱, 소식·Q&A는 뉴스·홍보 메뉴에 매핑)
+        const NAV_MAP = {
+            about: '#about', academy: '#academy', lectures: '#lectures',
+            'new-apps': '#new-apps', apps: '#new-apps',
+            promo: '#promo', news: '#promo', qna: '#promo',
+            membership: '#membership'
+        };
         const navAnchors = document.querySelectorAll('.nav-links a');
         const sectionObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
@@ -4929,6 +5382,7 @@
                 HANDBOOKS = await TenStore.listHandbooks();
                 renderHandbooks();
                 updateHeroStats();
+                updatePromoMeta();
             } catch (e) { console.warn('핸드북 로드 실패', e); }
             try {
                 LECTURES = await TenStore.listLectures();
@@ -4936,9 +5390,11 @@
             } catch (e) { console.warn('강의 로드 실패', e); }
             try {
                 APPS = await TenStore.listApps();
-                renderApps();
             } catch (e) { console.warn('앱 로드 실패', e); }
+            // 조회가 실패해도 그려 준다 — 안내판이 '불러오는 중'에 멈춰 있지 않게
+            try { renderNewApps(); renderApps(); } catch (e) { console.warn('앱 렌더 실패', e); }
             try { await renderNews(); } catch (e) { console.warn('소식 로드 실패', e); }
+            try { updatePromoMeta(); } catch (e) { console.warn('홍보 현황 갱신 실패', e); }
             try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
             try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
         })();

@@ -395,21 +395,29 @@ const SEED_LECTURES = [
     { id: 'l4', cat: '프롬프트 엔지니어링', title: '프롬프트 엔지니어링 스킬업 — 좋은 질문의 기술',  dur: '16:33', videoId: '', grad1: '#0f766e', grad2: '#134e4a', createdAt: 4 }
 ];
 const SEED_APPS = [
-    { id: 'a1', name: '서울LAW봇',      badge: 'Legal AI',      badgeCls: 'tag-vibe',  oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇', how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.', launch: '', github: '', createdAt: 1 },
-    { id: 'a2', name: '블록ESG',        badge: 'ESG Analytics', badgeCls: 'tag-genai', oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구', how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.', launch: '', github: '', createdAt: 2 },
-    { id: 'a3', name: 'TEN AI Hub',     badge: 'Platform',      badgeCls: 'tag-biz',   oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브', how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.', launch: '', github: '', createdAt: 3 },
-    { id: 'a4', name: 'Prompt Library', badge: 'Toolkit',       badgeCls: 'tag-vibe',  oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리', how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.', launch: '', github: '', createdAt: 4 }
+    { id: 'a1', name: '서울LAW봇',      badge: 'Legal AI',      badgeCls: 'tag-vibe',  oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇', how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.', launch: '', github: '', isNew: false, releasedAt: 0, createdAt: 1 },
+    { id: 'a2', name: '블록ESG',        badge: 'ESG Analytics', badgeCls: 'tag-genai', oneliner: '기업 ESG 데이터를 자동 분석·리포팅하는 평가 도구', how: '공시 데이터를 수집·정규화하고 TenOS 모델이 ESG 리스크를 요약해 경영진용 리포트를 자동 생성합니다.', launch: '', github: '', isNew: false, releasedAt: 0, createdAt: 2 },
+    { id: 'a3', name: 'TEN AI Hub',     badge: 'Platform',      badgeCls: 'tag-biz',   oneliner: '교육·툴킷·템플릿을 공유하는 실무형 AI 생태계 허브', how: '수강생과 실무자가 프롬프트 템플릿, 사례, 도구를 올리고 나누는 커뮤니티형 지식 플랫폼입니다.', launch: '', github: '', isNew: true,  releasedAt: Date.now() - 86400000 * 3,  createdAt: 3 },
+    { id: 'a4', name: 'Prompt Library', badge: 'Toolkit',       badgeCls: 'tag-vibe',  oneliner: '직무별 검증 프롬프트를 모아둔 템플릿 라이브러리', how: '기획·마케팅·개발 등 직무별로 검증된 프롬프트를 분류해 원클릭 복사로 바로 사용할 수 있습니다.', launch: '', github: '', isNew: true,  releasedAt: Date.now() - 86400000 * 12, createdAt: 4 }
 ];
 
 /* row ↔ JS 매핑 정의: [JS키, DB컬럼] */
 const HB_MAP  = [['title','title'],['course_tag','course_tag'],['level_tier','level_tier'],['access_level','access_level'],['desc','description'],['link','link_url'],['linkTarget','link_target'],['createdAt','created_at']];
 const LEC_MAP = [['cat','category'],['title','title'],['dur','duration'],['videoId','video_id'],['grad1','grad1'],['grad2','grad2'],['createdAt','created_at']];
-const APP_MAP = [['name','name'],['badge','badge'],['badgeCls','badge_cls'],['oneliner','oneliner'],['how','how'],['launch','launch_url'],['github','github_url'],['createdAt','created_at']];
+const APP_MAP = [['name','name'],['badge','badge'],['badgeCls','badge_cls'],['oneliner','oneliner'],['how','how'],['launch','launch_url'],['github','github_url'],['isNew','is_new'],['releasedAt','released_at'],['createdAt','created_at']];
 
 function makeContentApi(table, lsKey, seed, map) {
+    // 숫자·불리언 컬럼은 DB 표현이 흔들려도(문자열 'true', null 등) 같은 타입으로 맞춘다
+    const NUM_COLS  = ['created_at', 'level_tier', 'released_at'];
+    const BOOL_COLS = ['is_new'];
     const fromRow = r => {
         const o = { id: r.id };
-        map.forEach(([js, col]) => { o[js] = col === 'created_at' || col === 'level_tier' ? Number(r[col]) : r[col]; });
+        map.forEach(([js, col]) => {
+            const v = r[col];
+            if (NUM_COLS.includes(col))       o[js] = Number(v) || 0;
+            else if (BOOL_COLS.includes(col)) o[js] = v === true || v === 'true';
+            else                              o[js] = v;
+        });
         return o;
     };
     const toRow = item => {

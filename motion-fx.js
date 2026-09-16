@@ -528,10 +528,10 @@ function cardTilt() {
 }
 
 /* =====================================================
-   11. 동적 카드(핸드북·강의·앱·소식·Q&A) 등장 스태거
+   11. 동적 카드(핸드북·강의·신규앱·앱·소식·Q&A) 등장 스태거
    ===================================================== */
 function dynamicCardEntrance() {
-    ['#handbookGrid', '#lectureGrid', '#appsGrid', '#newsGrid', '#qnaPublicList'].forEach(sel => {
+    ['#handbookGrid', '#lectureGrid', '#newAppsBoard', '#appsGrid', '#newsGrid', '#qnaPublicList'].forEach(sel => {
         const grid = $1(sel);
         if (!grid) return;
         new MutationObserver(records => {

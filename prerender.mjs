@@ -145,14 +145,53 @@ function lectureHtml(rows) {
   }).join('');
 }
 
+/* index.html 의 isNewApp 과 같은 규칙 — is_new 지정 또는 최근 30일 공개 */
+const NEW_APP_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const isNewApp = a => {
+  if (a.is_new === true || a.is_new === 'true') return true;
+  const at = Number(a.released_at) || 0;
+  return at > 0 && Date.now() - at <= NEW_APP_WINDOW_MS;
+};
+const newAppOrder = (a, b) =>
+  (Number(b.released_at) || 0) - (Number(a.released_at) || 0) ||
+  (Number(b.created_at) || 0) - (Number(a.created_at) || 0);
+const NEW_FLAG_HTML = '<span class="new-flag"><span class="new-flag-dot"></span>NEW</span>';
+
+const appLinkUrl = u => {
+  const s = String(u || '').trim();
+  return /^https?:\/\//i.test(s) ? esc(s) : '#apps';
+};
+
+function newAppsHtml(rows) {
+  const items = rows.filter(isNewApp).sort(newAppOrder);
+  if (!items.length) {
+    return '<div class="board-empty">새 앱이 공개되면 이곳에 가장 먼저 안내됩니다.<br>지난 앱은 아래 쇼케이스에서 모두 확인하실 수 있습니다.</div>';
+  }
+  return items.map(a => `
+            <article class="board-item">
+                <span class="board-flag">${NEW_FLAG_HTML}</span>
+                <div class="board-item-head">
+                    <h4 class="board-item-name">${esc(a.name)}</h4>
+                    <span class="app-badge ${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">${esc(a.badge)}</span>
+                </div>
+                <p class="board-item-desc">${esc(a.oneliner)}</p>
+                <p class="board-item-date">${Number(a.released_at) ? '공개일 · ' + fmtDate(a.released_at) : '공개 준비 중'}</p>
+                <div class="board-item-actions">
+                    <a class="app-btn launch" href="${appLinkUrl(a.launch_url)}" ${a.launch_url ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>⚡ 바로 실행</a>
+                    <a class="app-btn gh" href="${appLinkUrl(a.github_url)}" ${a.github_url ? 'target="_blank" rel="noopener"' : 'data-nolink="github"'}>GitHub 보러가기</a>
+                </div>
+            </article>`).join('');
+}
+
 function appHtml(rows) {
   const safeUrl = u => {
     const s = String(u || '').trim();
     return /^https?:\/\//i.test(s) ? esc(s) : 'javascript:void(0)';
   };
   return rows.map(a => `
-            <article class="app-card visible">
+            <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
                 <div class="app-thumb tint-${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">
+                    ${isNewApp(a) ? NEW_FLAG_HTML : ''}
                     <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
                     <div class="app-overlay">${esc(a.how)}</div>
                 </div>
@@ -184,6 +223,18 @@ function newsHtml(rows) {
                     <p class="news-excerpt">${esc((p.content || '').slice(0, 90))}${(p.content || '').length > 90 ? '…' : ''}</p>
                     <span class="news-more">자세히 보기 →</span>
                 </button>`).join('');
+}
+
+/* ---------- 텍스트 한 줄짜리 요소(카운터·요약)를 갈아끼운다 ---------- */
+function setText(html, id, text) {
+  const re = new RegExp(`(<(\\w+)[^>]*\\bid="${id}"[^>]*>)([^<]*)(</\\2>)`);
+  return re.test(html) ? html.replace(re, (_, open, _tag, _old, close) => open + esc(text) + close) : html;
+}
+
+/* ---------- hidden 속성을 떼어 낸다 (JS 없이도 보이게) ---------- */
+function unhide(html, id) {
+  const re = new RegExp(`(<\\w+[^>]*\\bid="${id}"[^>]*?)\\s+hidden(\\s|>)`);
+  return html.replace(re, '$1$2');
 }
 
 /* ---------- 컨테이너 안쪽만 갈아끼운다 ---------- */
@@ -233,14 +284,37 @@ const report = [];
 for (const [id, rows, render] of [
   ['handbookGrid', handbooks, handbookHtml],
   ['lectureGrid',  lectures,  lectureHtml],
+  ['newAppsBoard', apps,      newAppsHtml],
   ['appsGrid',     apps,      appHtml],
   ['newsGrid',     posts,     newsHtml],
 ]) {
   if (!rows.length) { report.push(`${id}: 데이터 없음`); continue; }
+  const count = id === 'newAppsBoard' ? rows.filter(isNewApp).length : rows.length;
   const out = injectInto(html, id, render(rows));
   html = out.html;
-  report.push(`${id}: ${out.ok ? rows.length + '건 삽입' : '컨테이너 미발견'}`);
+  report.push(`${id}: ${out.ok ? count + '건 삽입' : '컨테이너 미발견'}`);
 }
+
+/* ---------- 요약 문구도 실제 데이터로 맞춘다 (JS 없이 보는 경우) ---------- */
+const freshCount = apps.filter(isNewApp).length;
+html = setText(html, 'newAppsCount', freshCount
+  ? `새로 공개된 앱 ${freshCount}개 · 최근 30일 기준`
+  : '현재 새로 공개된 앱이 없습니다');
+if (freshCount) html = unhide(html, 'promoNewFlag');
+
+const playable = lectures.filter(v => ytThumb(v.video_id)).length;
+html = setText(html, 'promoLectureMeta', lectures.length
+  ? `강의 ${lectures.length}편${playable ? ` · 바로 시청 ${playable}편` : ''}`
+  : '채널 강의 업데이트 중');
+
+const openHb = handbooks.filter(h => h.access_level === 'public').length;
+html = setText(html, 'promoHandbookMeta', handbooks.length
+  ? `핸드북 ${handbooks.length}권${openHb ? ` · 공개 교재 ${openHb}권` : ''}`
+  : '핸드북 목록 준비 중');
+
+html = setText(html, 'promoAppMeta', freshCount
+  ? `신규 공개 ${freshCount}개 · 전체 ${apps.length}개`
+  : (apps.length ? `공개된 앱 ${apps.length}개` : '신규앱 준비 중'));
 
 writeFileSync(DIST, html, 'utf8');
 console.log('[prerender] ' + report.join(' · '));

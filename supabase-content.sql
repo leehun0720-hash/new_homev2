@@ -65,6 +65,8 @@ create table if not exists apps (
   how        text not null default '',
   launch_url text not null default '',
   github_url text not null default '',
+  is_new     boolean not null default false,          -- 신규앱 안내판에 NEW 로 노출
+  released_at bigint not null default 0,              -- 공개일(ms). 최근 30일 이내면 자동으로 NEW
   created_at bigint not null
 );
 
