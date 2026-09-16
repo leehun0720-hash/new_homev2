@@ -3475,3 +3475,116 @@ blockquote { letter-spacing: -0.025em; }
     .board-foot { gap: 0.4rem 1rem; }
     .section-more { margin-top: 1.4rem; }
 }
+
+/* =====================================================================
+   쇼케이스 검색 — 앱이 늘어도 눈으로 훑지 않게
+   ---------------------------------------------------------------------
+   검색창 하나와 분류 칩 한 줄. 칩은 실제로 앱이 있는 분류만 나오므로
+   목록이 자라도 줄이 지저분해지지 않는다.
+   ===================================================================== */
+.apps-filters {
+    max-width: var(--container-max);
+    margin: 0 auto 1.1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.4rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ---- 검색창 ---- */
+.app-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 19rem;
+    max-width: 26rem;
+}
+.app-search-icon {
+    position: absolute;
+    left: 0.85rem;
+    color: #8a6a47;
+    pointer-events: none;
+}
+.app-search input {
+    width: 100%;
+    padding: 0.78rem 2.5rem 0.78rem 2.5rem;
+    background: #ffffff;
+    border: 1px solid var(--line-strong);
+    border-radius: 0;
+    color: var(--brand-ink);
+    font-family: inherit;
+    font-size: 0.97rem;
+    transition: border-color 0.25s ease;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.app-search input::placeholder { color: #9b7f5e; }
+.app-search input:focus { outline: none; border-color: var(--brand-ink); }
+/* 브라우저 기본 X 버튼은 숨기고 직접 만든 것을 쓴다 (모양·위치를 맞추려고) */
+.app-search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.app-search-clear {
+    position: absolute;
+    right: 0.5rem;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    background: none;
+    border: 0;
+    color: #8a6a47;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 0;
+}
+.app-search-clear:hover { color: var(--brand-ink); background: #f3ead9; }
+
+/* ---- 분류 칩 ---- */
+.app-cats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.app-cat { padding: 0.55rem 1rem; font-size: 0.88rem; }
+.app-cat-n {
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+    opacity: 0.55;
+    margin-left: 0.15rem;
+}
+
+/* ---- 결과 개수 ---- */
+.apps-count {
+    max-width: var(--container-max);
+    margin: 0 auto 1.5rem;
+    font-size: 0.86rem;
+    color: #6b4b2a;
+}
+
+/* ---- 카드 위의 분류 표시 ---- */
+.app-cat-line {
+    margin: 0 0 0.45rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #8a6a47;
+}
+
+/* ---- 문장 안에서 버튼처럼 쓰는 링크 ---- */
+.link-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--brand-ink);
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.link-btn:hover { color: var(--brand-accent); }
+
+@media (max-width: 760px) {
+    .apps-filters { gap: 0.8rem; }
+    .app-search { flex-basis: 100%; max-width: none; }
+    .app-cats { width: 100%; }
+    .app-cat { min-height: 40px; }
+    /* 지우기 ✕ 도 손가락으로 누를 만한 크기로 */
+    .app-search-clear { width: 40px; height: 40px; right: 0.35rem; }
+    .app-search input { padding-right: 3rem; }
+}

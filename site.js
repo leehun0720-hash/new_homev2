@@ -274,6 +274,124 @@ onId('newAppsBoard', 'click', e => {
         : 'GitHub 저장소는 오픈소스 공개 후 연결됩니다.');
 });
 
+/* ============ 앱 검색 ============
+   앱은 계속 늘어난다. 눈으로 훑는 대신 이름·기능·키워드로 찾게 한다.
+
+   검색 규칙
+     - 띄어쓴 낱말은 모두 만족해야 한다 (AND). '탄소 계산' → 둘 다 든 앱
+     - 대소문자를 가리지 않는다
+     - 띄어쓰기를 무시한 비교도 함께 한다 ('탄소리서치' ↔ '탄소 리서치')
+   검색 대상은 이름·한 줄 소개·작동 원리·배지·분류 이름·등록 키워드다. */
+const APP_CATS = (window.TenStore && window.TenStore.APP_CATEGORIES) || [];
+const catName = id => (APP_CATS.find(c => c.id === id) || {}).name || '';
+
+// 쉼표·가운뎃점·괄호 같은 구분기호는 낱말 경계로 본다.
+// '탄소, 배출량' 과 '탄소·ESG' 가 두 낱말로 쪼개져야 '탄소 ESG' 로도 찾힌다.
+const SEP_RE = /[,·․‧/|\\()\[\]{}<>"'`~!?;:_\-–—+&]+/g;
+const normQuery = v => String(v == null ? '' : v).toLowerCase()
+    .replace(SEP_RE, ' ').replace(/\s+/g, ' ').trim();
+const squash    = v => normQuery(v).replace(/ /g, '');
+
+function appHaystack(a) {
+    return normQuery([a.name, a.oneliner, a.how, a.badge, a.keywords, catName(a.category)].join(' '));
+}
+function appMatches(a, terms) {
+    if (!terms.length) return true;
+    const hay = appHaystack(a), flat = squash(hay);
+    return terms.every(t => hay.includes(t) || flat.includes(squash(t)));
+}
+
+let appQuery = '', appCat = 'all';
+
+function filteredApps() {
+    const terms = normQuery(appQuery).split(' ').filter(Boolean);
+    return APPS.filter(a =>
+        (appCat === 'all' || (a.category || '') === appCat) && appMatches(a, terms));
+}
+
+/* 분류 칩은 실제로 앱이 있는 분류만 보여 준다 — 빈 칩을 눌러 헛걸음하지 않게 */
+function renderAppCats() {
+    const box = document.getElementById('appCats');
+    if (!box) return;
+    const counts = new Map();
+    APPS.forEach(a => {
+        const id = a.category || '';
+        if (id) counts.set(id, (counts.get(id) || 0) + 1);
+    });
+    const chips = APP_CATS.filter(c => counts.has(c.id))
+        .map(c => ({ id: c.id, name: c.name, n: counts.get(c.id) }));
+    // 분류된 앱이 하나도 없으면 칩 줄을 통째로 숨긴다 (누를 것이 없는 '전체' 하나만 남으므로)
+    if (!chips.length) { box.innerHTML = ''; box.hidden = true; return; }
+    box.hidden = false;
+
+    const unfiled = APPS.filter(a => !a.category).length;
+    chips.unshift({ id: 'all', name: '전체', n: APPS.length });
+    if (unfiled) chips.push({ id: '', name: '미분류', n: unfiled });
+
+    box.innerHTML = chips.map(c => `
+        <button type="button" class="course-tab app-cat${c.id === appCat ? ' active' : ''}"
+                data-cat="${escHtml(c.id)}" aria-pressed="${c.id === appCat}">
+            ${escHtml(c.name)} <span class="app-cat-n">${c.n}</span>
+        </button>`).join('');
+}
+
+/* 주소에 검색 상태를 남긴다 — 결과 화면을 그대로 공유·북마크할 수 있게 */
+function syncAppUrl() {
+    const u = new URL(location.href);
+    appQuery ? u.searchParams.set('q', appQuery) : u.searchParams.delete('q');
+    appCat !== 'all' ? u.searchParams.set('cat', appCat) : u.searchParams.delete('cat');
+    history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+}
+
+function initAppSearch() {
+    const input = document.getElementById('appSearch');
+    if (!input) return;
+    const clear = document.getElementById('appSearchClear');
+    const params = new URLSearchParams(location.search);
+
+    appQuery = params.get('q') || '';
+    const wantCat = params.get('cat');
+    appCat = wantCat !== null && (wantCat === '' || APP_CATS.some(c => c.id === wantCat)) ? wantCat : 'all';
+    input.value = appQuery;
+    if (clear) clear.hidden = !appQuery;
+
+    let timer;
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            appQuery = input.value;
+            if (clear) clear.hidden = !appQuery;
+            syncAppUrl();
+            renderApps();
+        }, 150);
+    });
+    // 엔터로 폼이 제출되거나 esc 로 값만 비고 화면이 안 바뀌는 일이 없게
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    input.addEventListener('search', () => {
+        appQuery = input.value;
+        if (clear) clear.hidden = !appQuery;
+        syncAppUrl();
+        renderApps();
+    });
+    on(clear, 'click', () => {
+        input.value = ''; appQuery = ''; clear.hidden = true;
+        syncAppUrl(); renderApps(); input.focus();
+    });
+    onId('appCats', 'click', e => {
+        const btn = e.target.closest('[data-cat]');
+        if (!btn) return;
+        appCat = btn.dataset.cat;
+        syncAppUrl();
+        renderApps();
+    });
+    onId('appsGrid', 'click', e => {
+        if (!e.target.closest('[data-reset-search]')) return;
+        input.value = ''; appQuery = ''; appCat = 'all';
+        if (clear) clear.hidden = true;
+        syncAppUrl(); renderApps();
+    });
+}
+
 /* ============ 앱 쇼케이스 ============ */
 function renderApps() {
     const grid = document.getElementById('appsGrid');
@@ -282,7 +400,28 @@ function renderApps() {
         grid.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 앱이 없습니다. 관리자 콘솔에서 앱을 추가해 주세요.</div>';
         return;
     }
-    grid.innerHTML = limited(APPS, grid).map(a => `
+
+    const hasSearch = !!document.getElementById('appSearch');
+    const items = limited(hasSearch ? filteredApps() : APPS, grid);
+    renderAppCats();
+
+    const countEl = document.getElementById('appsCount');
+    if (countEl) {
+        const narrowed = appQuery || appCat !== 'all';
+        countEl.textContent = narrowed
+            ? `전체 ${APPS.length}개 중 ${items.length}개`
+            : `전체 ${APPS.length}개`;
+    }
+
+    if (!items.length) {
+        grid.innerHTML = `<div class="news-empty" style="grid-column:1/-1;">
+            '${escHtml(appQuery)}'에 해당하는 앱이 없습니다.<br>
+            다른 낱말로 찾아보시거나 <button type="button" class="link-btn" data-reset-search>전체 목록 보기</button>를 눌러 주세요.
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = items.map(a => `
     <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
         <div class="app-thumb tint-${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">
             ${isNewApp(a) ? NEW_FLAG_HTML : ''}
@@ -294,6 +433,7 @@ function renderApps() {
                 <h3 class="app-name">${escHtml(a.name)}</h3>
                 <span class="app-badge ${APP_BADGE_CLS[a.badgeCls] || 'tag-vibe'}">${escHtml(a.badge)}</span>
             </div>
+            ${catName(a.category) ? `<p class="app-cat-line">${escHtml(catName(a.category))}</p>` : ''}
             <p class="app-oneliner">${escHtml(a.oneliner)}</p>
             <div class="app-actions">
                 <a class="app-btn launch" href="${safeUrl(a.launch)}" ${a.launch ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>
@@ -869,7 +1009,7 @@ async function renderTenosRank() {
         APPS = await TenStore.listApps();
     } catch (e) { console.warn('앱 로드 실패', e); }
     // 조회가 실패해도 그려 준다 — 안내판이 '불러오는 중'에 멈춰 있지 않게
-    try { renderNewApps(); renderApps(); } catch (e) { console.warn('앱 렌더 실패', e); }
+    try { initAppSearch(); renderNewApps(); renderApps(); } catch (e) { console.warn('앱 렌더 실패', e); }
     try { await renderNews(); } catch (e) { console.warn('소식 로드 실패', e); }
     try { updatePromoMeta(); } catch (e) { console.warn('홍보 현황 갱신 실패', e); }
     try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }

@@ -87,6 +87,11 @@ const ACCESS_META = {
 };
 const CAT_CLS = { '공지': 'news-cat-notice', '뉴스': 'news-cat-news', '교육': 'news-cat-edu' };
 const APP_BADGE_CLS = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
+/* data-store.js 의 APP_CATEGORIES 와 같은 id·이름을 쓴다 */
+const APP_CAT_NAME = {
+  automation: '업무 자동화', document: '문서·글쓰기', data: '데이터·분석', esg: '탄소·ESG',
+  edu: '교육·학습', gov: '정부지원·공모', biz: '경영·금융', tool: '유틸리티',
+};
 
 const fmtDate = ts => ts
   ? new Date(Number(ts)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -203,6 +208,7 @@ function appHtml(rows, limit) {
                         <h3 class="app-name">${esc(a.name)}</h3>
                         <span class="app-badge ${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">${esc(a.badge)}</span>
                     </div>
+                    ${APP_CAT_NAME[a.category] ? `<p class="app-cat-line">${esc(APP_CAT_NAME[a.category])}</p>` : ''}
                     <p class="app-oneliner">${esc(a.oneliner)}</p>
                     <div class="app-actions">
                         <a class="app-btn launch" href="${safeUrl(a.launch_url)}" ${a.launch_url ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>

@@ -151,8 +151,20 @@
         <div class="section-header animate-on-scroll">
             <p class="section-label">TEN AI Apps</p>
             <h2 class="section-title">쇼케이스 — 직접 만든 AI</h2>
-            <p class="section-desc">TEN AI가 직접 개발한 전문가용 AI 애플리케이션. 카드에 마우스를 올려 작동 원리를 확인하고, 바로 실행해 보세요</p>
+            <p class="section-desc">TEN AI가 직접 개발한 전문가용 AI 애플리케이션. 이름·기능·키워드로 검색하거나 분류로 좁혀 찾아보세요.</p>
         </div>
+
+        <div class="apps-filters animate-on-scroll">
+            <div class="app-search">
+                <svg class="app-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="search" id="appSearch" autocomplete="off" spellcheck="false"
+                       placeholder="앱 이름, 기능, 키워드로 검색" aria-label="앱 검색">
+                <button type="button" class="app-search-clear" id="appSearchClear" hidden aria-label="검색어 지우기">✕</button>
+            </div>
+            <div class="app-cats" id="appCats" role="group" aria-label="분류 필터"></div>
+        </div>
+
+        <p class="apps-count" id="appsCount" aria-live="polite"></p>
         <div class="apps-grid" id="appsGrid"></div>
     </section>
 
