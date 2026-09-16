@@ -1,9 +1,53 @@
-# Netlify 배포 설정 — Vite 정적 빌드
+# Netlify 배포 설정 — Vite 정적 멀티페이지 빌드
 [build]
   command = "npm run build"
   publish = "dist"
 
-# SPA 아님(멀티 페이지) — 404는 홈으로
+# 깔끔한 주소 — /about 으로 들어와도 about.html 을 그대로 내보낸다.
+# Netlify 가 기본으로 해 주는 동작이지만, 내비게이션 전체가 여기에 걸려 있으므로
+# 설정에 명시해 두어 배포 환경이 바뀌어도 끊기지 않게 한다.
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/business"
+  to = "/business.html"
+  status = 200
+
+[[redirects]]
+  from = "/education"
+  to = "/education.html"
+  status = 200
+
+[[redirects]]
+  from = "/apps"
+  to = "/apps.html"
+  status = 200
+
+[[redirects]]
+  from = "/news"
+  to = "/news.html"
+  status = 200
+
+[[redirects]]
+  from = "/membership"
+  to = "/membership.html"
+  status = 200
+
+# 예전 랜딩페이지의 해시 주소로 들어오는 방문자·북마크를 새 페이지로 보낸다
+[[redirects]]
+  from = "/academy"
+  to = "/education"
+  status = 301
+
+[[redirects]]
+  from = "/lectures"
+  to = "/education"
+  status = 301
+
+# SPA 아님(멀티 페이지) — 그 외 주소는 홈을 404 본문으로
 [[redirects]]
   from = "/*"
   to = "/index.html"

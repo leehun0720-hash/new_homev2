@@ -17,7 +17,10 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
-const DIST = 'dist/index.html';
+/* 멀티페이지 — 섹션이 흩어져 있으므로 각 페이지에서 '있는 컨테이너'만 채운다.
+   홈처럼 일부만 보여주는 자리는 컨테이너의 data-limit 을 그대로 따른다. */
+const PAGES = ['index', 'about', 'business', 'education', 'apps', 'news', 'membership']
+  .map(n => `dist/${n}.html`);
 const TABLES = ['handbooks', 'lectures', 'apps', 'posts'];
 
 /* ---------- 접속 정보: 환경변수 → .env 파일 ---------- */
@@ -92,8 +95,8 @@ const fmtDate = ts => ts
 const ytThumb = id => /^[A-Za-z0-9_-]{11}$/.test(String(id || ''))
   ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : '';
 
-function handbookHtml(rows) {
-  return rows.map((h, i) => {
+function handbookHtml(rows, limit) {
+  return cut(rows, limit).map((h, i) => {
     const c = COURSE_META[h.course_tag] || COURSE_META.vibecoding;
     const a = ACCESS_META[h.access_level] || ACCESS_META.public;
     const unlocked = h.access_level === 'public';
@@ -117,8 +120,8 @@ function handbookHtml(rows) {
   }).join('');
 }
 
-function lectureHtml(rows) {
-  return rows.map(v => {
+function lectureHtml(rows, limit) {
+  return cut(rows, limit).map(v => {
     const id = /^[A-Za-z0-9_-]{11}$/.test(String(v.video_id || '')) ? v.video_id : '';
     const href = id ? `https://www.youtube.com/watch?v=${id}` : '';
     const tag = href ? 'a' : 'button';
@@ -159,15 +162,15 @@ const NEW_FLAG_HTML = '<span class="new-flag"><span class="new-flag-dot"></span>
 
 const appLinkUrl = u => {
   const s = String(u || '').trim();
-  return /^https?:\/\//i.test(s) ? esc(s) : '#apps';
+  return /^https?:\/\//i.test(s) ? esc(s) : '/apps';
 };
 
-function newAppsHtml(rows) {
+function newAppsHtml(rows, limit) {
   const items = rows.filter(isNewApp).sort(newAppOrder);
   if (!items.length) {
-    return '<div class="board-empty">새 앱이 공개되면 이곳에 가장 먼저 안내됩니다.<br>지난 앱은 아래 쇼케이스에서 모두 확인하실 수 있습니다.</div>';
+    return '<div class="board-empty">새 앱이 공개되면 이곳에 가장 먼저 안내됩니다.<br>지난 앱은 앱 쇼케이스에서 모두 확인하실 수 있습니다.</div>';
   }
-  return items.map(a => `
+  return cut(items, limit).map(a => `
             <article class="board-item">
                 <span class="board-flag">${NEW_FLAG_HTML}</span>
                 <div class="board-item-head">
@@ -183,12 +186,12 @@ function newAppsHtml(rows) {
             </article>`).join('');
 }
 
-function appHtml(rows) {
+function appHtml(rows, limit) {
   const safeUrl = u => {
     const s = String(u || '').trim();
     return /^https?:\/\//i.test(s) ? esc(s) : 'javascript:void(0)';
   };
-  return rows.map(a => `
+  return cut(rows, limit).map(a => `
             <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
                 <div class="app-thumb tint-${APP_BADGE_CLS[a.badge_cls] || 'tag-vibe'}">
                     ${isNewApp(a) ? NEW_FLAG_HTML : ''}
@@ -211,8 +214,8 @@ function appHtml(rows) {
             </article>`).join('');
 }
 
-function newsHtml(rows) {
-  return rows.slice(0, 6).map(p => `
+function newsHtml(rows, limit) {
+  return cut(rows, limit || 6).map(p => `
                 <button class="news-card" data-post="${esc(p.id)}">
                     <div class="news-meta">
                         <span class="news-cat ${CAT_CLS[p.category] || 'news-cat-notice'}">${esc(p.category)}</span>
@@ -223,6 +226,17 @@ function newsHtml(rows) {
                     <p class="news-excerpt">${esc((p.content || '').slice(0, 90))}${(p.content || '').length > 90 ? '…' : ''}</p>
                     <span class="news-more">자세히 보기 →</span>
                 </button>`).join('');
+}
+
+/* ---------- data-limit: 홈의 요약 카드처럼 일부만 심을 때 ---------- */
+const cut = (rows, limit) => (limit > 0 ? rows.slice(0, limit) : rows);
+
+/* 컨테이너가 이 페이지에 없으면 undefined, 있으면 data-limit 값(없으면 0) */
+function readLimit(html, id) {
+  const m = html.match(new RegExp(`<[^>]*\\bid="${id}"[^>]*>`));
+  if (!m) return undefined;
+  const d = m[0].match(/\bdata-limit="(\d+)"/);
+  return d ? Number(d[1]) : 0;
 }
 
 /* ---------- 텍스트 한 줄짜리 요소(카운터·요약)를 갈아끼운다 ---------- */
@@ -260,7 +274,7 @@ function injectInto(html, id, inner) {
 /* ---------- 실행 ---------- */
 const bail = msg => { console.log(`[prerender] 건너뜀 — ${msg}`); process.exit(0); };
 
-if (!existsSync(DIST)) bail(`${DIST} 없음`);
+if (!PAGES.some(existsSync)) bail('빌드 결과(dist/*.html) 없음');
 const { url, key } = readEnv();
 if (!url || !key) bail('Supabase 접속 정보 없음 (env·supabase-config.js 모두 미확인)');
 console.log('[prerender] 접속 대상 ' + url.replace(/^(https:\/\/[a-z0-9]{6})[a-z0-9]*/, '$1***'));
@@ -279,42 +293,52 @@ const lectures  = (data.lectures  || []).sort(byCreated);
 const apps      = (data.apps      || []).sort(byCreated);
 const posts     = (data.posts     || []).sort((a, b) => Number(b.created_at) - Number(a.created_at));
 
-let html = readFileSync(DIST, 'utf8');
-const report = [];
-for (const [id, rows, render] of [
+const TARGETS = [
   ['handbookGrid', handbooks, handbookHtml],
   ['lectureGrid',  lectures,  lectureHtml],
   ['newAppsBoard', apps,      newAppsHtml],
   ['appsGrid',     apps,      appHtml],
   ['newsGrid',     posts,     newsHtml],
-]) {
-  if (!rows.length) { report.push(`${id}: 데이터 없음`); continue; }
-  const count = id === 'newAppsBoard' ? rows.filter(isNewApp).length : rows.length;
-  const out = injectInto(html, id, render(rows));
-  html = out.html;
-  report.push(`${id}: ${out.ok ? count + '건 삽입' : '컨테이너 미발견'}`);
-}
+];
 
-/* ---------- 요약 문구도 실제 데이터로 맞춘다 (JS 없이 보는 경우) ---------- */
+/* 이 수치들은 페이지마다 같은 값이므로 한 번만 계산한다 */
 const freshCount = apps.filter(isNewApp).length;
-html = setText(html, 'newAppsCount', freshCount
-  ? `새로 공개된 앱 ${freshCount}개 · 최근 30일 기준`
-  : '현재 새로 공개된 앱이 없습니다');
-if (freshCount) html = unhide(html, 'promoNewFlag');
+const playable   = lectures.filter(v => ytThumb(v.video_id)).length;
+const openHb     = handbooks.filter(h => h.access_level === 'public').length;
 
-const playable = lectures.filter(v => ytThumb(v.video_id)).length;
-html = setText(html, 'promoLectureMeta', lectures.length
-  ? `강의 ${lectures.length}편${playable ? ` · 바로 시청 ${playable}편` : ''}`
-  : '채널 강의 업데이트 중');
+for (const file of PAGES) {
+  if (!existsSync(file)) continue;
+  let html = readFileSync(file, 'utf8');
+  const done = [];
 
-const openHb = handbooks.filter(h => h.access_level === 'public').length;
-html = setText(html, 'promoHandbookMeta', handbooks.length
-  ? `핸드북 ${handbooks.length}권${openHb ? ` · 공개 교재 ${openHb}권` : ''}`
-  : '핸드북 목록 준비 중');
+  for (const [id, rows, render] of TARGETS) {
+    const limit = readLimit(html, id);
+    if (limit === undefined) continue;            // 이 페이지에 없는 섹션
+    if (!rows.length) { done.push(`${id}: 데이터 없음`); continue; }
+    const shown = id === 'newAppsBoard'
+      ? cut(rows.filter(isNewApp), limit).length
+      : cut(rows, id === 'newsGrid' ? (limit || 6) : limit).length;
+    const out = injectInto(html, id, render(rows, limit));
+    html = out.html;
+    done.push(`${id}: ${out.ok ? shown + '건' : '컨테이너 미발견'}`);
+  }
 
-html = setText(html, 'promoAppMeta', freshCount
-  ? `신규 공개 ${freshCount}개 · 전체 ${apps.length}개`
-  : (apps.length ? `공개된 앱 ${apps.length}개` : '신규앱 준비 중'));
+  /* 요약 문구도 실제 데이터로 맞춘다 (JS 없이 보는 경우) */
+  html = setText(html, 'newAppsCount', freshCount
+    ? `새로 공개된 앱 ${freshCount}개 · 최근 30일 기준`
+    : '현재 새로 공개된 앱이 없습니다');
+  if (freshCount) html = unhide(html, 'promoNewFlag');
 
-writeFileSync(DIST, html, 'utf8');
-console.log('[prerender] ' + report.join(' · '));
+  html = setText(html, 'promoLectureMeta', lectures.length
+    ? `강의 ${lectures.length}편${playable ? ` · 바로 시청 ${playable}편` : ''}`
+    : '채널 강의 업데이트 중');
+  html = setText(html, 'promoHandbookMeta', handbooks.length
+    ? `핸드북 ${handbooks.length}권${openHb ? ` · 공개 교재 ${openHb}권` : ''}`
+    : '핸드북 목록 준비 중');
+  html = setText(html, 'promoAppMeta', freshCount
+    ? `신규 공개 ${freshCount}개 · 전체 ${apps.length}개`
+    : (apps.length ? `공개된 앱 ${apps.length}개` : '신규앱 준비 중'));
+
+  writeFileSync(file, html, 'utf8');
+  if (done.length) console.log(`[prerender] ${file.replace('dist/', '')} — ${done.join(' · ')}`);
+}
