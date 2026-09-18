@@ -507,6 +507,170 @@ const lectureApi  = makeContentApi('lectures',  'tenai_lectures',  SEED_LECTURES
 const appApi      = makeContentApi('apps',      'tenai_apps',      SEED_APPS,      APP_MAP);
 
 /* =====================================================================
+   홍보 팝업 배너
+   ---------------------------------------------------------------------
+   관리자 콘솔 > 배너 관리에서 만들고, 공개 사이트에 팝업으로 뜬다.
+   테이블이 아직 없으면(= supabase-banners.sql 미실행) 조용히 빈 목록을
+   돌려준다 — 배너는 없어도 사이트가 돌아가야 하는 부가 기능이다.
+
+   이미지는 Supabase Storage 의 'banners' 버킷에 올린다. 공개 버킷이라
+   서명 URL 이 만료돼 배너가 깨지는 일이 없다.
+   ===================================================================== */
+const BANNER_BUCKET = 'banners';
+const BANNER_MAX_BYTES = 5 * 1024 * 1024;         // 버킷 설정과 같은 값
+const BANNER_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'];
+
+const SEED_BANNERS = [];   // 기본 배너는 두지 않는다 — 관리자가 만든 것만 뜬다
+
+const bannerFromRow = r => ({
+    id: r.id,
+    title: r.title == null ? '' : String(r.title),
+    body: r.body == null ? '' : String(r.body),
+    badge: r.badge == null ? '' : String(r.badge),
+    imageUrl: r.image_url == null ? '' : String(r.image_url),
+    imageAlt: r.image_alt == null ? '' : String(r.image_alt),
+    linkUrl: r.link_url == null ? '' : String(r.link_url),
+    linkLabel: r.link_label == null ? '' : String(r.link_label),
+    active: r.active === true || r.active === 'true',
+    startAt: Number(r.start_at) || 0,
+    endAt: Number(r.end_at) || 0,
+    sortOrder: Number(r.sort_order) || 0,
+    createdAt: Number(r.created_at) || 0
+});
+const bannerToRow = b => ({
+    id: b.id,
+    title: b.title || '',
+    body: b.body || '',
+    badge: b.badge || '',
+    image_url: b.imageUrl || '',
+    image_alt: b.imageAlt || '',
+    link_url: b.linkUrl || '',
+    link_label: b.linkLabel || '',
+    active: !!b.active,
+    start_at: Number(b.startAt) || 0,
+    end_at: Number(b.endAt) || 0,
+    sort_order: Number(b.sortOrder) || 0,
+    created_at: Number(b.createdAt) || Date.now()
+});
+
+const bannerOrder = (a, b) => (a.sortOrder - b.sortOrder) || (a.createdAt - b.createdAt);
+
+async function listBanners() {
+    if (mode === 'supabase') {
+        try {
+            const { data, error } = await sb.from('banners').select('*');
+            if (error) throw error;
+            return (data || []).map(bannerFromRow).sort(bannerOrder);
+        } catch (e) {
+            console.info('[TenStore] 배너 테이블이 아직 없습니다 — supabase-banners.sql 을 실행하면 켜집니다.');
+            return [];
+        }
+    }
+    return localList('tenai_banners', SEED_BANNERS).map(bannerFromRow).sort(bannerOrder);
+}
+
+/* 지금 이 순간 띄울 배너를 고른다.
+   활성 + 노출 기간 안에 든 것 중 sort_order 가 가장 앞선 하나. */
+function pickLiveBanner(items, now) {
+    const t = Number(now) || Date.now();
+    return (items || []).filter(b =>
+        b.active &&
+        (!b.startAt || t >= b.startAt) &&
+        (!b.endAt   || t <= b.endAt)
+    ).sort(bannerOrder)[0] || null;
+}
+
+async function saveBanner(banner) {
+    const data = Object.assign({}, banner, {
+        id: banner.id || genId(),
+        createdAt: banner.createdAt || Date.now()
+    });
+    if (!String(data.title || '').trim() && !String(data.imageUrl || '').trim()) {
+        throw new Error('제목이나 이미지 중 하나는 있어야 합니다.');
+    }
+    if (mode === 'supabase') {
+        const { error } = await sb.from('banners').upsert(bannerToRow(data));
+        if (error) throw error;
+        return data.id;
+    }
+    const items = localList('tenai_banners', SEED_BANNERS);
+    const idx = items.findIndex(x => x.id === data.id);
+    const row = bannerToRow(data);
+    if (idx >= 0) items[idx] = row; else items.push(row);
+    LS.write('tenai_banners', items);
+    return data.id;
+}
+
+async function deleteBanner(id) {
+    // 올려 둔 이미지도 함께 지운다 — 배너를 지웠는데 저장소만 차오르지 않게
+    try {
+        const items = await listBanners();
+        const hit = items.find(b => b.id === id);
+        if (hit && hit.imageUrl) await deleteBannerImage(hit.imageUrl);
+    } catch (e) { /* 이미지 정리는 실패해도 배너 삭제는 진행한다 */ }
+
+    if (mode === 'supabase') {
+        const { error } = await sb.from('banners').delete().eq('id', id);
+        if (error) throw error;
+        return;
+    }
+    LS.write('tenai_banners', localList('tenai_banners', SEED_BANNERS).filter(x => x.id !== id));
+}
+
+/* ---------- 이미지 업로드 ---------- */
+function checkImageFile(file) {
+    if (!file) throw new Error('이미지 파일을 선택해 주세요.');
+    if (!BANNER_MIME.includes(file.type)) {
+        throw new Error('PNG · JPG · WebP · GIF · SVG 형식만 올릴 수 있습니다.');
+    }
+    if (file.size > BANNER_MAX_BYTES) {
+        throw new Error(`이미지가 너무 큽니다 (${(file.size / 1024 / 1024).toFixed(1)}MB). 5MB 이하로 줄여 주세요.`);
+    }
+}
+
+/* 파일 이름은 새로 짓는다 — 한글·공백·특수문자가 든 이름은 저장소 키로 쓸 수 없고,
+   같은 이름을 다시 올렸을 때 옛 이미지가 캐시에 남는 일도 막는다. */
+function bannerObjectPath(file) {
+    const ext = ({ 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp',
+                   'image/gif': 'gif', 'image/svg+xml': 'svg' })[file.type] || 'png';
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+}
+
+async function uploadBannerImage(file) {
+    checkImageFile(file);
+    if (mode !== 'supabase') {
+        // 로컬 모드에는 저장소가 없으므로 data URL 로 품는다 (미리보기·테스트용)
+        return await new Promise((resolve, reject) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(String(fr.result));
+            fr.onerror = () => reject(new Error('이미지를 읽지 못했습니다.'));
+            fr.readAsDataURL(file);
+        });
+    }
+    const path = bannerObjectPath(file);
+    const { error } = await sb.storage.from(BANNER_BUCKET)
+        .upload(path, file, { cacheControl: '31536000', contentType: file.type, upsert: false });
+    if (error) {
+        if (/bucket/i.test(error.message || '')) {
+            throw new Error('이미지 저장소가 아직 없습니다. supabase-banners.sql 을 실행해 주세요.');
+        }
+        throw error;
+    }
+    const { data } = sb.storage.from(BANNER_BUCKET).getPublicUrl(path);
+    return (data && data.publicUrl) || '';
+}
+
+/* 우리 버킷에 올린 이미지일 때만 지운다. 외부 주소를 붙여 넣은 경우는 건드리지 않는다. */
+async function deleteBannerImage(url) {
+    if (mode !== 'supabase') return;
+    const m = String(url || '').match(new RegExp('/storage/v1/object/public/' + BANNER_BUCKET + '/(.+)$'));
+    if (!m) return;
+    const path = decodeURIComponent(m[1].split('?')[0]);
+    const { error } = await sb.storage.from(BANNER_BUCKET).remove([path]);
+    if (error) console.warn('[TenStore] 배너 이미지 삭제 실패', error);
+}
+
+/* =====================================================================
    분류(카테고리) — 게시물 · Q&A · 핸드북 · 강의 · 앱 공통
    ---------------------------------------------------------------------
    categories 테이블 하나가 다섯 영역의 분류를 모두 담는다(scope 로 구분).
@@ -752,6 +916,9 @@ window.TenStore = {
     CATEGORY_SCOPES, CATEGORY_TONES, DEFAULT_TONE, COVER_OF,
     listCategories, categoriesOf, categorySource,
     saveCategory, deleteCategory, reorderCategories, countCategoryUsage,
+    /* 홍보 배너 */
+    listBanners, pickLiveBanner, saveBanner, deleteBanner,
+    uploadBannerImage, deleteBannerImage,
     getSettings, saveSettings,
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
