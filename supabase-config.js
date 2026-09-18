@@ -67,5 +67,21 @@ window.SUPABASE_CONFIG = {
        동의 화면 제목이 'tenai.kr' 로 뜹니다. 값을 비우거나 구글
        콘솔의 '승인된 자바스크립트 원본' 에 이 사이트 주소가 없으면
        예전처럼 Supabase 를 거치는 이동 방식으로 자동 되돌아갑니다. */
-    googleClientId: "214144894980-0digtof5slv08n9i6puo5hjsbba1g2fq.apps.googleusercontent.com"
+    googleClientId: "214144894980-0digtof5slv08n9i6puo5hjsbba1g2fq.apps.googleusercontent.com",
+
+    /* 구글 콘솔의 '승인된 자바스크립트 원본' 에 실제로 등록한 주소들.
+       ---------------------------------------------------------------
+       여기 없는 주소에서는 구글 버튼을 아예 시도하지 않는다.
+
+       왜 목록이 필요한가
+         등록되지 않은 주소에서 구글은 403 을 받고도 '겉보기에 똑같은'
+         버튼을 그린다 — 로고도 글자도 다 있는데 눌러도 아무 일이 없다.
+         DOM 으로도 높이로도 성공과 구분되지 않는다. 그런 버튼을 내거느니
+         예전 방식 버튼을 그대로 두는 편이 낫다.
+
+       콘솔에 주소를 추가했으면 여기에도 같이 적어 주세요. 두 곳이
+       어긋나면 그냥 예전 방식으로 동작할 뿐, 로그인이 끊기지는 않습니다. */
+    googleJsOrigins: [
+        "https://deploy-preview-7--amazing-cactus-dfd8d4.netlify.app"
+    ]
 };

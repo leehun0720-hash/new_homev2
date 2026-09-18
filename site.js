@@ -630,21 +630,24 @@ function loadGsiScript() {
      신호는 이것뿐이다 — 403 은 iframe 이라 performance 에 안 잡히고,
      교차 출처라 responseStatus 도 0 으로 가려진다.
 
-   console.error 를 잠깐만 빌린다. 원래 함수는 그대로 불러 주고,
-   판정이 끝나면 곧바로 돌려놓는다. */
-function watchGsiErrors() {
+   왜 이 파일이 뜨자마자 설치하나
+     구글 스크립트는 불러오는 순간 console.error 를 자기 안에 붙잡아
+     둔다. 스크립트를 부른 '뒤에' 감싸면 우리 손을 거치지 않는다.
+     (이 실수로 한 번 놓쳤다 — 미리보기에서 오류가 두 번 났는데도
+      감지하지 못했다.) 그래서 무조건 먼저 건다.
+
+   원래 함수는 항상 그대로 불러 준다 — 로그를 삼키지 않는다. */
+let gsiComplained = false;
+(function watchGsiErrors() {
+    if (typeof console === 'undefined' || typeof console.error !== 'function') return;
     const original = console.error;
-    const seen = { failed: false };
     console.error = function (...args) {
         try {
-            const line = args.map(a => String(a)).join(' ');
-            if (line.includes('GSI_LOGGER')) seen.failed = true;
+            if (args.map(a => String(a)).join(' ').includes('GSI_LOGGER')) gsiComplained = true;
         } catch (e) { /* 무슨 일이 있어도 원래 로그는 막지 않는다 */ }
         return original.apply(this, args);
     };
-    seen.stop = () => { console.error = original; };
-    return seen;
-}
+})();
 
 const GSI_BTN_OPTS = {
     type: 'standard', theme: 'outline', size: 'large',
@@ -666,19 +669,20 @@ async function initGoogleButton() {
     let nonce;
     try { nonce = await makeGoogleNonce(); } catch (e) { return; }
 
-    const width = Math.min(400, Math.max(200,
-        Math.round(slot.getBoundingClientRect().width) || 320));
+    /* 버튼이 들어갈 실제 폭. 슬롯이 아직 숨겨져 있으므로 부모에서 잰다. */
+    const room = Math.round((slot.parentElement || slot).getBoundingClientRect().width)
+        || Math.round(slot.getBoundingClientRect().width) || 320;
+    const width = Math.min(400, Math.max(200, room));
 
     /* 먼저 화면 밖에서 시험 삼아 한 번 그려 본다.
        여기서 판정이 끝날 때까지 우리 버튼은 그대로 둔다 — 멀쩡한 버튼을
        치워 놓고 나중에 되돌리는 일이 없도록. */
-    const watch = watchGsiErrors();
     const probe = document.createElement('div');
     probe.setAttribute('aria-hidden', 'true');
     probe.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + width + 'px;pointer-events:none;';
     document.body.appendChild(probe);
 
-    const cleanUp = () => { watch.stop(); probe.remove(); };
+    const cleanUp = () => { probe.remove(); };
 
     try {
         google.accounts.id.initialize({
@@ -713,16 +717,24 @@ async function initGoogleButton() {
     const started = Date.now();
     let drawn = false;
     while (Date.now() - started < 5000) {
-        if (watch.failed) { cleanUp(); return; }         // 구글이 거부했다
+        if (gsiComplained) { cleanUp(); return; }        // 구글이 거부했다
         if (!drawn && probe.getBoundingClientRect().height > 0) drawn = true;
         if (drawn && Date.now() - started >= QUIET_MS) break;
         await new Promise(r => setTimeout(r, 120));
     }
-    if (!drawn || watch.failed) { cleanUp(); return; }
+    if (!drawn || gsiComplained) { cleanUp(); return; }
+
+    /* 폭이 맞는지도 시험 자리에서 본다.
+       구글 버튼은 min-width 가 내용 길이로 잡혀 있어, 폭을 작게 달라고
+       해도 글자가 길면 그만큼 삐져나온다. 잘라 붙이거나 축소하느니
+       안 쓰는 편이 낫다 — 예전 버튼은 어느 폭에서도 멀쩡하다. */
+    const inner = probe.querySelector('[role="button"]');
+    const drawnW = inner ? Math.ceil(inner.getBoundingClientRect().width) : 0;
+    if (!drawnW || drawnW > room) { cleanUp(); return; }
 
     cleanUp();
 
-    // 여기까지 왔으면 구글이 이 주소를 받아 준 것이다. 이제 진짜 자리에 건다.
+    // 여기까지 왔으면 구글이 이 주소를 받아 주고 폭도 맞는다. 진짜 자리에 건다.
     slot.hidden = false;
     try {
         google.accounts.id.renderButton(slot, Object.assign({ width }, GSI_BTN_OPTS));
@@ -731,11 +743,12 @@ async function initGoogleButton() {
         return;
     }
     for (let i = 0; i < 20; i++) {
-        if (slot.getBoundingClientRect().height > 0) {
+        if (!gsiComplained && slot.getBoundingClientRect().height > 0) {
             slot.classList.add('is-ready');
             ours.hidden = true;
             return;
         }
+        if (gsiComplained) break;
         await new Promise(r => setTimeout(r, 100));
     }
     slot.hidden = true;                          // 끝내 안 그려졌다 — 우리 버튼으로 간다
