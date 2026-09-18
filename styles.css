@@ -3778,3 +3778,92 @@ blockquote { letter-spacing: -0.025em; }
 
 /* 로그인 진행 중에는 다시 누를 수 없게 */
 .social-btn:disabled { opacity: 0.65; cursor: progress; transform: none; filter: none; }
+
+/* =====================================================================
+   약관 · 개인정보처리방침
+   ---------------------------------------------------------------------
+   읽으라고 만든 페이지다. 한 줄을 짧게 잡고 여백을 넉넉히 둬서
+   긴 글을 끝까지 따라갈 수 있게 한다.
+   ===================================================================== */
+.legal { padding: var(--section-padding) 5%; background: var(--brand-cream); }
+.legal-inner { max-width: 760px; margin: 0 auto; }
+
+.legal-updated {
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    font-size: 0.82rem; font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #8a6a47;
+    padding-bottom: 1.2rem;
+    border-bottom: 2px solid var(--brand-ink);
+    margin-bottom: 2rem;
+}
+.legal-lead {
+    font-size: 1.03rem; line-height: 1.9;
+    color: var(--brand-ink);
+    margin-bottom: 2.6rem;
+}
+.legal h2 {
+    font-size: 1.22rem; font-weight: 900;
+    color: var(--brand-ink);
+    margin: 2.8rem 0 0.9rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid #e0d2bb;
+}
+.legal h2:first-of-type { border-top: 0; padding-top: 0; }
+.legal h3 {
+    font-size: 1.02rem; font-weight: 800;
+    color: var(--brand-ink);
+    margin: 1.9rem 0 0.7rem;
+}
+.legal p { font-size: 0.96rem; line-height: 1.95; color: #6b4b2a; margin-bottom: 1rem; }
+.legal a { color: var(--brand-accent); text-decoration: underline; text-underline-offset: 3px; }
+.legal a:hover { color: var(--brand-ink); }
+
+.legal-note {
+    background: #f9f3e6;
+    border-left: 3px solid var(--brand-orange);
+    padding: 1rem 1.2rem;
+    margin: 1.2rem 0 1.4rem;
+    font-size: 0.92rem;
+}
+.legal-list { margin: 0.6rem 0 1.4rem; padding-left: 1.2rem; }
+.legal-list li {
+    font-size: 0.96rem; line-height: 1.9;
+    color: #6b4b2a;
+    margin-bottom: 0.5rem;
+    padding-left: 0.3rem;
+}
+.legal-list li::marker { color: var(--brand-orange); }
+
+.legal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.6rem;
+    font-size: 0.92rem;
+}
+.legal-table th, .legal-table td {
+    border: 1px solid #e0d2bb;
+    padding: 0.7rem 0.9rem;
+    text-align: left;
+    line-height: 1.7;
+    vertical-align: top;
+}
+.legal-table thead th { background: var(--brand-ink); color: var(--brand-cream); font-weight: 800; }
+.legal-table tbody th { background: #f3ead9; color: var(--brand-ink); font-weight: 800; white-space: nowrap; }
+.legal-table td { color: #6b4b2a; }
+
+/* 푸터의 약관 링크 */
+.footer-legal { display: inline-flex; gap: 1rem; margin-left: 1rem; }
+.footer-legal a { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 760px) {
+    .legal h2 { font-size: 1.12rem; }
+    .legal-table { font-size: 0.86rem; }
+    .legal-table th, .legal-table td { padding: 0.55rem 0.6rem; }
+    /* 표가 좁은 화면을 밀어내지 않게 가로로 넘겨 본다 */
+    .legal-inner { overflow-x: auto; }
+    /* 손가락으로 누를 만한 크기 (WCAG 2.5.8). flex 자식이라 display 가
+       block 으로 잡히므로 '문장 속 링크' 예외에 들지 않는다 — 높이를 준다. */
+    .footer-legal { display: flex; margin: 0.4rem 0 0; gap: 1.4rem; }
+    .footer-legal a { display: inline-flex; align-items: center; min-height: 44px; }
+}
