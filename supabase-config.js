@@ -55,5 +55,17 @@
    ===================================================================== */
 window.SUPABASE_CONFIG = {
     url: "https://pjulgdlbgaobyvnfjzhe.supabase.co",
-    anonKey: "sb_publishable_VS76_GDWpXDWhvjA_S-O_A_cNujom4t"
+    anonKey: "sb_publishable_VS76_GDWpXDWhvjA_S-O_A_cNujom4t",
+
+    /* 구글 로그인 화면에 우리 도메인을 띄우기 위한 클라이언트 ID.
+       ---------------------------------------------------------------
+       비밀이 아닙니다. 구글이 로그인 요청마다 주소창에 실어 보내는
+       공개 값이라 브라우저에 그대로 둡니다 (보안 비밀번호는 Supabase
+       대시보드에만 있고 여기에는 없습니다).
+
+       이 값이 있으면 구글이 발급한 ID 토큰을 브라우저에서 직접 받아
+       동의 화면 제목이 'tenai.kr' 로 뜹니다. 값을 비우거나 구글
+       콘솔의 '승인된 자바스크립트 원본' 에 이 사이트 주소가 없으면
+       예전처럼 Supabase 를 거치는 이동 방식으로 자동 되돌아갑니다. */
+    googleClientId: "214144894980-0digtof5slv08n9i6puo5hjsbba1g2fq.apps.googleusercontent.com"
 };

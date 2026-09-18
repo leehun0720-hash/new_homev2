@@ -570,8 +570,115 @@ const safeImg = u => {
 };
 
 /* ============ 구글 로그인 ============
-   버튼을 누르면 구글로 갔다가 /membership 으로 돌아온다.
-   돌아온 뒤 처리는 아래 handleOAuthReturn 이 맡는다. */
+
+   길이 둘 있다. 둘 다 같은 구글 계정으로, 같은 회원 정보에 닿는다.
+
+     (가) 구글이 그린 버튼  — 구글 스크립트가 페이지 안에서 ID 토큰을 바로
+          건네준다. 받는 쪽이 우리 도메인이라 동의 화면 제목이 'tenai.kr'.
+     (나) 우리 버튼        — 주소창을 Supabase → 구글 → 우리 사이트로 옮긴다.
+          토큰을 Supabase 가 받으므로 제목에 'xxxx.supabase.co' 가 뜬다.
+
+   (가)가 뜨면 (나)는 숨긴다. 구글 스크립트가 막히거나 이 도메인이 구글
+   콘솔의 '승인된 자바스크립트 원본' 에 없으면 (가)는 아예 그려지지 않으므로
+   (나)가 그대로 남는다 — 어느 쪽이든 로그인은 끊기지 않는다. */
+
+/* nonce 한 쌍을 만든다. 구글에는 해시한 값을, Supabase 에는 원본을 준다.
+   (Supabase 가 원본을 해시해 토큰 속 값과 맞춰 본다) */
+async function makeGoogleNonce() {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const raw = btoa(String.fromCharCode(...bytes)).replace(/[+/=]/g, '');
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+    const hashed = Array.from(new Uint8Array(digest))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+    return { raw, hashed };
+}
+
+/* 구글 스크립트를 한 번만 불러온다 */
+let gsiLoading = null;
+function loadGsiScript() {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+        return Promise.resolve(true);
+    }
+    if (gsiLoading) return gsiLoading;
+    gsiLoading = new Promise(resolve => {
+        const el = document.createElement('script');
+        el.src = 'https://accounts.google.com/gsi/client';
+        el.async = true;
+        el.defer = true;
+        el.onload = () => resolve(!!(window.google && window.google.accounts && window.google.accounts.id));
+        el.onerror = () => resolve(false);
+        document.head.appendChild(el);
+        // 네트워크가 막힌 곳(사내망 등)에서 onerror 가 오래 걸릴 수 있다
+        setTimeout(() => resolve(!!(window.google && window.google.accounts && window.google.accounts.id)), 8000);
+    });
+    return gsiLoading;
+}
+
+async function initGoogleButton() {
+    const slot = document.getElementById('googleGsiSlot');
+    const ours = document.getElementById('googleLoginBtn');
+    if (!slot || !ours) return;
+
+    const clientId = (window.TenStore && TenStore.googleClientId) || '';
+    if (!clientId) return;                       // 로컬 모드이거나 ID 미설정 — 우리 버튼으로 간다
+    if (!(window.crypto && crypto.subtle)) return;   // 구형 브라우저
+
+    if (!(await loadGsiScript())) return;
+
+    let nonce;
+    try { nonce = await makeGoogleNonce(); } catch (e) { return; }
+
+    /* 빈 div 는 높이 0 이라 미리 펴 두어도 화면이 흔들리지 않는다.
+       구글은 숨겨진(display:none) 자리에는 버튼을 그리지 못하므로 먼저 편다. */
+    slot.hidden = false;
+
+    try {
+        google.accounts.id.initialize({
+            client_id: clientId,
+            nonce: nonce.hashed,
+            auto_select: false,          // 묻지 않고 조용히 들어가지 않는다
+            cancel_on_tap_outside: true,
+            itp_support: true,
+            callback: async (res) => {
+                try {
+                    await TenStore.signInWithGoogleIdToken(res && res.credential, nonce.raw);
+                    const profile = await TenStore.getMemberProfile();
+                    await refreshMemberUI();
+                    showToast(`${(profile && (profile.name || profile.email)) || '회원'}님, 환영합니다.`);
+                } catch (e) {
+                    showToast(e.message || '구글 로그인을 마치지 못했습니다.');
+                }
+            }
+        });
+
+        // 버튼 너비는 정수 픽셀만 받는다(200~400)
+        const w = Math.round(slot.getBoundingClientRect().width) || 320;
+        google.accounts.id.renderButton(slot, {
+            type: 'standard', theme: 'outline', size: 'large',
+            text: 'continue_with', shape: 'rectangular',
+            logo_alignment: 'center', locale: 'ko',
+            width: Math.min(400, Math.max(200, w))
+        });
+    } catch (e) {
+        slot.hidden = true;
+        return;                                  // 무슨 일이 있어도 우리 버튼은 남는다
+    }
+
+    /* 구글이 실제로 버튼을 그렸을 때만 바꿔 단다.
+       '승인된 자바스크립트 원본' 에 이 주소가 없으면 구글은 콘솔에만
+       알리고 아무것도 그리지 않는다 — 그 경우 높이가 0 으로 남아 걸러진다. */
+    for (let i = 0; i < 20; i++) {
+        if (slot.getBoundingClientRect().height > 0) {
+            slot.classList.add('is-ready');
+            ours.hidden = true;
+            return;
+        }
+        await new Promise(r => setTimeout(r, 150));
+    }
+    slot.hidden = true;                          // 끝내 안 그려졌다 — 우리 버튼으로 간다
+}
+
 onId('googleLoginBtn', 'click', async () => {
     const btn = document.getElementById('googleLoginBtn');
     const label = btn.innerHTML;
@@ -1157,6 +1264,8 @@ onId('memberSignupForm', 'submit', async e => {
 
 // 로그아웃
 onId('memberLogoutBtn', 'click', async () => {
+    // 구글이 기억해 둔 계정을 지운다 — 로그아웃했는데 다시 들어가지는 일을 막는다
+    try { google.accounts.id.disableAutoSelect(); } catch (e) { /* 구글 스크립트가 없을 수도 있다 */ }
     await TenStore.signOutMember();
     await refreshMemberUI();
     showToast('로그아웃되었습니다.');
@@ -1402,6 +1511,8 @@ async function initPromoBanner() {
     try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
     try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
     try { await handleOAuthReturn(); } catch (e) { console.warn('구글 로그인 복귀 처리 실패', e); }
+    // 구글이 그린 버튼은 있으면 좋고 없어도 그만이라 기다리지 않는다
+    initGoogleButton().catch(e => console.warn('구글 버튼 준비 실패', e));
     // 팝업은 본문이 다 그려진 뒤에 올린다
     try { await initPromoBanner(); } catch (e) { console.warn('홍보 배너 표시 실패', e); }
 })();
