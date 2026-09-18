@@ -52,6 +52,19 @@ body {
     overflow-wrap: break-word;
 }
 
+/* hidden 속성을 붙였는데도 화면에 남는 일이 없게 한다.
+
+   [hidden] 의 display:none 은 브라우저 기본 스타일이라, 작성자가 쓴
+   어떤 display 규칙에도 진다. 그래서 `.login-fields { display: grid }`
+   같은 한 줄이 <form hidden> 을 그대로 보이게 만든다 —
+   실제로 멤버십 화면에서 회원가입 폼이 로그인 폼 아래 늘 펼쳐져 있었고,
+   검색창의 지우기(✕) 버튼도 검색어가 없는데 떠 있었다.
+
+   !important 를 쓰는 이유는 이것이 '숨기라'는 명령이기 때문이다.
+   숨김이 다른 규칙에 밀려 실패하면 화면이 깨진다. normalize.css 도
+   같은 이유로 같은 한 줄을 둔다. */
+[hidden] { display: none !important; }
+
 .outfit { font-family: 'Outfit', system-ui, -apple-system, sans-serif; }
 .container { max-width: var(--container-max); margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
 
