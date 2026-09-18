@@ -615,6 +615,43 @@ function loadGsiScript() {
     return gsiLoading;
 }
 
+/* 구글이 이 주소를 승인했는지 확인한다.
+
+   왜 눈으로 못 고르나
+     '승인된 자바스크립트 원본' 에 이 주소가 없으면 구글은 403 을 받고도
+     겉보기에 똑같은 버튼을 그린다 — 로고도 글자도 다 있는데 눌러도
+     아무 일이 없다. 높이도 DOM 도 성공했을 때와 구분되지 않는다.
+     (배포 미리보기에서 실제로 확인했다: 40px, role=button, 구글 로고,
+      'Continue with Google' 까지 똑같다.)
+
+   그래서 구글이 직접 뱉는 말을 듣는다
+     이때 구글은 console.error 로 '[GSI_LOGGER]: The given origin is not
+     allowed for the given client ID.' 를 남긴다. 페이지에서 잡을 수 있는
+     신호는 이것뿐이다 — 403 은 iframe 이라 performance 에 안 잡히고,
+     교차 출처라 responseStatus 도 0 으로 가려진다.
+
+   console.error 를 잠깐만 빌린다. 원래 함수는 그대로 불러 주고,
+   판정이 끝나면 곧바로 돌려놓는다. */
+function watchGsiErrors() {
+    const original = console.error;
+    const seen = { failed: false };
+    console.error = function (...args) {
+        try {
+            const line = args.map(a => String(a)).join(' ');
+            if (line.includes('GSI_LOGGER')) seen.failed = true;
+        } catch (e) { /* 무슨 일이 있어도 원래 로그는 막지 않는다 */ }
+        return original.apply(this, args);
+    };
+    seen.stop = () => { console.error = original; };
+    return seen;
+}
+
+const GSI_BTN_OPTS = {
+    type: 'standard', theme: 'outline', size: 'large',
+    text: 'continue_with', shape: 'rectangular',
+    logo_alignment: 'center', locale: 'ko'
+};
+
 async function initGoogleButton() {
     const slot = document.getElementById('googleGsiSlot');
     const ours = document.getElementById('googleLoginBtn');
@@ -629,9 +666,19 @@ async function initGoogleButton() {
     let nonce;
     try { nonce = await makeGoogleNonce(); } catch (e) { return; }
 
-    /* 빈 div 는 높이 0 이라 미리 펴 두어도 화면이 흔들리지 않는다.
-       구글은 숨겨진(display:none) 자리에는 버튼을 그리지 못하므로 먼저 편다. */
-    slot.hidden = false;
+    const width = Math.min(400, Math.max(200,
+        Math.round(slot.getBoundingClientRect().width) || 320));
+
+    /* 먼저 화면 밖에서 시험 삼아 한 번 그려 본다.
+       여기서 판정이 끝날 때까지 우리 버튼은 그대로 둔다 — 멀쩡한 버튼을
+       치워 놓고 나중에 되돌리는 일이 없도록. */
+    const watch = watchGsiErrors();
+    const probe = document.createElement('div');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + width + 'px;pointer-events:none;';
+    document.body.appendChild(probe);
+
+    const cleanUp = () => { watch.stop(); probe.remove(); };
 
     try {
         google.accounts.id.initialize({
@@ -651,30 +698,45 @@ async function initGoogleButton() {
                 }
             }
         });
-
-        // 버튼 너비는 정수 픽셀만 받는다(200~400)
-        const w = Math.round(slot.getBoundingClientRect().width) || 320;
-        google.accounts.id.renderButton(slot, {
-            type: 'standard', theme: 'outline', size: 'large',
-            text: 'continue_with', shape: 'rectangular',
-            logo_alignment: 'center', locale: 'ko',
-            width: Math.min(400, Math.max(200, w))
-        });
+        google.accounts.id.renderButton(probe, Object.assign({ width }, GSI_BTN_OPTS));
     } catch (e) {
-        slot.hidden = true;
+        cleanUp();
         return;                                  // 무슨 일이 있어도 우리 버튼은 남는다
     }
 
-    /* 구글이 실제로 버튼을 그렸을 때만 바꿔 단다.
-       '승인된 자바스크립트 원본' 에 이 주소가 없으면 구글은 콘솔에만
-       알리고 아무것도 그리지 않는다 — 그 경우 높이가 0 으로 남아 걸러진다. */
+    /* 버튼이 그려지고 나서도 한참 더 듣는다.
+       구글의 거부(403)와 그에 따른 오류 기록은 버튼이 그려진 '뒤에'
+       도착한다. 서둘러 판정하면 죽은 버튼을 진짜인 줄 알고 내건다.
+       시험용 자리는 화면 밖이라 기다리는 동안에도 우리 버튼이 그대로
+       보인다 — 늦어서 손해 보는 것은 없다. */
+    const QUIET_MS = 2400;                               // 이만큼 조용해야 받아들인다
+    const started = Date.now();
+    let drawn = false;
+    while (Date.now() - started < 5000) {
+        if (watch.failed) { cleanUp(); return; }         // 구글이 거부했다
+        if (!drawn && probe.getBoundingClientRect().height > 0) drawn = true;
+        if (drawn && Date.now() - started >= QUIET_MS) break;
+        await new Promise(r => setTimeout(r, 120));
+    }
+    if (!drawn || watch.failed) { cleanUp(); return; }
+
+    cleanUp();
+
+    // 여기까지 왔으면 구글이 이 주소를 받아 준 것이다. 이제 진짜 자리에 건다.
+    slot.hidden = false;
+    try {
+        google.accounts.id.renderButton(slot, Object.assign({ width }, GSI_BTN_OPTS));
+    } catch (e) {
+        slot.hidden = true;
+        return;
+    }
     for (let i = 0; i < 20; i++) {
         if (slot.getBoundingClientRect().height > 0) {
             slot.classList.add('is-ready');
             ours.hidden = true;
             return;
         }
-        await new Promise(r => setTimeout(r, 150));
+        await new Promise(r => setTimeout(r, 100));
     }
     slot.hidden = true;                          // 끝내 안 그려졌다 — 우리 버튼으로 간다
 }
