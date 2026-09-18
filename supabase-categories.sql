@@ -55,6 +55,18 @@ create index        if not exists categories_scope_order_idx on categories (scop
 alter table qna add column if not exists category text not null default '';
 create index if not exists qna_category_idx on qna (category);
 
+-- 익명 방문자에게 분류 컬럼 읽기 권한을 준다.
+--
+-- 왜 이 한 줄이 필요한가
+--   supabase-security.sql 의 `revoke select (email) on qna from anon` 때문에
+--   qna 의 SELECT 권한이 '테이블 전체'에서 '그 시점의 컬럼 목록'으로 바뀌어
+--   있다. 그래서 나중에 추가한 컬럼은 자동으로 포함되지 않는다.
+--   이 줄이 없으면 공개 사이트의 Q&A 분류 필터가 동작하지 않는다
+--   (목록은 정상 표시되지만 분류를 못 읽어 칩 줄이 숨겨진다).
+--
+-- email 은 계속 차단된 채로 남는다 — 분류 컬럼 하나만 여는 것이다.
+grant select (category) on qna to anon;
+
 -- ---------- 3) RLS: 누구나 읽기, 쓰기는 관리자만 ----------
 -- 분류는 공개 사이트의 필터에 쓰이므로 읽기는 열어 둡니다.
 alter table categories enable row level security;
