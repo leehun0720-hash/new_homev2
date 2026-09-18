@@ -1511,11 +1511,16 @@ async function initPromoBanner() {
     try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
     try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
     try { await handleOAuthReturn(); } catch (e) { console.warn('구글 로그인 복귀 처리 실패', e); }
-    // 구글이 그린 버튼은 있으면 좋고 없어도 그만이라 기다리지 않는다
-    initGoogleButton().catch(e => console.warn('구글 버튼 준비 실패', e));
     // 팝업은 본문이 다 그려진 뒤에 올린다
     try { await initPromoBanner(); } catch (e) { console.warn('홍보 배너 표시 실패', e); }
 })();
+
+/* 구글 버튼도 위 줄에 세우지 않는다.
+   이 일은 사이트 데이터와 아무 상관이 없는데, 줄 끝에 세워 두면 분류·핸드북·
+   강의·앱·소식·Q&A 조회가 다 끝난 뒤에야 시작한다. 그러면 느린 회선에서
+   사용자가 버튼을 누르려는 순간에 버튼이 바뀐다 — 가장 나쁜 때다.
+   따로 떼어 처음부터 나란히 달리게 한다. */
+initGoogleButton().catch(e => console.warn('구글 버튼 준비 실패', e));
 
 // 외부 리더보드는 독립적으로 조회한다 — 지연되거나 실패해도 본문 로딩과 무관
 renderTenosRank().catch(e => console.warn('K-AI 리더보드 순위 조회 실패', e));
