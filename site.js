@@ -570,8 +570,191 @@ const safeImg = u => {
 };
 
 /* ============ 구글 로그인 ============
-   버튼을 누르면 구글로 갔다가 /membership 으로 돌아온다.
-   돌아온 뒤 처리는 아래 handleOAuthReturn 이 맡는다. */
+
+   길이 둘 있다. 둘 다 같은 구글 계정으로, 같은 회원 정보에 닿는다.
+
+     (가) 구글이 그린 버튼  — 구글 스크립트가 페이지 안에서 ID 토큰을 바로
+          건네준다. 받는 쪽이 우리 도메인이라 동의 화면 제목이 'tenai.kr'.
+     (나) 우리 버튼        — 주소창을 Supabase → 구글 → 우리 사이트로 옮긴다.
+          토큰을 Supabase 가 받으므로 제목에 'xxxx.supabase.co' 가 뜬다.
+
+   (가)가 뜨면 (나)는 숨긴다. 구글 스크립트가 막히거나 이 도메인이 구글
+   콘솔의 '승인된 자바스크립트 원본' 에 없으면 (가)는 아예 그려지지 않으므로
+   (나)가 그대로 남는다 — 어느 쪽이든 로그인은 끊기지 않는다. */
+
+/* nonce 한 쌍을 만든다. 구글에는 해시한 값을, Supabase 에는 원본을 준다.
+   (Supabase 가 원본을 해시해 토큰 속 값과 맞춰 본다) */
+async function makeGoogleNonce() {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const raw = btoa(String.fromCharCode(...bytes)).replace(/[+/=]/g, '');
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+    const hashed = Array.from(new Uint8Array(digest))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+    return { raw, hashed };
+}
+
+/* 구글 스크립트를 한 번만 불러온다 */
+let gsiLoading = null;
+function loadGsiScript() {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+        return Promise.resolve(true);
+    }
+    if (gsiLoading) return gsiLoading;
+    gsiLoading = new Promise(resolve => {
+        const el = document.createElement('script');
+        el.src = 'https://accounts.google.com/gsi/client';
+        el.async = true;
+        el.defer = true;
+        el.onload = () => resolve(!!(window.google && window.google.accounts && window.google.accounts.id));
+        el.onerror = () => resolve(false);
+        document.head.appendChild(el);
+        // 네트워크가 막힌 곳(사내망 등)에서 onerror 가 오래 걸릴 수 있다
+        setTimeout(() => resolve(!!(window.google && window.google.accounts && window.google.accounts.id)), 8000);
+    });
+    return gsiLoading;
+}
+
+/* 구글 버튼은 '등록된 주소'에서만 건다.
+
+   왜 눈으로 못 고르나
+     '승인된 자바스크립트 원본' 에 이 주소가 없으면 구글은 403 을 받고도
+     겉보기에 똑같은 버튼을 그린다 — 로고도 글자도 다 있는데 눌러도
+     아무 일이 없다. 배포 미리보기에서 직접 확인했다:
+     40px, role=button, 구글 로고 SVG, "Continue with Google" 까지 같다.
+
+   페이지에서 읽을 수 있는 신호를 다 재 봤지만 쓸 만한 것이 없었다.
+     · performance responseStatus → 교차 출처라 0 으로 가려짐
+     · /gsi/button 403           → iframe 이라 performance 에 안 잡힘
+     · DOM 구조·높이·글자         → 성공했을 때와 구분 안 됨
+     · [GSI_LOGGER] 콘솔 오류     → 우리 프레임으로 오지 않고, 나는
+                                    때조차 들쭉날쭉했다 (두 번 놓쳤다)
+
+   그래서 추측을 그만두고 설정으로 정한다. supabase-config.js 의
+   googleJsOrigins 에 적힌 주소에서만 시도한다. 그 목록은 사람이
+   구글 콘솔과 맞춰 두는 값이고, 어긋나 봐야 예전 방식으로 돌아갈 뿐이다. */
+
+/* 마지막 안전망 — 눌렀는데 아무 일도 없을 때.
+
+   등록된 주소만 쓰므로 여기까지 올 일은 없어야 한다. 그래도 구글
+   콘솔에서 주소가 빠지는 날이 오면 사용자는 '눌러도 안 되는 버튼'
+   앞에 서게 된다. 그때 길을 하나 더 열어 준다.
+
+   구글 버튼을 치우지는 않는다 — 창이 떠 있는 중일 수도 있으므로
+   멀쩡한 흐름을 끊지 않고, 예전 버튼만 다시 꺼내 놓는다. */
+let gsiCredentialSeen = false;
+function watchDeadClick(slot, ours) {
+    slot.addEventListener('click', () => {
+        setTimeout(() => {
+            if (gsiCredentialSeen || !ours.hidden) return;
+            ours.hidden = false;
+            showToast('구글 창이 열리지 않으면 아래 버튼으로 로그인해 주세요.');
+        }, 4000);
+    }, true);
+}
+
+const GSI_BTN_OPTS = {
+    type: 'standard', theme: 'outline', size: 'large',
+    text: 'continue_with', shape: 'rectangular',
+    logo_alignment: 'center', locale: 'ko'
+};
+
+async function initGoogleButton() {
+    const slot = document.getElementById('googleGsiSlot');
+    const ours = document.getElementById('googleLoginBtn');
+    if (!slot || !ours) return;
+
+    const clientId = (window.TenStore && TenStore.googleClientId) || '';
+    if (!clientId) return;                       // 로컬 모드이거나 ID 미설정 — 우리 버튼으로 간다
+    if (!(window.crypto && crypto.subtle)) return;   // 구형 브라우저
+
+    if (!(await loadGsiScript())) return;
+
+    let nonce;
+    try { nonce = await makeGoogleNonce(); } catch (e) { return; }
+
+    /* 버튼이 들어갈 실제 폭. 슬롯이 아직 숨겨져 있으므로 부모에서 잰다. */
+    const room = Math.round((slot.parentElement || slot).getBoundingClientRect().width)
+        || Math.round(slot.getBoundingClientRect().width) || 320;
+    const width = Math.min(400, Math.max(200, room));
+
+    /* 먼저 화면 밖에서 시험 삼아 한 번 그려 본다.
+       여기서 판정이 끝날 때까지 우리 버튼은 그대로 둔다 — 멀쩡한 버튼을
+       치워 놓고 나중에 되돌리는 일이 없도록. */
+    const probe = document.createElement('div');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + width + 'px;pointer-events:none;';
+    document.body.appendChild(probe);
+
+    const cleanUp = () => { probe.remove(); };
+
+    try {
+        google.accounts.id.initialize({
+            client_id: clientId,
+            nonce: nonce.hashed,
+            auto_select: false,          // 묻지 않고 조용히 들어가지 않는다
+            cancel_on_tap_outside: true,
+            itp_support: true,
+            callback: async (res) => {
+                gsiCredentialSeen = true;
+                try {
+                    await TenStore.signInWithGoogleIdToken(res && res.credential, nonce.raw);
+                    const profile = await TenStore.getMemberProfile();
+                    await refreshMemberUI();
+                    showToast(`${(profile && (profile.name || profile.email)) || '회원'}님, 환영합니다.`);
+                } catch (e) {
+                    showToast(e.message || '구글 로그인을 마치지 못했습니다.');
+                }
+            }
+        });
+        google.accounts.id.renderButton(probe, Object.assign({ width }, GSI_BTN_OPTS));
+    } catch (e) {
+        cleanUp();
+        return;                                  // 무슨 일이 있어도 우리 버튼은 남는다
+    }
+
+    /* 구글이 버튼을 다 그릴 때까지 기다린다. 시험 자리는 화면 밖이라
+       기다리는 동안에도 우리 버튼이 그대로 보인다 — 늦어서 손해 볼 것이 없다. */
+    const QUIET_MS = 1200;
+    const started = Date.now();
+    let drawn = false;
+    while (Date.now() - started < 5000) {
+        if (!drawn && probe.getBoundingClientRect().height > 0) drawn = true;
+        if (drawn && Date.now() - started >= QUIET_MS) break;
+        await new Promise(r => setTimeout(r, 120));
+    }
+    if (!drawn) { cleanUp(); return; }
+
+    /* 폭이 맞는지도 시험 자리에서 본다.
+       구글 버튼은 min-width 가 내용 길이로 잡혀 있어, 폭을 작게 달라고
+       해도 글자가 길면 그만큼 삐져나온다. 잘라 붙이거나 축소하느니
+       안 쓰는 편이 낫다 — 예전 버튼은 어느 폭에서도 멀쩡하다. */
+    const inner = probe.querySelector('[role="button"]');
+    const drawnW = inner ? Math.ceil(inner.getBoundingClientRect().width) : 0;
+    if (!drawnW || drawnW > room) { cleanUp(); return; }
+
+    cleanUp();
+
+    // 여기까지 왔으면 구글이 이 주소를 받아 주고 폭도 맞는다. 진짜 자리에 건다.
+    slot.hidden = false;
+    try {
+        google.accounts.id.renderButton(slot, Object.assign({ width }, GSI_BTN_OPTS));
+    } catch (e) {
+        slot.hidden = true;
+        return;
+    }
+    for (let i = 0; i < 20; i++) {
+        if (slot.getBoundingClientRect().height > 0) {
+            slot.classList.add('is-ready');
+            ours.hidden = true;
+            watchDeadClick(slot, ours);
+            return;
+        }
+        await new Promise(r => setTimeout(r, 100));
+    }
+    slot.hidden = true;                          // 끝내 안 그려졌다 — 우리 버튼으로 간다
+}
+
 onId('googleLoginBtn', 'click', async () => {
     const btn = document.getElementById('googleLoginBtn');
     const label = btn.innerHTML;
@@ -1157,6 +1340,8 @@ onId('memberSignupForm', 'submit', async e => {
 
 // 로그아웃
 onId('memberLogoutBtn', 'click', async () => {
+    // 구글이 기억해 둔 계정을 지운다 — 로그아웃했는데 다시 들어가지는 일을 막는다
+    try { google.accounts.id.disableAutoSelect(); } catch (e) { /* 구글 스크립트가 없을 수도 있다 */ }
     await TenStore.signOutMember();
     await refreshMemberUI();
     showToast('로그아웃되었습니다.');
@@ -1405,6 +1590,13 @@ async function initPromoBanner() {
     // 팝업은 본문이 다 그려진 뒤에 올린다
     try { await initPromoBanner(); } catch (e) { console.warn('홍보 배너 표시 실패', e); }
 })();
+
+/* 구글 버튼도 위 줄에 세우지 않는다.
+   이 일은 사이트 데이터와 아무 상관이 없는데, 줄 끝에 세워 두면 분류·핸드북·
+   강의·앱·소식·Q&A 조회가 다 끝난 뒤에야 시작한다. 그러면 느린 회선에서
+   사용자가 버튼을 누르려는 순간에 버튼이 바뀐다 — 가장 나쁜 때다.
+   따로 떼어 처음부터 나란히 달리게 한다. */
+initGoogleButton().catch(e => console.warn('구글 버튼 준비 실패', e));
 
 // 외부 리더보드는 독립적으로 조회한다 — 지연되거나 실패해도 본문 로딩과 무관
 renderTenosRank().catch(e => console.warn('K-AI 리더보드 순위 조회 실패', e));

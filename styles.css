@@ -1445,6 +1445,12 @@ section { padding: var(--section-padding) 5%; position: relative; }
 .social-btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
 .social-btn.google { background: var(--white); color: #1f2937; box-shadow: 0 6px 20px rgba(255,255,255,0.08); }
 .social-btn.kakao { background: var(--kakao); color: #191600; box-shadow: 0 6px 20px rgba(254,229,0,0.12); }
+/* 구글이 직접 그려 넣는 버튼 자리.
+   비어 있으면(=구글이 안 그렸으면) 높이도 여백도 0 이라 자리를 먹지 않는다.
+   버튼이 들어온 뒤에만 아래 여백을 붙인다. */
+.gsi-slot { display: flex; justify-content: center; }
+.gsi-slot.is-ready { margin-bottom: 0.8rem; }
+
 .login-divider {
     display: flex; align-items: center; gap: 0.9rem;
     color: var(--gray-600); font-size: 0.78rem;

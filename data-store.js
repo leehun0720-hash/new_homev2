@@ -68,26 +68,35 @@ const SEED_QNA = [
 
 /* ---------- 접속 정보 결정: env(.env.local) → window.SUPABASE_CONFIG ---------- */
 function resolveConfig() {
-    let url = '', key = '';
+    let url = '', key = '', googleId = '';
     try {
         const env = import.meta.env || {};
         url = env.NEXT_PUBLIC_SUPABASE_URL || env.VITE_SUPABASE_URL || '';
         key = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY || '';
+        googleId = env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || env.VITE_GOOGLE_CLIENT_ID || '';
     } catch (e) { /* Vite 외 환경 */ }
+    const cfg = window.SUPABASE_CONFIG || {};
     if (!url || !key) {
-        const cfg = window.SUPABASE_CONFIG || {};
         if (cfg.url && !/^YOUR_/.test(cfg.url)) url = cfg.url;
         if (cfg.anonKey && !/^YOUR_/.test(cfg.anonKey)) key = cfg.anonKey;
     }
-    return { url, key };
+    if (!googleId && cfg.googleClientId && !/^YOUR_/.test(cfg.googleClientId)) {
+        googleId = cfg.googleClientId;
+    }
+    const origins = Array.isArray(cfg.googleJsOrigins) ? cfg.googleJsOrigins : [];
+    return { url, key, googleId, origins };
 }
 
 /* ---------- 모드 감지 (Supabase 또는 로컬) ---------- */
 let sb = null;      // Supabase 클라이언트
 let mode = 'local';
 let sbUrl = '', sbKey = '';   // OAuth 제공자 확인처럼 REST 로 직접 물을 때 쓴다
+let googleClientId = '';      // 구글이 브라우저에 바로 ID 토큰을 줄 때 쓰는 공개 값
+let googleJsOrigins = [];     // 구글 콘솔에 실제로 등록한 주소들
 try {
-    const { url, key } = resolveConfig();
+    const { url, key, googleId, origins } = resolveConfig();
+    googleClientId = googleId || '';
+    googleJsOrigins = origins;
     if (url && key) {
         sb = createClient(url, key);
         sbUrl = url; sbKey = key;
@@ -200,6 +209,34 @@ async function signInWithGoogle(redirectTo) {
     });
     if (error) {
         // 제공자가 꺼져 있으면 Supabase 가 'provider is not enabled' 로 답한다
+        if (/provider.*not enabled|unsupported provider/i.test(error.message || '')) {
+            throw new Error('구글 로그인이 아직 켜져 있지 않습니다. Supabase 대시보드에서 Google 제공자를 활성화해 주세요.');
+        }
+        throw error;
+    }
+    return data;
+}
+
+/* ---- 구글이 브라우저에 바로 준 ID 토큰으로 로그인 ----
+
+   위의 signInWithGoogle 과 무엇이 다른가
+     signInWithGoogle 은 주소창을 Supabase → 구글 → 다시 우리 사이트로
+     옮긴다. 이때 토큰을 받는 주소가 Supabase 이므로 구글 동의 화면
+     제목에 'xxxx.supabase.co' 가 박힌다.
+     이 함수는 구글이 우리 페이지 안에서 곧바로 ID 토큰을 건네주는
+     방식이라, 토큰을 받는 쪽이 우리 도메인이고 제목도 'tenai.kr' 이 된다.
+
+   nonce 를 왜 같이 보내나
+     구글에는 '해시한 nonce' 를, Supabase 에는 '원본 nonce' 를 준다.
+     Supabase 가 원본을 해시해 토큰 안의 값과 맞춰 보므로, 남의
+     화면에서 가로챈 토큰을 그대로 되쓰는 일을 막는다. */
+async function signInWithGoogleIdToken(token, nonce) {
+    if (mode !== 'supabase') throw new Error('Supabase 연결 시 사용할 수 있습니다.');
+    if (!token) throw new Error('구글에서 로그인 정보를 받지 못했습니다.');
+    const { data, error } = await sb.auth.signInWithIdToken({
+        provider: 'google', token, nonce
+    });
+    if (error) {
         if (/provider.*not enabled|unsupported provider/i.test(error.message || '')) {
             throw new Error('구글 로그인이 아직 켜져 있지 않습니다. Supabase 대시보드에서 Google 제공자를 활성화해 주세요.');
         }
@@ -998,7 +1035,16 @@ window.TenStore = {
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
     signInAdmin, signOutAdmin, getAdminSession,
-    signUpMember, signInMember, signOutMember, signInWithGoogle, getMemberProfile, isAdminUser,
+    signUpMember, signInMember, signOutMember, signInWithGoogle, signInWithGoogleIdToken,
+    getMemberProfile, isAdminUser,
+    /* 구글이 브라우저에 직접 ID 토큰을 줄 수 있는 자리인지.
+       Supabase 모드이고, 클라이언트 ID 가 있고, 지금 주소가 구글 콘솔에
+       등록된 주소일 때만 참이다. 셋 중 하나라도 어긋나면 예전 방식으로 간다. */
+    get googleClientId() {
+        if (mode !== 'supabase' || !googleClientId) return '';
+        const here = (typeof location !== 'undefined' && location.origin) || '';
+        return googleJsOrigins.indexOf(here) >= 0 ? googleClientId : '';
+    },
     listHandbooks: handbookApi.list, saveHandbook: handbookApi.save, deleteHandbook: handbookApi.remove,
     listLectures: lectureApi.list,  saveLecture: lectureApi.save,   deleteLecture: lectureApi.remove,
     listApps: appApi.list,          saveApp: appApi.save,           deleteApp: appApi.remove
