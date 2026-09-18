@@ -34,11 +34,19 @@ function goMembership() {
    ===================================================== */
 let HANDBOOKS = [];
 
-const COURSE_META = {
-    vibecoding:  { name: '바이브코딩',      tagClass: 'tag-vibe',  coverClass: 'cover-vibe',  deco: 'V' },
-    genai:       { name: '생성형 AI 실무',  tagClass: 'tag-genai', coverClass: 'cover-genai', deco: 'G' },
-    ai_business: { name: 'AI 경영 전략',    tagClass: 'tag-biz',   coverClass: 'cover-biz',   deco: 'B' },
-};
+/* 핸드북 과정 표시 — 이름·색은 분류 관리(categories)에서 온다.
+   표지 워터마크 글자만 색조에서 끌어내 예전 모양을 유지한다. */
+const DECO_OF = { 'tag-vibe': 'V', 'tag-genai': 'G', 'tag-biz': 'B' };
+function courseMeta(slug) {
+    const c = catOf('handbook', slug);
+    const tone = catTone('handbook', slug);
+    return {
+        name: c ? c.name : (slug || '미분류'),
+        tagClass: tone,
+        coverClass: (TenStore.COVER_OF || {})[tone] || 'cover-biz',
+        deco: DECO_OF[tone] || 'B'
+    };
+}
 
 const ACCESS_META = {
     public:   { label: '전체 공개',   cls: 'access-public',   icon: '🌐' },
@@ -53,31 +61,23 @@ let LECTURES = [];
 let APPS = [];
 
 /* ============ 핸드북 탐색기 ============ */
+/* 과정(분류)과 레벨 두 축으로 좁히고, 제목·소개로 검색한다. */
 const grid = document.getElementById('handbookGrid');
-let curCourse = 'all', curLevel = 'all';
+let curLevel = 'all';
+let hbFilter = null;
 
-function renderHandbooks() {
-    if (!grid) return;
-    const items = limited(HANDBOOKS.filter(h =>
-        (curCourse === 'all' || h.course_tag === curCourse) &&
-        (curLevel === 'all' || h.level_tier === Number(curLevel))
-    ), grid);
-    if (!items.length) {
-        grid.innerHTML = '<div class="handbook-empty">해당 과정·레벨의 핸드북이 아직 없습니다.<br>새 교재는 관리자 콘솔 업로드 즉시 이곳에 반영됩니다.</div>';
-        return;
-    }
-    grid.innerHTML = items.map((h, i) => {
-        const c = COURSE_META[h.course_tag] || COURSE_META.vibecoding;
-        const a = ACCESS_META[h.access_level] || ACCESS_META.public;
-        const unlocked = h.access_level === 'public';
-        return `
+function handbookCardHtml(h, i) {
+    const c = courseMeta(h.course_tag);
+    const a = ACCESS_META[h.access_level] || ACCESS_META.public;
+    const unlocked = h.access_level === 'public';
+    return `
         <article class="handbook-card" style="animation-delay:${i * 0.06}s">
             <div class="hb-cover ${c.coverClass}" data-deco="${c.deco}${h.level_tier}">
                 <span class="hb-level outfit">LEVEL ${h.level_tier}</span>
             </div>
             <div class="hb-body">
                 <div class="hb-meta">
-                    <span class="hb-course-tag ${c.tagClass}">${c.name}</span>
+                    <span class="hb-course-tag ${c.tagClass}">${escHtml(c.name)}</span>
                     <span class="hb-access ${a.cls}">${a.icon} ${a.label}</span>
                 </div>
                 <h3 class="hb-title">${escHtml(h.title)}</h3>
@@ -87,18 +87,35 @@ function renderHandbooks() {
                 </button>
             </div>
         </article>`;
-    }).join('');
 }
 
-document.querySelectorAll('.course-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        document.querySelectorAll('.course-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-        curCourse = tab.dataset.course;
-        renderHandbooks();
+function initHandbookFilter() {
+    hbFilter = createFilter({
+        scope: 'handbook',
+        unit: '권',
+        els: { search: 'hbSearch', clear: 'hbSearchClear', cats: 'hbCats', count: 'hbCount', grid: 'handbookGrid' },
+        params: { q: 'q', cat: 'course' },
+        getItems: () => HANDBOOKS,
+        getCat: h => h.course_tag,
+        getFields: h => [h.title, h.desc, catName('handbook', h.course_tag)],
+        extra: h => curLevel === 'all' || h.level_tier === Number(curLevel),
+        renderEmpty: g => {
+            g.innerHTML = '<div class="handbook-empty">등록된 핸드북이 없습니다.<br>새 교재는 관리자 콘솔 업로드 즉시 이곳에 반영됩니다.</div>';
+        },
+        render: (items, g) => { g.innerHTML = items.map(handbookCardHtml).join(''); }
     });
-});
+}
+
+function renderHandbooks() {
+    if (hbFilter) { hbFilter.draw(); return; }
+    if (!grid) return;
+    const items = limited(HANDBOOKS.filter(h => curLevel === 'all' || h.level_tier === Number(curLevel)), grid);
+    grid.innerHTML = items.length
+        ? items.map(handbookCardHtml).join('')
+        : '<div class="handbook-empty">해당 레벨의 핸드북이 아직 없습니다.<br>새 교재는 관리자 콘솔 업로드 즉시 이곳에 반영됩니다.</div>';
+}
+
+/* 레벨은 분류와는 다른 축이라 칩 줄을 따로 둔다 */
 document.querySelectorAll('.level-chip').forEach(chip => {
     chip.addEventListener('click', () => {
         document.querySelectorAll('.level-chip').forEach(c => c.classList.remove('active'));
@@ -148,36 +165,56 @@ renderHandbooks();
 
 /* ============ 강의 카드 & YouTube 새 창 연결 ============ */
 const lectureGrid = document.getElementById('lectureGrid');
-function renderLectures() {
-    if (!lectureGrid) return;
-    if (!LECTURES.length) {
-        lectureGrid.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 강의가 없습니다. 관리자 콘솔에서 강의를 추가해 주세요.</div>';
-        return;
-    }
-    lectureGrid.innerHTML = limited(LECTURES, lectureGrid).map(v => {
-        const youtubeUrl = youtubeWatchUrl(v.videoId);
-        const tag = youtubeUrl ? 'a' : 'button';
-        const attrs = youtubeUrl
-            ? `href="${escHtml(youtubeUrl)}" target="_blank" rel="noopener noreferrer"`
-            : 'type="button" data-missing-video="true"';
-        const actionLabel = youtubeUrl ? 'YouTube에서 새 창으로 보기' : 'YouTube 링크 미등록';
-        const thumb = ytThumbUrl(youtubeUrl);
-        return `
+let lecFilter = null;
+
+function lectureCardHtml(v) {
+    const youtubeUrl = youtubeWatchUrl(v.videoId);
+    const tag = youtubeUrl ? 'a' : 'button';
+    const attrs = youtubeUrl
+        ? `href="${escHtml(youtubeUrl)}" target="_blank" rel="noopener noreferrer"`
+        : 'type="button" data-missing-video="true"';
+    const actionLabel = youtubeUrl ? 'YouTube에서 새 창으로 보기' : 'YouTube 링크 미등록';
+    const thumb = ytThumbUrl(youtubeUrl);
+    const label = catName('lecture', v.cat) || v.cat || '';
+    return `
         <${tag} class="lecture-card visible" ${attrs} aria-label="${escHtml(v.title)} - ${actionLabel}">
             <div class="lecture-thumb${thumb ? '' : ' is-blank'}">
                 ${thumb
                     ? `<img class="lecture-shot" src="${thumb}" alt="" loading="lazy" decoding="async" width="480" height="360">`
                     : `<img class="thumb-mark" src="/brand/TenAI_cream.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
-                       <span class="thumb-note">${escHtml(v.cat || 'TEN AI 강의')}</span>`}
+                       <span class="thumb-note">${escHtml(label || 'TEN AI 강의')}</span>`}
                 <div class="play"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
                 ${v.dur ? `<span class="dur outfit">${escHtml(v.dur)}</span>` : ''}
             </div>
             <div class="lecture-body">
-                <div class="lecture-cat">${escHtml(v.cat)}</div>
+                <div class="lecture-cat">${escHtml(label)}</div>
                 <div class="lecture-title">${escHtml(v.title)}</div>
             </div>
         </${tag}>`;
-    }).join('');
+}
+
+function initLectureFilter() {
+    lecFilter = createFilter({
+        scope: 'lecture',
+        unit: '편',
+        els: { search: 'lecSearch', clear: 'lecSearchClear', cats: 'lecCats', count: 'lecCount', grid: 'lectureGrid' },
+        params: { q: 'lq', cat: 'lcat' },
+        getItems: () => LECTURES,
+        getCat: v => v.cat,
+        getFields: v => [v.title, catName('lecture', v.cat), v.cat],
+        renderEmpty: g => {
+            g.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 강의가 없습니다. 관리자 콘솔에서 강의를 추가해 주세요.</div>';
+        },
+        render: (items, g) => { g.innerHTML = items.map(lectureCardHtml).join(''); }
+    });
+}
+
+function renderLectures() {
+    if (lecFilter) { lecFilter.draw(); return; }
+    if (!lectureGrid) return;
+    lectureGrid.innerHTML = LECTURES.length
+        ? limited(LECTURES, lectureGrid).map(lectureCardHtml).join('')
+        : '<div class="news-empty" style="grid-column:1/-1;">등록된 강의가 없습니다. 관리자 콘솔에서 강의를 추가해 주세요.</div>';
 }
 
 on(lectureGrid, 'click', e => {
@@ -274,172 +311,214 @@ onId('newAppsBoard', 'click', e => {
         : 'GitHub 저장소는 오픈소스 공개 후 연결됩니다.');
 });
 
-/* ============ 앱 검색 ============
-   앱은 계속 늘어난다. 눈으로 훑는 대신 이름·기능·키워드로 찾게 한다.
+/* =====================================================================
+   분류 필터 + 검색 — 소식 · Q&A · 핸드북 · 강의 · 앱 공통
+   ---------------------------------------------------------------------
+   콘텐츠가 계속 늘어난다. 눈으로 훑는 대신 분류로 좁히고 낱말로 찾게 한다.
+   다섯 목록이 같은 규칙을 쓰도록 여기 한 군데에 두었다.
 
    검색 규칙
-     - 띄어쓴 낱말은 모두 만족해야 한다 (AND). '탄소 계산' → 둘 다 든 앱
+     - 띄어쓴 낱말은 모두 만족해야 한다 (AND). '탄소 계산' → 둘 다 든 것
      - 대소문자를 가리지 않는다
-     - 띄어쓰기를 무시한 비교도 함께 한다 ('탄소리서치' ↔ '탄소 리서치')
-   검색 대상은 이름·한 줄 소개·작동 원리·배지·분류 이름·등록 키워드다. */
-const APP_CATS = (window.TenStore && window.TenStore.APP_CATEGORIES) || [];
-const catOf   = id => APP_CATS.find(c => c.id === id) || null;
-const catName = id => (catOf(id) || {}).name || '';
-// 배지·썸네일 색은 분류에서 나온다. 화이트리스트라 임의 클래스가 끼어들 수 없다.
-const CAT_TONE = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
-const catTone = id => CAT_TONE[(catOf(id) || {}).tone] || 'tag-biz';
+     - 쉼표·가운뎃점·괄호는 낱말 경계로 본다 ('탄소·ESG' → '탄소 ESG')
+     - 붙여 쓴 한글도 띄어 쓴 데이터에 걸린다 ('탄소리서치' ↔ '탄소 리서치')
+   ===================================================================== */
 
-// 쉼표·가운뎃점·괄호 같은 구분기호는 낱말 경계로 본다.
-// '탄소, 배출량' 과 '탄소·ESG' 가 두 낱말로 쪼개져야 '탄소 ESG' 로도 찾힌다.
 const SEP_RE = /[,·․‧/|\\()\[\]{}<>"'`~!?;:_\-–—+&]+/g;
 const normQuery = v => String(v == null ? '' : v).toLowerCase()
     .replace(SEP_RE, ' ').replace(/\s+/g, ' ').trim();
-const squash    = v => normQuery(v).replace(/ /g, '');
+const squash = v => normQuery(v).replace(/ /g, '');
 
-const appFields = a => [a.name, a.oneliner, a.how, a.keywords, catName(a.category)].map(normQuery);
-
-/* 붙여 쓴 한글 검색어('탄소리서치')가 띄어 쓴 데이터('탄소 리서치')에도 걸리게
-   띄어쓰기를 지운 보조 비교를 함께 한다. 다만 두 가지를 지킨다.
+/* 붙여 쓴 한글 검색어가 띄어 쓴 데이터에도 걸리게 보조 비교를 함께 한다. 다만
 
    1. 필드마다 따로 본다. 전부 이어 붙이면 앞 필드 끝과 뒤 필드 앞이 붙어
       없던 낱말이 생긴다.
    2. 한글이 든 두 글자 이상 검색어에만 쓴다. 영문에 쓰면 낱말 사이가 붙어
       'festival carbon' → 'festivalcarbon' 이 되고 'lca' 가 걸린다.
-      영문은 원래 비교(hay.includes)로 충분하다 — 'runiq' 는 'runiqzip' 에 걸린다. */
+      영문은 원래 비교로 충분하다 — 'runiq' 는 'runiqzip' 에 걸린다. */
 const HANGUL_RE = /[가-힣]/;
-function appMatches(a, terms) {
+function matchesTerms(fields, terms) {
     if (!terms.length) return true;
-    const fields = appFields(a);
-    const hay = fields.join(' ');
-    const flat = fields.map(squash);
+    const norm = fields.map(normQuery);
+    const hay = norm.join(' ');
+    const flat = norm.map(squash);
     return terms.every(t =>
         hay.includes(t) ||
         (HANGUL_RE.test(t) && t.length >= 2 && flat.some(f => f.includes(squash(t)))));
 }
 
-let appQuery = '', appCat = 'all';
+/* ---------- 분류 조회 ---------- */
+/* 관리자 콘솔 > 분류 관리에서 편집한 목록. 아직 못 읽었으면 기본값이 온다. */
+const catList = scope => (TenStore.categoriesOf ? TenStore.categoriesOf(scope) : []);
+const catOf   = (scope, slug) => catList(scope).find(c => c.slug === slug) || null;
+const catName = (scope, slug) => (catOf(scope, slug) || {}).name || '';
+// 배지 색은 분류에서 나온다. 화이트리스트라 임의 클래스가 끼어들 수 없다.
+const CAT_TONE = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
+const catTone = (scope, slug) => CAT_TONE[(catOf(scope, slug) || {}).tone] || 'tag-biz';
 
-function filteredApps() {
-    const terms = normQuery(appQuery).split(' ').filter(Boolean);
-    return APPS.filter(a =>
-        (appCat === 'all' || (a.category || '') === appCat) && appMatches(a, terms));
-}
+/* ---------- 필터 하나를 만든다 ----------
+   목록마다 이 함수를 한 번 불러 검색창·분류 칩·결과 수를 붙인다.
+   해당 페이지에 컨테이너가 없으면 아무 일도 하지 않는다(홈의 요약 목록 등). */
+function createFilter(opts) {
+    const els = opts.els || {};
+    const grid = document.getElementById(els.grid);
+    if (!grid) return null;                      // 이 페이지에 목록이 없다
 
-/* 분류 칩은 실제로 앱이 있는 분류만 보여 준다 — 빈 칩을 눌러 헛걸음하지 않게 */
-function renderAppCats() {
-    const box = document.getElementById('appCats');
-    if (!box) return;
-    const counts = new Map();
-    APPS.forEach(a => {
-        const id = a.category || '';
-        if (id) counts.set(id, (counts.get(id) || 0) + 1);
-    });
-    const chips = APP_CATS.filter(c => counts.has(c.id))
-        .map(c => ({ id: c.id, name: c.name, n: counts.get(c.id) }));
-    // 분류된 앱이 하나도 없으면 칩 줄을 통째로 숨긴다 (누를 것이 없는 '전체' 하나만 남으므로)
-    if (!chips.length) { box.innerHTML = ''; box.hidden = true; return; }
-    box.hidden = false;
+    const input  = els.search ? document.getElementById(els.search) : null;
+    const clear  = els.clear  ? document.getElementById(els.clear)  : null;
+    const catBox = els.cats   ? document.getElementById(els.cats)   : null;
+    const countEl = els.count ? document.getElementById(els.count)  : null;
+    const scope  = opts.scope;
+    const pq = (opts.params && opts.params.q) || 'q';
+    const pc = (opts.params && opts.params.cat) || 'cat';
+    const unit = opts.unit || '건';
 
-    const unfiled = APPS.filter(a => !a.category).length;
-    chips.unshift({ id: 'all', name: '전체', n: APPS.length });
-    if (unfiled) chips.push({ id: '', name: '미분류', n: unfiled });
+    const state = { q: '', cat: 'all' };
 
-    box.innerHTML = chips.map(c => `
-        <button type="button" class="course-tab app-cat${c.id === appCat ? ' active' : ''}"
-                data-cat="${escHtml(c.id)}" aria-pressed="${c.id === appCat}">
-            ${escHtml(c.name)} <span class="app-cat-n">${c.n}</span>
-        </button>`).join('');
-}
+    const slugOf = item => String(opts.getCat(item) || '');
 
-/* 주소에 검색 상태를 남긴다 — 결과 화면을 그대로 공유·북마크할 수 있게 */
-function syncAppUrl() {
-    const u = new URL(location.href);
-    appQuery ? u.searchParams.set('q', appQuery) : u.searchParams.delete('q');
-    appCat !== 'all' ? u.searchParams.set('cat', appCat) : u.searchParams.delete('cat');
-    history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
-}
+    function selected() {
+        const terms = normQuery(state.q).split(' ').filter(Boolean);
+        return opts.getItems().filter(item =>
+            (state.cat === 'all' || slugOf(item) === state.cat) &&
+            (!opts.extra || opts.extra(item)) &&
+            matchesTerms(opts.getFields(item), terms));
+    }
 
-function initAppSearch() {
-    const input = document.getElementById('appSearch');
-    if (!input) return;
-    const clear = document.getElementById('appSearchClear');
+    /* 분류 칩은 실제로 콘텐츠가 있는 분류만 보여 준다 — 빈 칩을 눌러 헛걸음하지 않게 */
+    function renderCats() {
+        if (!catBox) return;
+        const all = opts.getItems();
+        const counts = new Map();
+        all.forEach(item => {
+            const s = slugOf(item);
+            if (s) counts.set(s, (counts.get(s) || 0) + 1);
+        });
+        const chips = catList(scope).filter(c => counts.has(c.slug))
+            .map(c => ({ slug: c.slug, name: c.name, n: counts.get(c.slug) }));
+        const unfiled = all.filter(item => !slugOf(item)).length;
+        // 누를 이유가 없으면 칩 줄을 통째로 숨긴다 —
+        //   분류된 것이 하나도 없거나('전체'만 남음),
+        //   전부 같은 분류 하나뿐이거나('전체'와 그 분류가 같은 결과)
+        if (!chips.length || (chips.length === 1 && !unfiled)) {
+            catBox.innerHTML = ''; catBox.hidden = true; return;
+        }
+        catBox.hidden = false;
+        chips.unshift({ slug: 'all', name: '전체', n: all.length });
+        if (unfiled) chips.push({ slug: '', name: '미분류', n: unfiled });
+
+        catBox.innerHTML = chips.map(c => `
+            <button type="button" class="course-tab cat-chip${c.slug === state.cat ? ' active' : ''}"
+                    data-cat="${escHtml(c.slug)}" aria-pressed="${c.slug === state.cat}">
+                ${escHtml(c.name)} <span class="cat-chip-n">${c.n}</span>
+            </button>`).join('');
+    }
+
+    /* 주소에 검색 상태를 남긴다 — 결과 화면을 그대로 공유·북마크할 수 있게 */
+    function syncUrl() {
+        const u = new URL(location.href);
+        state.q ? u.searchParams.set(pq, state.q) : u.searchParams.delete(pq);
+        state.cat !== 'all' ? u.searchParams.set(pc, state.cat) : u.searchParams.delete(pc);
+        history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+    }
+
+    const narrowed = () => !!state.q || state.cat !== 'all';
+
+    function draw() {
+        const all = opts.getItems();
+        renderCats();
+
+        if (!all.length) {
+            if (countEl) countEl.textContent = '';
+            opts.renderEmpty ? opts.renderEmpty(grid) : (grid.innerHTML = '');
+            return;
+        }
+
+        const items = limited(selected(), grid);
+        if (countEl) {
+            countEl.textContent = narrowed()
+                ? `전체 ${all.length}${unit} 중 ${items.length}${unit}`
+                : `전체 ${all.length}${unit}`;
+        }
+
+        if (!items.length && narrowed()) {
+            grid.innerHTML = `<div class="filter-empty">
+                ${state.q ? `'${escHtml(state.q)}'에 해당하는 결과가 없습니다.` : '이 분류에 해당하는 결과가 없습니다.'}<br>
+                다른 낱말로 찾아보시거나 <button type="button" class="link-btn" data-reset-filter>전체 목록 보기</button>를 눌러 주세요.
+            </div>`;
+            return;
+        }
+        opts.render(items, grid);
+    }
+
+    function reset() {
+        state.q = ''; state.cat = 'all';
+        if (input) input.value = '';
+        if (clear) clear.hidden = true;
+        syncUrl(); draw();
+    }
+
+    /* ---- 주소에 담겨 온 상태를 먼저 읽는다 ---- */
     const params = new URLSearchParams(location.search);
+    state.q = params.get(pq) || '';
+    const wantCat = params.get(pc);
+    // 빈 문자열은 '미분류' 라는 뜻이므로 유효한 값이다
+    state.cat = wantCat !== null && (wantCat === '' || catList(scope).some(c => c.slug === wantCat))
+        ? wantCat : 'all';
+    if (input) input.value = state.q;
+    if (clear) clear.hidden = !state.q;
 
-    appQuery = params.get('q') || '';
-    const wantCat = params.get('cat');
-    appCat = wantCat !== null && (wantCat === '' || APP_CATS.some(c => c.id === wantCat)) ? wantCat : 'all';
-    input.value = appQuery;
-    if (clear) clear.hidden = !appQuery;
-
-    let timer;
-    input.addEventListener('input', () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            appQuery = input.value;
-            if (clear) clear.hidden = !appQuery;
-            syncAppUrl();
-            renderApps();
-        }, 150);
-    });
-    // 엔터로 폼이 제출되거나 esc 로 값만 비고 화면이 안 바뀌는 일이 없게
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
-    input.addEventListener('search', () => {
-        appQuery = input.value;
-        if (clear) clear.hidden = !appQuery;
-        syncAppUrl();
-        renderApps();
-    });
-    on(clear, 'click', () => {
-        input.value = ''; appQuery = ''; clear.hidden = true;
-        syncAppUrl(); renderApps(); input.focus();
-    });
-    onId('appCats', 'click', e => {
+    /* ---- 이벤트 ---- */
+    if (input) {
+        let timer;
+        const commit = () => {
+            state.q = input.value;
+            if (clear) clear.hidden = !state.q;
+            syncUrl(); draw();
+        };
+        input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(commit, 150); });
+        // 엔터로 폼이 제출되거나 esc 로 값만 비고 화면이 안 바뀌는 일이 없게
+        input.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+        input.addEventListener('search', commit);
+    }
+    on(clear, 'click', () => { reset(); if (input) input.focus(); });
+    on(catBox, 'click', e => {
         const btn = e.target.closest('[data-cat]');
         if (!btn) return;
-        appCat = btn.dataset.cat;
-        syncAppUrl();
-        renderApps();
+        state.cat = btn.dataset.cat;
+        syncUrl(); draw();
     });
-    onId('appsGrid', 'click', e => {
-        if (!e.target.closest('[data-reset-search]')) return;
-        input.value = ''; appQuery = ''; appCat = 'all';
-        if (clear) clear.hidden = true;
-        syncAppUrl(); renderApps();
+    on(grid, 'click', e => { if (e.target.closest('[data-reset-filter]')) reset(); });
+
+    return { draw, reset, state };
+}
+
+/* ============ 앱 검색 ============ */
+let appFilter = null;
+
+function initAppFilter() {
+    appFilter = createFilter({
+        scope: 'app',
+        unit: '개',
+        els: { search: 'appSearch', clear: 'appSearchClear', cats: 'appCats', count: 'appsCount', grid: 'appsGrid' },
+        params: { q: 'q', cat: 'cat' },
+        getItems: () => APPS,
+        getCat: a => a.category,
+        getFields: a => [a.name, a.oneliner, a.how, a.keywords, catName('app', a.category)],
+        renderEmpty: grid => {
+            grid.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 앱이 없습니다. 관리자 콘솔에서 앱을 추가해 주세요.</div>';
+        },
+        render: (items, grid) => { grid.innerHTML = items.map(appCardHtml).join(''); }
     });
 }
 
 /* ============ 앱 쇼케이스 ============ */
-function renderApps() {
-    const grid = document.getElementById('appsGrid');
-    if (!grid) return;
-    if (!APPS.length) {
-        grid.innerHTML = '<div class="news-empty" style="grid-column:1/-1;">등록된 앱이 없습니다. 관리자 콘솔에서 앱을 추가해 주세요.</div>';
-        return;
-    }
-
-    const hasSearch = !!document.getElementById('appSearch');
-    const items = limited(hasSearch ? filteredApps() : APPS, grid);
-    renderAppCats();
-
-    const countEl = document.getElementById('appsCount');
-    if (countEl) {
-        const narrowed = appQuery || appCat !== 'all';
-        countEl.textContent = narrowed
-            ? `전체 ${APPS.length}개 중 ${items.length}개`
-            : `전체 ${APPS.length}개`;
-    }
-
-    if (!items.length) {
-        grid.innerHTML = `<div class="news-empty" style="grid-column:1/-1;">
-            '${escHtml(appQuery)}'에 해당하는 앱이 없습니다.<br>
-            다른 낱말로 찾아보시거나 <button type="button" class="link-btn" data-reset-search>전체 목록 보기</button>를 눌러 주세요.
-        </div>`;
-        return;
-    }
-
-    grid.innerHTML = items.map(a => `
+function appCardHtml(a) {
+    const tone = catTone('app', a.category);
+    const name = catName('app', a.category);
+    return `
     <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
-        <div class="app-thumb tint-${catTone(a.category)}">
+        <div class="app-thumb tint-${tone}">
             ${isNewApp(a) ? NEW_FLAG_HTML : ''}
             <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
             <div class="app-overlay">${escHtml(a.how)}</div>
@@ -447,7 +526,7 @@ function renderApps() {
         <div class="app-body">
             <div class="app-head">
                 <h3 class="app-name">${escHtml(a.name)}</h3>
-                ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${escHtml(catName(a.category))}</span>` : ''}
+                ${name ? `<span class="app-badge ${tone}">${escHtml(name)}</span>` : ''}
             </div>
             <p class="app-oneliner">${escHtml(a.oneliner)}</p>
             <div class="app-actions">
@@ -460,8 +539,17 @@ function renderApps() {
                 </a>
             </div>
         </div>
-    </article>
-    `).join('');
+    </article>`;
+}
+
+function renderApps() {
+    if (appFilter) { appFilter.draw(); return; }
+    // 필터가 아직 붙기 전(초기 로드)에도 목록은 그린다
+    const grid = document.getElementById('appsGrid');
+    if (!grid) return;
+    grid.innerHTML = APPS.length
+        ? limited(APPS, grid).map(appCardHtml).join('')
+        : '<div class="news-empty" style="grid-column:1/-1;">등록된 앱이 없습니다. 관리자 콘솔에서 앱을 추가해 주세요.</div>';
 }
 
 // 실행/GitHub 링크 미설정 앱: 인라인 onclick 대신 이벤트 위임 (JS 인젝션 차단)
@@ -722,30 +810,47 @@ async function applySettings() {
 }
 
 /* ----- 소식 (게시물) ----- */
-const CAT_CLS = { '공지': 'news-cat-notice', '뉴스': 'news-cat-news', '교육': 'news-cat-edu' };
 let NEWS_CACHE = [];
+let newsFilter = null;
 
-async function renderNews() {
-    const posts = await TenStore.listPosts();
-    NEWS_CACHE = posts;
-    const el = document.getElementById('newsGrid');
-    if (!el) return;
-    if (!posts.length) {
-        el.innerHTML = '<div class="news-empty">등록된 소식이 없습니다.</div>';
-        return;
-    }
-    el.innerHTML = limited(posts, el, 6).map(p => `
+function newsCardHtml(p) {
+    const tone = catTone('post', p.category);
+    const label = catName('post', p.category) || p.category || '';
+    return `
         <button class="news-card" data-post="${p.id}">
             <div class="news-meta">
-                <span class="news-cat ${CAT_CLS[p.category] || 'news-cat-notice'}">${escHtml(p.category)}</span>
+                ${label ? `<span class="news-cat ${tone}">${escHtml(label)}</span>` : ''}
                 ${p.pinned ? '<span class="news-pin">📌 고정</span>' : ''}
                 <span class="news-date">${fmtDate(p.createdAt)}</span>
             </div>
             <div class="news-title">${escHtml(p.title)}</div>
             <p class="news-excerpt">${escHtml((p.content || '').slice(0, 90))}${(p.content || '').length > 90 ? '…' : ''}</p>
             <span class="news-more">자세히 보기 →</span>
-        </button>
-    `).join('');
+        </button>`;
+}
+
+function initNewsFilter() {
+    newsFilter = createFilter({
+        scope: 'post',
+        unit: '건',
+        els: { search: 'newsSearch', clear: 'newsSearchClear', cats: 'newsCats', count: 'newsCount', grid: 'newsGrid' },
+        params: { q: 'q', cat: 'cat' },
+        getItems: () => NEWS_CACHE,
+        getCat: p => p.category,
+        getFields: p => [p.title, p.content, catName('post', p.category), p.category],
+        renderEmpty: g => { g.innerHTML = '<div class="news-empty">등록된 소식이 없습니다.</div>'; },
+        render: (items, g) => { g.innerHTML = items.map(newsCardHtml).join(''); }
+    });
+}
+
+async function renderNews() {
+    NEWS_CACHE = await TenStore.listPosts();
+    const el = document.getElementById('newsGrid');
+    if (!el) return;
+    if (newsFilter) { newsFilter.draw(); return; }
+    el.innerHTML = NEWS_CACHE.length
+        ? limited(NEWS_CACHE, el, 6).map(newsCardHtml).join('')
+        : '<div class="news-empty">등록된 소식이 없습니다.</div>';
 }
 
 const postModal = document.getElementById('postModal');
@@ -754,8 +859,9 @@ onId('newsGrid', 'click', e => {
     if (!card) return;
     const p = NEWS_CACHE.find(x => x.id === card.dataset.post);
     if (!p) return;
+    const mLabel = catName('post', p.category) || p.category || '';
     document.getElementById('postModalMeta').innerHTML =
-        '<span class="news-cat ' + (CAT_CLS[p.category] || 'news-cat-notice') + '">' + escHtml(p.category) + '</span>' +
+        (mLabel ? '<span class="news-cat ' + catTone('post', p.category) + '">' + escHtml(mLabel) + '</span>' : '') +
         '<span class="news-date">' + fmtDate(p.createdAt) + '</span>';
     document.getElementById('postModalTitle').textContent = p.title;
     document.getElementById('postModalContent').textContent = p.content || '';
@@ -778,19 +884,17 @@ document.addEventListener('keydown', e => {
 });
 
 /* ----- Q&A ----- */
-async function renderPublicQna() {
-    const items = await TenStore.listQna({ publicOnly: true });
-    const el = document.getElementById('qnaPublicList');
-    if (!el) return;
-    if (!items.length) {
-        el.innerHTML = '<div class="qna-empty">아직 공개된 답변이 없습니다.<br>첫 질문을 남겨주세요!</div>';
-        return;
-    }
-    el.innerHTML = items.map(q => `
+let QNA_CACHE = [];
+let qnaFilter = null;
+
+function qnaItemHtml(q) {
+    const label = catName('qna', q.category);
+    return `
         <div class="qna-item">
             <button class="qna-item-q" aria-expanded="false">
                 <span class="q-mark">Q</span>
                 <span class="q-text">${escHtml(q.question)}</span>
+                ${label ? `<span class="qna-cat ${catTone('qna', q.category)}">${escHtml(label)}</span>` : ''}
                 <svg class="q-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
             </button>
             <div class="qna-item-a">
@@ -802,9 +906,35 @@ async function renderPublicQna() {
                     </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
 }
+
+function initQnaFilter() {
+    qnaFilter = createFilter({
+        scope: 'qna',
+        unit: '건',
+        els: { search: 'qnaSearch', clear: 'qnaSearchClear', cats: 'qnaCats', count: 'qnaCount', grid: 'qnaPublicList' },
+        params: { q: 'qq', cat: 'qcat' },
+        getItems: () => QNA_CACHE,
+        getCat: q => q.category,
+        getFields: q => [q.question, q.answer, catName('qna', q.category)],
+        renderEmpty: g => {
+            g.innerHTML = '<div class="qna-empty">아직 공개된 답변이 없습니다.<br>첫 질문을 남겨주세요!</div>';
+        },
+        render: (items, g) => { g.innerHTML = items.map(qnaItemHtml).join(''); }
+    });
+}
+
+async function renderPublicQna() {
+    QNA_CACHE = await TenStore.listQna({ publicOnly: true });
+    const el = document.getElementById('qnaPublicList');
+    if (!el) return;
+    if (qnaFilter) { qnaFilter.draw(); return; }
+    el.innerHTML = QNA_CACHE.length
+        ? QNA_CACHE.map(qnaItemHtml).join('')
+        : '<div class="qna-empty">아직 공개된 답변이 없습니다.<br>첫 질문을 남겨주세요!</div>';
+}
+
 
 onId('qnaPublicList', 'click', e => {
     const btn = e.target.closest('.qna-item-q');
@@ -1007,7 +1137,17 @@ async function renderTenosRank() {
 
 /* ----- 초기 로드 ----- */
 (async function initDynamic() {
-    try { await applySettings(); } catch (e) { console.warn('설정 적용 실패', e); }
+    // 분류를 가장 먼저 읽는다 — 배지 이름과 필터 칩이 여기서 나온다.
+    // 실패해도 기본 분류로 계속 간다 (categories-default.mjs).
+    try { await TenStore.listCategories(); } catch (e) { console.warn('분류 로드 실패', e); }
+
+    // 필터는 데이터보다 먼저 붙인다. 주소에 담겨 온 검색 상태(?q=, ?cat=)를
+    // 읽어 두어야 첫 렌더부터 걸러진 결과가 나온다.
+    try {
+        initHandbookFilter(); initLectureFilter();
+        initNewsFilter(); initQnaFilter(); initAppFilter();
+    } catch (e) { console.warn('필터 초기화 실패', e); }
+
     try {
         HANDBOOKS = await TenStore.listHandbooks();
         renderHandbooks();
@@ -1022,7 +1162,7 @@ async function renderTenosRank() {
         APPS = await TenStore.listApps();
     } catch (e) { console.warn('앱 로드 실패', e); }
     // 조회가 실패해도 그려 준다 — 안내판이 '불러오는 중'에 멈춰 있지 않게
-    try { initAppSearch(); renderNewApps(); renderApps(); } catch (e) { console.warn('앱 렌더 실패', e); }
+    try { renderNewApps(); renderApps(); } catch (e) { console.warn('앱 렌더 실패', e); }
     try { await renderNews(); } catch (e) { console.warn('소식 로드 실패', e); }
     try { updatePromoMeta(); } catch (e) { console.warn('홍보 현황 갱신 실패', e); }
     try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }

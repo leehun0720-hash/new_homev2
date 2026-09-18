@@ -237,6 +237,18 @@
         .chip-answered { background: rgba(110,231,183,0.12); color: var(--green); }
         .chip-public { background: rgba(0,212,255,0.12); color: var(--cyan-soft); }
         .chip-private { background: rgba(255,255,255,0.08); color: var(--gray-400); }
+        /* 분류 배지 — 공개 사이트와 같은 3색을 쓴다. 색은 리듬만 주고 의미는 이름이 진다. */
+        .chip.tag-vibe  { background: rgba(249,139,94,0.16);  color: #f9b98e; }
+        .chip.tag-genai { background: rgba(200,249,155,0.14); color: #c8f99b; }
+        .chip.tag-biz   { background: rgba(251,245,233,0.12); color: #e6d9c2; }
+        /* 분류 목록의 slug 표기 */
+        .item-meta code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.82rem;
+            background: rgba(255,255,255,0.07);
+            padding: 0.08rem 0.4rem;
+            border-radius: 4px;
+        }
 
         .qna-q { font-size: 0.92rem; margin: 0.6rem 0 0.8rem; color: var(--gray-200); white-space: pre-wrap; }
         .qna-answer-box { margin-top: 0.4rem; }
@@ -333,6 +345,7 @@
             <button class="admin-tab" data-panel="handbooks">📚 핸드북 관리</button>
             <button class="admin-tab" data-panel="lectures">🎬 강의 관리</button>
             <button class="admin-tab" data-panel="apps">🧩 앱 관리</button>
+            <button class="admin-tab" data-panel="categories">🏷️ 분류 관리</button>
         </nav>
 
         <main>
@@ -398,7 +411,8 @@
             <section class="panel" id="panel-posts">
                 <div class="card">
                     <h2 id="postFormTitle">새 게시물 작성</h2>
-                    <p class="sub">공지·뉴스·교육 소식을 등록합니다. 사이트의 '소식' 섹션에 노출됩니다.</p>
+                    <p class="sub">소식을 등록합니다. 사이트의 '소식' 섹션에 노출되며, 분류는 방문자의 검색 필터가 됩니다.<br>
+                    분류를 늘리거나 이름을 바꾸려면 <strong>🏷️ 분류 관리</strong> 탭에서 편집하세요.</p>
                     <input type="hidden" id="pId">
                     <div class="field-row">
                         <div class="field">
@@ -406,12 +420,8 @@
                             <input type="text" id="pTitle" placeholder="게시물 제목">
                         </div>
                         <div class="field">
-                            <label for="pCategory">카테고리</label>
-                            <select id="pCategory">
-                                <option value="공지">공지</option>
-                                <option value="뉴스">뉴스</option>
-                                <option value="교육">교육</option>
-                            </select>
+                            <label for="pCategory">분류</label>
+                            <select id="pCategory"></select>
                         </div>
                     </div>
                     <div class="field">
@@ -460,12 +470,8 @@
                     </div>
                     <div class="field-row-3">
                         <div class="field">
-                            <label for="hbCourse">과정</label>
-                            <select id="hbCourse">
-                                <option value="vibecoding">바이브코딩</option>
-                                <option value="genai">생성형 AI 실무</option>
-                                <option value="ai_business">AI 경영 전략</option>
-                            </select>
+                            <label for="hbCourse">과정 (분류)</label>
+                            <select id="hbCourse"></select>
                         </div>
                         <div class="field">
                             <label for="hbLevel">레벨</label>
@@ -517,12 +523,13 @@
             <section class="panel" id="panel-lectures">
                 <div class="card">
                     <h2 id="lecFormTitle">새 강의 등록</h2>
-                    <p class="sub">유튜브 강의 주소 또는 11자리 영상 ID를 입력하면, 홈페이지에서 강의를 누를 때 YouTube가 새 창으로 열립니다.</p>
+                    <p class="sub">유튜브 강의 주소 또는 11자리 영상 ID를 입력하면, 홈페이지에서 강의를 누를 때 YouTube가 새 창으로 열립니다.<br>
+                    분류는 강의 목록의 검색 필터가 됩니다 — 선택지는 <strong>🏷️ 분류 관리</strong> 탭에서 편집하세요.</p>
                     <input type="hidden" id="lecId">
                     <div class="field-row">
                         <div class="field">
-                            <label for="lecCat">카테고리</label>
-                            <input type="text" id="lecCat" placeholder="예: ChatGPT 실무">
+                            <label for="lecCat">분류</label>
+                            <select id="lecCat"></select>
                         </div>
                         <div class="field">
                             <label for="lecDur">재생 시간</label>
@@ -565,7 +572,8 @@
                     <h2 id="appFormTitle">새 앱 등록</h2>
                     <p class="sub">사이트의 'TEN AI Apps' 쇼케이스에 노출됩니다. 실행/GitHub 주소를 비워두면 '준비 중' 안내가 표시됩니다.<br>
                     <strong>NEW 표시</strong>를 켜거나 <strong>공개일</strong>이 최근 30일 이내이면 홈페이지 상단 '신규앱 안내판'에도 함께 걸립니다.<br>
-                    <strong>분류</strong>가 카드 배지로 그대로 표시되고 쇼케이스 필터가 됩니다. 배지 색상은 분류에 따라 자동으로 정해집니다.</p>
+                    <strong>분류</strong>가 카드 배지로 그대로 표시되고 쇼케이스 필터가 됩니다. 배지 색상은 분류에 따라 자동으로 정해지며,
+                    선택지는 <strong>🏷️ 분류 관리</strong> 탭에서 편집합니다.</p>
                     <input type="hidden" id="appId">
                     <div class="field-row">
                         <div class="field">
@@ -624,6 +632,40 @@
                     <div class="item-list" id="appList"></div>
                 </div>
             </section>
+
+            <!-- ===== 분류 관리 ===== -->
+            <section class="panel" id="panel-categories">
+                <div class="card">
+                    <h2>분류 관리</h2>
+                    <p class="sub">
+                        게시물 · Q&amp;A · 핸드북 · 강의 · 앱의 분류를 여기서 한꺼번에 관리합니다.
+                        여기서 만든 분류가 각 관리 화면의 선택지가 되고, 동시에 홈페이지 방문자가 쓰는 <strong>분류 필터</strong>가 됩니다.<br>
+                        <strong>이름</strong>은 언제든 바꿔도 됩니다 — 이미 등록된 글·교재·앱과의 연결은 끊기지 않습니다.
+                    </p>
+                    <div class="filter-row" id="catScopeTabs" role="group" aria-label="분류 영역 선택"></div>
+                    <p class="sub" id="catScopeHint" style="margin:-0.4rem 0 1.2rem;"></p>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="catNewName">새 분류 이름</label>
+                            <input type="text" id="catNewName" maxlength="40" placeholder="예: 채용 공고">
+                        </div>
+                        <div class="field">
+                            <label for="catNewTone">배지 색</label>
+                            <select id="catNewTone"></select>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:0.6rem;">
+                        <button class="btn btn-cyan" id="addCatBtn">➕ 분류 추가</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>분류 목록</h2>
+                    <p class="sub" id="catCount"></p>
+                    <div class="item-list" id="catList"></div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -633,6 +675,8 @@
     <script type="module">
         'use strict';
         const $ = id => document.getElementById(id);
+        // 요소가 없는 화면에서도 조용히 넘어가게 (패널이 비활성일 때 등)
+        const on = (el, ev, fn) => { if (el) el.addEventListener(ev, fn); };
         const esc = s => String(s == null ? '' : s)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -776,8 +820,13 @@
         });
 
         /* ===== 초기화 ===== */
-        function initPanels() {
+        async function initPanels() {
             fillSettingsForm();
+            // 분류를 가장 먼저 읽는다 — 다섯 화면의 선택지와 목록 배지가 여기서 나온다
+            try { await TenStore.listCategories({ reload: true }); }
+            catch (e) { console.warn('분류 로드 실패 — 기본 분류로 표시합니다.', e); }
+            fillAllCatSelects();
+            renderCatAdmin();
             renderPosts();
             renderQna();
             renderHbAdmin();
@@ -822,7 +871,6 @@
         });
 
         /* ===== 2) 게시물 관리 ===== */
-        const CAT_CHIP = { '공지': 'chip-notice', '뉴스': 'chip-news', '교육': 'chip-edu' };
 
         async function renderPosts() {
             const posts = await TenStore.listPosts();
@@ -837,7 +885,7 @@
                     <div class="item-top">
                         <div>
                             <div class="item-title">
-                                <span class="chip ${CAT_CHIP[p.category] || 'chip-notice'}">${esc(p.category)}</span>
+                                <span class="chip ${esc(catTone('post', p.category))}">${esc(catLabel('post', p.category))}</span>
                                 ${p.pinned ? '<span class="chip chip-pin">📌 고정</span>' : ''}
                                 ${esc(p.title)}
                             </div>
@@ -855,7 +903,7 @@
         function resetPostForm() {
             $('pId').value = '';
             $('pTitle').value = '';
-            $('pCategory').value = '공지';
+            fillCatSelect('pCategory', 'post', '');
             $('pContent').value = '';
             $('pPinned').checked = false;
             $('postFormTitle').textContent = '새 게시물 작성';
@@ -891,7 +939,7 @@
                 if (!p) return;
                 $('pId').value = p.id;
                 $('pTitle').value = p.title;
-                $('pCategory').value = p.category;
+                fillCatSelect('pCategory', 'post', p.category);
                 $('pContent').value = p.content;
                 $('pPinned').checked = !!p.pinned;
                 $('postFormTitle').textContent = '게시물 수정';
@@ -931,6 +979,7 @@
                             <div class="item-title">
                                 <span class="chip ${q.status === 'answered' ? 'chip-answered' : 'chip-pending'}">${q.status === 'answered' ? '답변 완료' : '답변 대기'}</span>
                                 <span class="chip ${q.isPublic ? 'chip-public' : 'chip-private'}">${q.isPublic ? '공개' : '비공개'}</span>
+                                <span class="chip ${esc(catTone('qna', q.category))}">${esc(catLabel('qna', q.category))}</span>
                                 ${esc(q.name)}${q.email ? ' · ' + esc(q.email) : ''}
                             </div>
                             <div class="item-meta">질문일 ${fmtDate(q.createdAt)}${q.answeredAt ? ' · 답변일 ' + fmtDate(q.answeredAt) : ''}</div>
@@ -941,10 +990,20 @@
                         </div>
                     </div>
                     <p class="qna-q">Q. ${esc(q.question)}</p>
+                    <div class="field">
+                        <label for="qcat-${q.id}">분류</label>
+                        <select id="qcat-${q.id}" data-qcat="${q.id}">
+                            <option value="">미분류</option>
+                            ${catsOf('qna').map(c => '<option value="' + esc(c.slug) + '"' +
+                                (c.slug === q.category ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('')}
+                            ${q.category && !catsOf('qna').some(c => c.slug === q.category)
+                                ? '<option value="' + esc(q.category) + '" selected>' + esc(q.category) + ' (목록에 없는 값)</option>' : ''}
+                        </select>
+                    </div>
                     <div class="field qna-answer-box">
                         <textarea data-qanswer="${q.id}" placeholder="답변을 입력하세요">${esc(q.answer || '')}</textarea>
                     </div>
-                    <button class="btn btn-cyan btn-sm" data-qsave="${q.id}">답변 저장</button>
+                    <button class="btn btn-cyan btn-sm" data-qsave="${q.id}">분류 · 답변 저장</button>
                 </div>
             `).join('');
         }
@@ -953,14 +1012,26 @@
             const d = e.target.dataset || {};
             if (d.qsave) {
                 const ta = document.querySelector('[data-qanswer="' + d.qsave + '"]');
+                const catSel = document.querySelector('[data-qcat="' + d.qsave + '"]');
                 const answer = ta.value.trim();
-                await TenStore.updateQna(d.qsave, {
+                const patch = {
                     answer,
                     status: answer ? 'answered' : 'pending',
                     answeredAt: answer ? Date.now() : null
-                });
+                };
+                if (catSel) patch.category = catSel.value;
+                try {
+                    await TenStore.updateQna(d.qsave, patch);
+                } catch (err) {
+                    // 분류 컬럼이 아직 없으면(마이그레이션 전) 답변만이라도 저장한다
+                    delete patch.category;
+                    await TenStore.updateQna(d.qsave, patch);
+                    showToast('답변은 저장했지만 분류는 저장하지 못했습니다. supabase-categories.sql 을 실행해 주세요.');
+                    await renderQna();
+                    return;
+                }
                 await renderQna();
-                showToast(answer ? '답변이 저장되었습니다.' : '답변이 비워져 대기 상태로 변경되었습니다.');
+                showToast(answer ? '저장되었습니다.' : '답변이 비워져 대기 상태로 변경되었습니다.');
             }
             if (d.qpub) {
                 const items = await TenStore.listQna();
@@ -983,7 +1054,6 @@
         });
 
         /* ===== 5) 핸드북 관리 ===== */
-        const HB_COURSE_NAME = { vibecoding: '바이브코딩', genai: '생성형 AI 실무', ai_business: 'AI 경영 전략' };
         const HB_ACCESS_NAME = { public: '전체 공개', member: '회원 공개', enrolled: '수강생 전용' };
         const HB_ACCESS_CHIP = { public: 'chip-answered', member: 'chip-notice', enrolled: 'chip-edu' };
 
@@ -995,7 +1065,7 @@
                     <div class="item-top">
                         <div>
                             <div class="item-title">
-                                <span class="chip chip-notice">${esc(HB_COURSE_NAME[h.course_tag] || h.course_tag)}</span>
+                                <span class="chip ${esc(catTone('handbook', h.course_tag))}">${esc(catLabel('handbook', h.course_tag))}</span>
                                 <span class="chip chip-news">L${h.level_tier}</span>
                                 <span class="chip ${HB_ACCESS_CHIP[h.access_level] || 'chip-notice'}">${esc(HB_ACCESS_NAME[h.access_level] || h.access_level)}</span>
                                 <span class="chip ${h.link ? 'chip-answered' : 'chip-private'}">${h.link ? '🔗 링크 있음' : '링크 없음'}</span>
@@ -1013,7 +1083,7 @@
         }
 
         function resetHbForm() {
-            $('hbId').value = ''; $('hbTitle').value = ''; $('hbCourse').value = 'vibecoding';
+            $('hbId').value = ''; $('hbTitle').value = ''; fillCatSelect('hbCourse', 'handbook', '');
             $('hbLevel').value = '1'; $('hbAccess').value = 'public'; $('hbDesc').value = ''; $('hbLink').value = ''; $('hbLinkTarget').value = '_blank';
             $('hbFormTitle').textContent = '새 핸드북 등록';
         }
@@ -1052,7 +1122,7 @@
                 const h = items.find(x => x.id === d.hbedit);
                 if (!h) return;
                 $('hbId').value = h.id; $('hbTitle').value = h.title;
-                $('hbCourse').value = h.course_tag; $('hbLevel').value = String(h.level_tier);
+                fillCatSelect('hbCourse', 'handbook', h.course_tag); $('hbLevel').value = String(h.level_tier);
                 $('hbAccess').value = h.access_level; $('hbDesc').value = h.desc || ''; $('hbLink').value = h.link || '';
                 $('hbLinkTarget').value = h.linkTarget === '_self' ? '_self' : '_blank';
                 $('hbFormTitle').textContent = '핸드북 수정';
@@ -1091,7 +1161,7 @@
         }
 
         function resetLecForm() {
-            $('lecId').value = ''; $('lecCat').value = ''; $('lecTitle').value = '';
+            $('lecId').value = ''; fillCatSelect('lecCat', 'lecture', ''); $('lecTitle').value = '';
             $('lecDur').value = ''; $('lecVideo').value = '';
             $('lecGrad1').value = '#0e7490'; $('lecGrad2').value = '#164e63';
             $('lecFormTitle').textContent = '새 강의 등록';
@@ -1110,7 +1180,7 @@
             try {
                 await TenStore.saveLecture({
                     id: $('lecId').value || null,
-                    cat: $('lecCat').value.trim(),
+                    cat: $('lecCat').value,
                     title,
                     dur: $('lecDur').value.trim(),
                     videoId,
@@ -1129,7 +1199,7 @@
                 const items = await TenStore.listLectures();
                 const v = items.find(x => x.id === d.lecedit);
                 if (!v) return;
-                $('lecId').value = v.id; $('lecCat').value = v.cat; $('lecTitle').value = v.title;
+                $('lecId').value = v.id; fillCatSelect('lecCat', 'lecture', v.cat); $('lecTitle').value = v.title;
                 $('lecDur').value = v.dur; $('lecVideo').value = v.videoId || '';
                 $('lecGrad1').value = v.grad1 || '#0e7490'; $('lecGrad2').value = v.grad2 || '#164e63';
                 $('lecFormTitle').textContent = '강의 수정';
@@ -1168,16 +1238,238 @@
             return at > 0 && Date.now() - at <= NEW_APP_WINDOW_MS;
         };
 
-        /* 분류 선택지는 data-store.js 의 APP_CATEGORIES 하나에서 온다 —
-           사이트 필터 칩과 목록이 어긋나지 않게 */
-        const APP_CATS = (window.TenStore && window.TenStore.APP_CATEGORIES) || [];
-        const catLabel = id => (APP_CATS.find(c => c.id === id) || {}).name || '미분류';
-        (function fillCategorySelect() {
-            const sel = $('appCategory');
+        /* 분류 선택지는 categories 테이블 하나에서 온다 (분류 관리 탭).
+           사이트의 필터 칩과 관리 화면의 선택지가 어긋나지 않게. */
+        const catsOf    = scope => (TenStore.categoriesOf ? TenStore.categoriesOf(scope) : []);
+        const catLabel  = (scope, slug) =>
+            (catsOf(scope).find(c => c.slug === slug) || {}).name || '미분류';
+        // 목록 배지도 사이트와 같은 색을 쓴다. 화이트리스트라 임의 클래스가 끼어들 수 없다.
+        const TONE_OK = { 'tag-vibe': 'tag-vibe', 'tag-genai': 'tag-genai', 'tag-biz': 'tag-biz' };
+        const catTone   = (scope, slug) =>
+            TONE_OK[(catsOf(scope).find(c => c.slug === slug) || {}).tone] || 'chip-private';
+
+        /* select 하나를 분류 목록으로 채운다. 현재 값이 목록에 없으면
+           (분류가 지워졌거나 마이그레이션 전이면) 그 값을 살려서 얹는다 —
+           저장 버튼을 눌렀을 때 조용히 미분류로 바뀌지 않게. */
+        function fillCatSelect(selId, scope, current) {
+            const sel = $(selId);
             if (!sel) return;
-            sel.innerHTML = '<option value="">미분류</option>' +
-                APP_CATS.map(c => '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>').join('');
-        })();
+            const list = catsOf(scope);
+            const cur = String(current == null ? '' : current);
+            let html = '<option value="">미분류</option>' +
+                list.map(c => '<option value="' + esc(c.slug) + '">' + esc(c.name) + '</option>').join('');
+            if (cur && !list.some(c => c.slug === cur)) {
+                html += '<option value="' + esc(cur) + '">' + esc(cur) + ' (목록에 없는 값)</option>';
+            }
+            sel.innerHTML = html;
+            sel.value = cur;
+        }
+
+        function fillAllCatSelects() {
+            fillCatSelect('pCategory',  'post',     $('pCategory')  && $('pCategory').value);
+            fillCatSelect('hbCourse',   'handbook', $('hbCourse')   && $('hbCourse').value);
+            fillCatSelect('lecCat',     'lecture',  $('lecCat')     && $('lecCat').value);
+            fillCatSelect('appCategory','app',      $('appCategory')&& $('appCategory').value);
+        }
+
+        /* =====================================================================
+           분류 관리 탭
+           ---------------------------------------------------------------------
+           slug(콘텐츠에 저장되는 값)는 만들 때 한 번 정해지고 바뀌지 않는다.
+           이름만 바꿔도 되게 해 두면 '공지' 를 '공지사항' 으로 고쳐도
+           이미 올린 글이 미분류로 떨어지지 않는다.
+           ===================================================================== */
+        /* 받침에 따라 '로 / 으로' 를 고른다 — '필터으로' 같은 어색한 안내문이 나오지 않게.
+           ㄹ 받침(종성 8)도 '로' 를 쓴다: '탐색기의 과정 탭으로', '쇼케이스 필터로' */
+        function euro(word) {
+            const w = String(word || '').trim();
+            if (!w) return '로';
+            const c = w.charCodeAt(w.length - 1);
+            if (c < 0xAC00 || c > 0xD7A3) return '로';
+            const jong = (c - 0xAC00) % 28;
+            return (jong === 0 || jong === 8) ? '로' : '으로';
+        }
+
+        const CAT_SCOPES = (TenStore.CATEGORY_SCOPES || []);
+        const CAT_TONES  = (TenStore.CATEGORY_TONES  || []);
+        let curScope = CAT_SCOPES.length ? CAT_SCOPES[0].id : 'post';
+        let catDeleting = null;        // 삭제 확인 중인 분류 id
+
+        function renderScopeTabs() {
+            const box = $('catScopeTabs');
+            if (!box) return;
+            box.innerHTML = CAT_SCOPES.map(sc =>
+                '<button class="filter-btn' + (sc.id === curScope ? ' active' : '') + '" data-scope="' +
+                esc(sc.id) + '">' + esc(sc.name) + '</button>').join('');
+            const hint = CAT_SCOPES.find(sc => sc.id === curScope);
+            if ($('catScopeHint')) {
+                $('catScopeHint').textContent = hint ? '여기서 만든 분류는 ' + hint.where + euro(hint.where) + ' 쓰입니다.' : '';
+            }
+        }
+
+        function fillToneSelect(sel, current) {
+            if (!sel) return;
+            sel.innerHTML = CAT_TONES.map(t =>
+                '<option value="' + esc(t.id) + '">' + esc(t.name) + '</option>').join('');
+            sel.value = current || TenStore.DEFAULT_TONE || 'tag-biz';
+        }
+
+        async function renderCatAdmin() {
+            renderScopeTabs();
+            fillToneSelect($('catNewTone'), $('catNewTone') && $('catNewTone').value);
+
+            const list = catsOf(curScope);
+            const usage = {};
+            for (const c of list) {
+                try { usage[c.slug] = await TenStore.countCategoryUsage(curScope, c.slug); }
+                catch (e) { usage[c.slug] = 0; }
+            }
+
+            const src = TenStore.categorySource ? TenStore.categorySource() : '';
+            $('catCount').innerHTML = '총 ' + list.length + '개' + (src === 'default'
+                ? ' · <strong>아직 기본 분류입니다.</strong> supabase-categories.sql 을 실행하면 여기서 편집한 내용이 저장됩니다.'
+                : '');
+
+            if (!list.length) {
+                $('catList').innerHTML = '<div class="empty">분류가 없습니다. 위에서 추가해 주세요.</div>';
+                return;
+            }
+
+            $('catList').innerHTML = list.map((c, i) => {
+                const used = usage[c.slug] || 0;
+                const deleting = catDeleting === c.id;
+                const others = list.filter(x => x.id !== c.id);
+                return `
+                <div class="item-row" data-cat-row="${esc(c.id)}">
+                    <div class="item-top">
+                        <div style="flex:1; min-width:0;">
+                            <div class="item-title">
+                                <span class="chip ${esc(c.tone)}">${esc(c.name)}</span>
+                                ${used ? '<span class="chip chip-notice">' + used + '건 사용 중</span>'
+                                       : '<span class="chip chip-private">사용 없음</span>'}
+                            </div>
+                            <div class="item-meta">저장 값(slug) <code>${esc(c.slug)}</code> — 콘텐츠와 연결된 값이라 바뀌지 않습니다</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-cat-up="${esc(c.id)}" ${i === 0 ? 'disabled' : ''} aria-label="위로">▲</button>
+                            <button class="btn btn-ghost btn-sm" data-cat-down="${esc(c.id)}" ${i === list.length - 1 ? 'disabled' : ''} aria-label="아래로">▼</button>
+                            <button class="btn btn-danger btn-sm" data-cat-del="${esc(c.id)}">삭제</button>
+                        </div>
+                    </div>
+                    <div class="field-row" style="margin-top:0.8rem;">
+                        <div class="field">
+                            <label for="catName-${esc(c.id)}">이름</label>
+                            <input type="text" id="catName-${esc(c.id)}" maxlength="40" value="${esc(c.name)}" data-cat-name="${esc(c.id)}">
+                        </div>
+                        <div class="field">
+                            <label for="catTone-${esc(c.id)}">배지 색</label>
+                            <select id="catTone-${esc(c.id)}" data-cat-tone="${esc(c.id)}">
+                                ${CAT_TONES.map(t => '<option value="' + esc(t.id) + '"' +
+                                    (t.id === c.tone ? ' selected' : '') + '>' + esc(t.name) + '</option>').join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-cyan btn-sm" data-cat-save="${esc(c.id)}">💾 저장</button>
+
+                    ${deleting ? `
+                    <div class="field" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line);">
+                        <label for="catMove-${esc(c.id)}">
+                            ${used ? '이 분류를 쓰는 콘텐츠 ' + used + '건을 어디로 옮길까요?'
+                                   : '이 분류를 삭제합니다.'}
+                        </label>
+                        ${used ? `<select id="catMove-${esc(c.id)}" data-cat-move="${esc(c.id)}">
+                            <option value="">미분류로 두기</option>
+                            ${others.map(o => '<option value="' + esc(o.slug) + '">' + esc(o.name) + euro(o.name) + ' 옮기기</option>').join('')}
+                        </select>` : ''}
+                        <div style="display:flex; gap:0.6rem; margin-top:0.8rem;">
+                            <button class="btn btn-danger btn-sm" data-cat-del-ok="${esc(c.id)}">삭제 확정</button>
+                            <button class="btn btn-ghost btn-sm" data-cat-del-cancel="1">취소</button>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        on($('catScopeTabs'), 'click', async e => {
+            const btn = e.target.closest('[data-scope]');
+            if (!btn) return;
+            curScope = btn.dataset.scope;
+            catDeleting = null;
+            await renderCatAdmin();
+        });
+
+        on($('addCatBtn'), 'click', async () => {
+            const name = ($('catNewName').value || '').trim();
+            if (!name) { showToast('분류 이름을 입력해 주세요.'); $('catNewName').focus(); return; }
+            try {
+                await TenStore.saveCategory({ scope: curScope, name, tone: $('catNewTone').value });
+                $('catNewName').value = '';
+                await renderCatAdmin();
+                fillAllCatSelects();
+                showToast('분류 「' + name + '」이(가) 추가되었습니다.');
+            } catch (err) {
+                showToast(err.message || '분류를 추가하지 못했습니다.');
+            }
+        });
+
+        on($('catList'), 'click', async e => {
+            const d = (e.target.closest('button') || {}).dataset || {};
+
+            if (d.catSave) {
+                const id = d.catSave;
+                const name = (document.querySelector('[data-cat-name="' + id + '"]') || {}).value || '';
+                const tone = (document.querySelector('[data-cat-tone="' + id + '"]') || {}).value || '';
+                const cur = catsOf(curScope).find(c => c.id === id);
+                if (!cur) return;
+                try {
+                    await TenStore.saveCategory({ id, scope: curScope, name: name.trim(), tone });
+                    await renderCatAdmin();
+                    fillAllCatSelects();
+                    showToast('분류가 저장되었습니다.');
+                } catch (err) { showToast(err.message || '저장하지 못했습니다.'); }
+                return;
+            }
+
+            if (d.catUp || d.catDown) {
+                const id = d.catUp || d.catDown;
+                const ids = catsOf(curScope).map(c => c.id);
+                const i = ids.indexOf(id);
+                const j = d.catUp ? i - 1 : i + 1;
+                if (i < 0 || j < 0 || j >= ids.length) return;
+                ids[i] = ids[j]; ids[j] = id;
+                try {
+                    await TenStore.reorderCategories(curScope, ids);
+                    await renderCatAdmin();
+                } catch (err) { showToast(err.message || '순서를 바꾸지 못했습니다.'); }
+                return;
+            }
+
+            if (d.catDel)       { catDeleting = d.catDel; await renderCatAdmin(); return; }
+            if (d.catDelCancel) { catDeleting = null;     await renderCatAdmin(); return; }
+
+            if (d.catDelOk) {
+                const id = d.catDelOk;
+                const sel = document.querySelector('[data-cat-move="' + id + '"]');
+                const moveTo = sel ? sel.value : '';
+                try {
+                    const r = await TenStore.deleteCategory(id, moveTo);
+                    catDeleting = null;
+                    await renderCatAdmin();
+                    fillAllCatSelects();
+                    await refreshContentPanels();
+                    showToast(r.moved
+                        ? '분류를 삭제하고 ' + r.moved + '건을 ' + (moveTo ? '다른 분류로' : '미분류로') + ' 옮겼습니다.'
+                        : '분류가 삭제되었습니다.');
+                } catch (err) { showToast(err.message || '삭제하지 못했습니다.'); }
+            }
+        });
+
+        /* 분류가 바뀌면 다른 탭의 목록에 찍힌 분류 이름도 다시 그린다 */
+        async function refreshContentPanels() {
+            await Promise.all([
+                renderPosts(), renderQna(), renderHbAdmin(), renderLecAdmin(), renderAppAdmin()
+            ].map(p => Promise.resolve(p).catch(() => {})));
+        }
 
         async function renderAppAdmin() {
             // 새 앱 등록 폼은 오늘 날짜로 시작한다 — 공개일을 비워 둔 채 저장하는 실수를 막는다
@@ -1189,7 +1481,7 @@
                     <div class="item-top">
                         <div>
                             <div class="item-title">
-                                <span class="chip chip-notice">${esc(catLabel(a.category))}</span>
+                                <span class="chip ${esc(catTone('app', a.category))}">${esc(catLabel('app', a.category))}</span>
                                 <span class="chip ${a.launch ? 'chip-answered' : 'chip-private'}">${a.launch ? '실행 연결됨' : '실행 준비 중'}</span>
                                 ${isNewApp(a) ? '<span class="chip chip-answered">NEW 안내판 노출</span>' : ''}
                                 ${esc(a.name)}
@@ -1212,7 +1504,7 @@
             $('appId').value = ''; $('appName').value = ''; $('appOneliner').value = '';
             $('appHow').value = ''; $('appLaunch').value = ''; $('appGithub').value = '';
             $('appIsNew').checked = false; $('appReleased').value = todayInput();
-            $('appCategory').value = ''; $('appKeywords').value = '';
+            fillCatSelect('appCategory', 'app', ''); $('appKeywords').value = '';
             $('appFormTitle').textContent = '새 앱 등록';
         }
         $('resetAppBtn').addEventListener('click', resetAppForm);
@@ -1248,7 +1540,7 @@
                 $('appId').value = a.id; $('appName').value = a.name; $('appOneliner').value = a.oneliner || '';
                 $('appHow').value = a.how || ''; $('appLaunch').value = a.launch || ''; $('appGithub').value = a.github || '';
                 $('appIsNew').checked = a.isNew === true; $('appReleased').value = tsToDateInput(a.releasedAt);
-                $('appCategory').value = a.category || ''; $('appKeywords').value = a.keywords || '';
+                fillCatSelect('appCategory', 'app', a.category || ''); $('appKeywords').value = a.keywords || '';
                 $('appFormTitle').textContent = '앱 수정';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }

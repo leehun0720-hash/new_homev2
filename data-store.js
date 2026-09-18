@@ -16,6 +16,10 @@
    ===================================================================== */
 import './supabase-config.js';   // window.SUPABASE_CONFIG (env 미설정 시 폴백)
 import { createClient } from '@supabase/supabase-js';
+import {
+    CATEGORY_SCOPES, SCOPE_IDS, CATEGORY_TONES, DEFAULT_TONE,
+    safeTone, COVER_OF, defaultRows
+} from './categories-default.mjs';
 
 const DEFAULT_SETTINGS = {
     heroBadge: 'The 10th Intelligence for Human Progress',
@@ -198,12 +202,15 @@ const postFromRow = r => ({
 const qnaFromRow = r => ({
     id: r.id, name: r.name, email: r.email, question: r.question,
     answer: r.answer, status: r.status, isPublic: !!r.is_public,
+    // 마이그레이션 전에는 컬럼이 없어 undefined 가 온다 — 빈 값(미분류)으로 맞춘다
+    category: r.category == null ? '' : String(r.category),
     createdAt: Number(r.created_at),
     answeredAt: r.answered_at != null ? Number(r.answered_at) : null
 });
 const QNA_COL = {
     name: 'name', email: 'email', question: 'question', answer: 'answer',
-    status: 'status', isPublic: 'is_public', createdAt: 'created_at', answeredAt: 'answered_at'
+    status: 'status', isPublic: 'is_public', category: 'category',
+    createdAt: 'created_at', answeredAt: 'answered_at'
 };
 function qnaToRow(patch) {
     const row = {};
@@ -304,17 +311,27 @@ async function listQna(opts) {
     opts = opts || {};
     let items;
     if (mode === 'supabase') {
-        try {
-            // 관리자 : 전체 컬럼·전체 행 / 익명·일반 회원 : 공개 답변만, email 컬럼 제외 (RLS + 컬럼 권한)
-            const admin = await isAdminUser();
-            const query = admin
-                ? sb.from('qna').select('*')
-                : sb.from('qna').select('id,name,question,answer,status,is_public,created_at,answered_at')
-                    .eq('is_public', true).eq('status', 'answered');
-            const { data, error } = await query;
+        // 관리자 : 전체 컬럼·전체 행 / 익명·일반 회원 : 공개 답변만, email 컬럼 제외 (RLS + 컬럼 권한)
+        const admin = await isAdminUser().catch(() => false);
+        // 분류 컬럼은 supabase-categories.sql 실행 후에 생긴다. 아직 없으면
+        // 컬럼을 콕 집어 고른 쿼리가 통째로 실패하므로, 빼고 한 번 더 시도한다.
+        const cols = withCat => admin ? '*'
+            : 'id,name,question,answer,status,is_public,' + (withCat ? 'category,' : '') + 'created_at,answered_at';
+        const run = async withCat => {
+            let q = sb.from('qna').select(cols(withCat));
+            if (!admin) q = q.eq('is_public', true).eq('status', 'answered');
+            const { data, error } = await q;
             if (error) throw error;
-            items = (data || []).map(qnaFromRow);
-        } catch (e) { console.warn('[TenStore] Q&A 로드 실패', e); items = []; }
+            return (data || []).map(qnaFromRow);
+        };
+        try {
+            items = await run(true);
+        } catch (e) {
+            try {
+                items = await run(false);
+                console.info('[TenStore] Q&A 분류 컬럼이 아직 없습니다 — supabase-categories.sql 을 실행하면 분류 필터가 켜집니다.');
+            } catch (e2) { console.warn('[TenStore] Q&A 로드 실패', e2); items = []; }
+        }
     } else {
         items = localList('tenai_qna', SEED_QNA);
     }
@@ -394,21 +411,11 @@ const SEED_LECTURES = [
     { id: 'l3', cat: 'AI 경영 전략',        title: 'AI 경영 전략 강의 — 우리 회사에 AI 심는 법',     dur: '21:08', videoId: '', grad1: '#b45309', grad2: '#7c2d12', createdAt: 3 },
     { id: 'l4', cat: '프롬프트 엔지니어링', title: '프롬프트 엔지니어링 스킬업 — 좋은 질문의 기술',  dur: '16:33', videoId: '', grad1: '#0f766e', grad2: '#134e4a', createdAt: 4 }
 ];
-/* 앱 분류 — 쇼케이스 필터 칩과 관리자 콘솔 선택지가 이 목록 하나를 공유한다.
-   늘리려면 여기에 한 줄 추가하면 양쪽에 함께 반영된다. */
-/* tone 은 카드 배지와 썸네일 색조다. 브랜드 3색을 성격별로 나눠 쓴다.
-   의미는 배지 '이름'이 지고, 색은 리듬만 준다 — 8색을 새로 만들면
-   편집형 색면이라는 이 사이트의 성격이 흐트러진다. */
-const APP_CATEGORIES = [
-    { id: 'automation', name: '업무 자동화',   tone: 'tag-vibe'  },
-    { id: 'document',   name: '문서·글쓰기',   tone: 'tag-biz'   },
-    { id: 'data',       name: '데이터·분석',   tone: 'tag-vibe'  },
-    { id: 'esg',        name: '탄소·ESG',     tone: 'tag-genai' },
-    { id: 'edu',        name: '교육·학습',     tone: 'tag-genai' },
-    { id: 'gov',        name: '정부지원·공모', tone: 'tag-biz'   },
-    { id: 'biz',        name: '경영·금융',     tone: 'tag-biz'   },
-    { id: 'tool',       name: '유틸리티',      tone: 'tag-vibe'  }
-];
+/* 앱 분류 — 이제 categories 테이블(관리자 콘솔 > 분류 관리)에서 관리한다.
+   이 상수는 분류 테이블을 아직 읽지 못한 시점에 쓰는 폴백이며,
+   정의는 categories-default.mjs 한 곳에만 둔다.
+   {id} 는 앱 행의 category 값(slug)과 같아야 한다 — 기존 호출부 호환. */
+const APP_CATEGORIES = defaultRows('app').map(c => ({ id: c.slug, name: c.name, tone: c.tone }));
 
 const SEED_APPS = [
     { id: 'a1', name: '서울LAW봇',      badge: 'Legal AI',      badgeCls: 'tag-vibe',  oneliner: '판례와 법령을 이해하는 법률 특화 AI 챗봇', how: '한국 판례·법령 데이터를 RAG로 연결해, 일반인의 언어로 물어봐도 관련 법 조항과 판례를 근거와 함께 답변합니다.', launch: '', github: '', category: 'gov',      keywords: '법률, 판례, 법령, 변호사, 리걸, legal', isNew: false, releasedAt: 0, createdAt: 1 },
@@ -499,12 +506,252 @@ const handbookApi = makeContentApi('handbooks', 'tenai_handbooks', SEED_HANDBOOK
 const lectureApi  = makeContentApi('lectures',  'tenai_lectures',  SEED_LECTURES,  LEC_MAP);
 const appApi      = makeContentApi('apps',      'tenai_apps',      SEED_APPS,      APP_MAP);
 
+/* =====================================================================
+   분류(카테고리) — 게시물 · Q&A · 핸드북 · 강의 · 앱 공통
+   ---------------------------------------------------------------------
+   categories 테이블 하나가 다섯 영역의 분류를 모두 담는다(scope 로 구분).
+   관리자 콘솔 > 분류 관리에서 편집하면 공개 사이트의 필터가 함께 바뀐다.
+
+   테이블이 아직 없으면(= supabase-categories.sql 미실행) categories-default.mjs
+   의 기본값으로 동작한다. 마이그레이션 전에도 사이트가 멀쩡히 돈다.
+
+   slug 는 콘텐츠 행에 저장되는 값이라 만든 뒤에는 바꾸지 않는다.
+   이름(name)은 언제든 바꿔도 콘텐츠와의 연결이 끊기지 않는다.
+   ===================================================================== */
+
+/* 영역별로 분류 값이 실제로 저장되는 곳 — 사용 건수 집계와 삭제 시 이동에 쓴다 */
+const SCOPE_CONTENT = {
+    post:     { table: 'posts',     col: 'category',   lsKey: 'tenai_posts',     seed: SEED_POSTS,      jsKey: 'category' },
+    qna:      { table: 'qna',       col: 'category',   lsKey: 'tenai_qna',       seed: SEED_QNA,        jsKey: 'category' },
+    handbook: { table: 'handbooks', col: 'course_tag', lsKey: 'tenai_handbooks', seed: SEED_HANDBOOKS,  jsKey: 'course_tag' },
+    lecture:  { table: 'lectures',  col: 'category',   lsKey: 'tenai_lectures',  seed: SEED_LECTURES,   jsKey: 'cat' },
+    app:      { table: 'apps',      col: 'category',   lsKey: 'tenai_apps',      seed: SEED_APPS,       jsKey: 'category' }
+};
+
+const catFromRow = r => ({
+    id: r.id,
+    scope: r.scope,
+    slug: r.slug == null ? '' : String(r.slug),
+    name: r.name == null ? '' : String(r.name),
+    tone: safeTone(r.tone),
+    sortOrder: Number(r.sort_order) || 0,
+    createdAt: Number(r.created_at) || 0
+});
+const catToRow = c => ({
+    id: c.id, scope: c.scope, slug: c.slug, name: c.name,
+    tone: safeTone(c.tone), sort_order: Number(c.sortOrder) || 0,
+    created_at: Number(c.createdAt) || 0
+});
+
+const byOrder = (a, b) => (a.sortOrder - b.sortOrder) || a.name.localeCompare(b.name, 'ko');
+
+let CAT_CACHE = null;          // scope → 정렬된 분류 배열
+let CAT_SOURCE = 'default';    // 'db' | 'local' | 'default' — 어디서 읽었는지
+
+function groupByScope(rows) {
+    const out = {};
+    SCOPE_IDS.forEach(s => { out[s] = []; });
+    rows.forEach(r => { if (out[r.scope]) out[r.scope].push(r); });
+    SCOPE_IDS.forEach(s => out[s].sort(byOrder));
+    return out;
+}
+
+function defaultGrouped() {
+    return groupByScope(SCOPE_IDS.reduce((acc, s) => acc.concat(defaultRows(s)), []));
+}
+
+/* 분류 목록을 불러와 캐시한다. 한 번 읽으면 페이지가 살아 있는 동안 재사용하고,
+   관리자 콘솔에서 편집한 뒤에는 {reload:true} 로 다시 읽는다. */
+async function listCategories(opts) {
+    opts = opts || {};
+    if (CAT_CACHE && !opts.reload) return CAT_CACHE;
+
+    if (mode === 'supabase') {
+        try {
+            const { data, error } = await sb.from('categories').select('*');
+            if (error) throw error;
+            const rows = (data || []).map(catFromRow);
+            // 테이블은 있는데 비어 있으면 기본값으로 둔다 (빈 필터를 내보내지 않게)
+            CAT_CACHE = rows.length ? groupByScope(rows) : defaultGrouped();
+            CAT_SOURCE = rows.length ? 'db' : 'default';
+        } catch (e) {
+            console.info('[TenStore] 분류 테이블을 읽지 못했습니다 — 기본 분류로 표시합니다. ' +
+                         'supabase-categories.sql 을 실행하면 관리자 콘솔에서 편집할 수 있습니다.');
+            CAT_CACHE = defaultGrouped();
+            CAT_SOURCE = 'default';
+        }
+    } else {
+        const rows = LS.read('tenai_categories', null);
+        CAT_CACHE = rows && rows.length ? groupByScope(rows.map(catFromRow)) : defaultGrouped();
+        CAT_SOURCE = 'local';
+    }
+    return CAT_CACHE;
+}
+
+/* 이미 불러온 분류를 동기적으로 꺼낸다 — 렌더 함수에서 쓰기 편하게.
+   listCategories() 를 한 번도 부르지 않았다면 기본값을 돌려준다. */
+function categoriesOf(scope) {
+    const all = CAT_CACHE || defaultGrouped();
+    return (all[scope] || []).slice();
+}
+
+function categorySource() { return CAT_SOURCE; }
+
+/* 이름에서 slug 를 만든다. 한글 이름은 그대로 쓴다 — 억지로 로마자로 바꾸면
+   읽을 수 없는 문자열이 되고, 어차피 주소에서는 인코딩되어 나간다.
+   같은 영역에 겹치는 값이 있으면 뒤에 번호를 붙인다. */
+function makeSlug(scope, name, existing) {
+    const base = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 40) || 'cat';
+    const taken = new Set((existing || categoriesOf(scope)).map(c => c.slug));
+    if (!taken.has(base)) return base;
+    for (let i = 2; i < 100; i++) {
+        const t = base + '-' + i;
+        if (!taken.has(t)) return t;
+    }
+    return base + '-' + genId();
+}
+
+/* 로컬 모드도 DB 와 같은 행 모양(snake_case)으로 저장한다.
+   JS 모양 그대로 쓰면 다시 읽을 때 catFromRow 가 sort_order 를 못 찾아
+   순서가 전부 0 이 되고 목록이 가나다순으로 튄다. */
+function writeLocalCategories(grouped) {
+    LS.write('tenai_categories',
+        SCOPE_IDS.reduce((acc, s) => acc.concat(grouped[s] || []), []).map(catToRow));
+}
+
+/* 분류 저장 — id 가 있으면 수정(이름·색조·순서), 없으면 새로 만든다.
+   slug 는 새로 만들 때만 정해지고 이후에는 바뀌지 않는다. */
+async function saveCategory(cat) {
+    const all = await listCategories();
+    const scope = cat.scope;
+    if (!SCOPE_IDS.includes(scope)) throw new Error('알 수 없는 분류 영역입니다: ' + scope);
+
+    const name = String(cat.name || '').trim();
+    if (!name) throw new Error('분류 이름을 입력해 주세요.');
+
+    const list = all[scope] || [];
+    const prev = cat.id ? list.find(c => c.id === cat.id) : null;
+    if (cat.id && !prev) throw new Error('수정할 분류를 찾지 못했습니다.');
+
+    // 같은 영역에서 이름이 겹치면 목록에서 구분이 안 된다
+    if (list.some(c => c.id !== cat.id && c.name === name)) {
+        throw new Error('같은 이름의 분류가 이미 있습니다: ' + name);
+    }
+
+    const slug = prev ? prev.slug : makeSlug(scope, name, list);
+    const row = {
+        id: prev ? prev.id : scope + ':' + slug,
+        scope, slug, name,
+        tone: safeTone(cat.tone),
+        sortOrder: cat.sortOrder != null ? Number(cat.sortOrder)
+                 : prev ? prev.sortOrder
+                 : (list.length ? Math.max.apply(null, list.map(c => c.sortOrder)) + 10 : 10),
+        createdAt: prev ? prev.createdAt : Date.now()
+    };
+
+    if (mode === 'supabase') {
+        const { error } = await sb.from('categories').upsert(catToRow(row));
+        if (error) throw error;
+    } else {
+        const next = Object.assign({}, all);
+        next[scope] = list.filter(c => c.id !== row.id).concat(row).sort(byOrder);
+        writeLocalCategories(next);
+    }
+    await listCategories({ reload: true });
+    return row.id;
+}
+
+/* 이 분류를 쓰고 있는 콘텐츠가 몇 건인지 센다 (삭제 전에 물어보려고) */
+async function countCategoryUsage(scope, slug) {
+    const spec = SCOPE_CONTENT[scope];
+    if (!spec || !slug) return 0;
+    if (mode === 'supabase') {
+        try {
+            const { count, error } = await sb.from(spec.table)
+                .select('id', { count: 'exact', head: true }).eq(spec.col, slug);
+            if (error) throw error;
+            return Number(count) || 0;
+        } catch (e) {
+            console.warn('[TenStore] 사용 건수 확인 실패 — ' + spec.table, e);
+            return 0;
+        }
+    }
+    return localList(spec.lsKey, spec.seed).filter(x => String(x[spec.jsKey] || '') === slug).length;
+}
+
+/* 분류 삭제. 쓰고 있는 콘텐츠가 있으면 moveToSlug 로 옮긴 뒤 지운다.
+   moveToSlug 를 비우면 그 콘텐츠는 '미분류'가 된다. */
+async function deleteCategory(id, moveToSlug) {
+    const all = await listCategories();
+    let target = null, scope = null;
+    for (const s of SCOPE_IDS) {
+        const hit = (all[s] || []).find(c => c.id === id);
+        if (hit) { target = hit; scope = s; break; }
+    }
+    if (!target) throw new Error('삭제할 분류를 찾지 못했습니다.');
+
+    const spec = SCOPE_CONTENT[scope];
+    const used = await countCategoryUsage(scope, target.slug);
+    const moveTo = String(moveToSlug == null ? '' : moveToSlug);
+
+    if (used > 0 && spec) {
+        if (mode === 'supabase') {
+            const patch = {};
+            patch[spec.col] = moveTo;
+            const { error } = await sb.from(spec.table).update(patch).eq(spec.col, target.slug);
+            if (error) throw error;
+        } else {
+            const items = localList(spec.lsKey, spec.seed);
+            items.forEach(x => { if (String(x[spec.jsKey] || '') === target.slug) x[spec.jsKey] = moveTo; });
+            LS.write(spec.lsKey, items);
+        }
+    }
+
+    if (mode === 'supabase') {
+        const { error } = await sb.from('categories').delete().eq('id', id);
+        if (error) throw error;
+    } else {
+        const next = Object.assign({}, all);
+        next[scope] = (all[scope] || []).filter(c => c.id !== id);
+        writeLocalCategories(next);
+    }
+    await listCategories({ reload: true });
+    return { moved: used, movedTo: moveTo };
+}
+
+/* 순서 바꾸기 — 화면에 보이는 순서대로 id 를 넘기면 10 단위로 다시 매긴다 */
+async function reorderCategories(scope, orderedIds) {
+    const all = await listCategories();
+    const list = all[scope] || [];
+    const rows = orderedIds
+        .map((id, i) => {
+            const c = list.find(x => x.id === id);
+            return c ? Object.assign({}, c, { sortOrder: (i + 1) * 10 }) : null;
+        })
+        .filter(Boolean);
+    if (!rows.length) return;
+
+    if (mode === 'supabase') {
+        const { error } = await sb.from('categories').upsert(rows.map(catToRow));
+        if (error) throw error;
+    } else {
+        const next = Object.assign({}, all);
+        next[scope] = rows.slice().sort(byOrder);
+        writeLocalCategories(next);
+    }
+    await listCategories({ reload: true });
+}
+
 /* ---------- 공개 API (index.html / admin.html 인라인 스크립트에서 사용) ---------- */
 window.TenStore = {
     mode,
     modeLabel: mode === 'supabase' ? 'Supabase 연결됨' : '로컬 모드 (브라우저 저장)',
     DEFAULT_SETTINGS,
     APP_CATEGORIES,
+    /* 분류 관리 */
+    CATEGORY_SCOPES, CATEGORY_TONES, DEFAULT_TONE, COVER_OF,
+    listCategories, categoriesOf, categorySource,
+    saveCategory, deleteCategory, reorderCategories, countCategoryUsage,
     getSettings, saveSettings,
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
