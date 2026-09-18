@@ -85,10 +85,12 @@ function resolveConfig() {
 /* ---------- 모드 감지 (Supabase 또는 로컬) ---------- */
 let sb = null;      // Supabase 클라이언트
 let mode = 'local';
+let sbUrl = '', sbKey = '';   // OAuth 제공자 확인처럼 REST 로 직접 물을 때 쓴다
 try {
     const { url, key } = resolveConfig();
     if (url && key) {
         sb = createClient(url, key);
+        sbUrl = url; sbKey = key;
         mode = 'supabase';
     }
 } catch (e) {
@@ -151,20 +153,93 @@ async function signInMember(email, password) {
 
 const signOutMember = signOutAdmin;
 
+/* ---------- 구글 로그인 (Supabase Auth OAuth) ----------
+   대시보드에서 Google 제공자를 켜 두어야 동작한다
+   (supabase-google-login.sql 머리말의 ★ 두 단계 참고).
+
+   redirectTo 를 멤버십 화면으로 주는 이유
+     구글이 돌려보내는 주소는 Supabase 의 Redirect URLs 목록에 있어야 한다.
+     어느 페이지에서 눌렀든 '내 정보' 가 있는 곳으로 돌아오게 해 두면
+     로그인 직후 무엇이 달라졌는지 바로 보인다. */
+/* 구글 제공자가 켜져 있는지 미리 확인한다.
+
+   왜 미리 보는가
+     signInWithOAuth 는 서버에 묻지 않고 곧장 주소창을 옮긴다. 제공자가
+     꺼져 있으면 사용자는 Supabase 가 뱉은 날것의 JSON 오류 화면을 본다.
+     먼저 물어보면 우리 화면에서 우리 말로 안내할 수 있다.
+
+   확실할 때만 막는다 — 조회에 실패하면(null) 그대로 진행한다.
+   확인이 안 된다고 로그인을 못 하게 하는 편이 더 나쁘다. */
+async function googleProviderEnabled() {
+    if (!sbUrl || !sbKey) return null;
+    try {
+        const res = await fetch(sbUrl.replace(/\/$/, '') + '/auth/v1/settings', {
+            headers: { apikey: sbKey }
+        });
+        if (!res.ok) return null;
+        const s = await res.json();
+        if (!s || !s.external || typeof s.external.google === 'undefined') return null;
+        return !!s.external.google;
+    } catch (e) { return null; }
+}
+
+async function signInWithGoogle(redirectTo) {
+    if (mode !== 'supabase') throw new Error('Supabase 연결 시 사용할 수 있습니다.');
+    if ((await googleProviderEnabled()) === false) {
+        throw new Error('구글 로그인이 아직 켜져 있지 않습니다. 잠시 후 다시 시도하시거나 이메일로 로그인해 주세요.');
+    }
+    const back = redirectTo || (location.origin + '/membership');
+    const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: back,
+            // 계정을 고를 수 있게 한다 — 여러 구글 계정을 쓰는 사람이
+            // 지난번 계정으로 조용히 들어가 버리지 않도록
+            queryParams: { prompt: 'select_account' }
+        }
+    });
+    if (error) {
+        // 제공자가 꺼져 있으면 Supabase 가 'provider is not enabled' 로 답한다
+        if (/provider.*not enabled|unsupported provider/i.test(error.message || '')) {
+            throw new Error('구글 로그인이 아직 켜져 있지 않습니다. Supabase 대시보드에서 Google 제공자를 활성화해 주세요.');
+        }
+        throw error;
+    }
+    return data;
+}
+
 /* 로그인된 사용자의 프로필(역할 포함) 조회 — 비로그인 시 null */
 async function getMemberProfile() {
     if (mode !== 'supabase') return null;
     const session = await getAdminSession();
     if (!session) return null;
+    /* 구글 로그인은 이름·사진을 auth 쪽 메타데이터로 준다.
+       supabase-google-login.sql 을 실행하면 profiles 에도 들어오지만,
+       실행 전이거나 트리거보다 먼저 만들어진 계정은 비어 있다.
+       그럴 때 메타데이터에서 끌어와 '이메일만 덩그러니' 를 면한다. */
+    const meta = (session.user && session.user.user_metadata) || {};
+    const metaName   = meta.full_name || meta.name || '';
+    const metaAvatar = meta.avatar_url || meta.picture || '';
+    const base = {
+        id: session.user.id,
+        email: session.user.email || '',
+        name: metaName, avatar_url: metaAvatar,
+        address: '', company: '', position: '', role: 'member'
+    };
     try {
         const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
         if (error) throw error;
-        if (data) return data;
-        // 트리거 이전 가입자 등 프로필이 없으면 최소 정보 반환
-        return { id: session.user.id, email: session.user.email || '', address: '', company: '', position: '', role: 'member' };
+        if (data) {
+            return Object.assign({}, base, data, {
+                // 컬럼이 아직 없거나 비어 있으면 메타데이터 쪽을 쓴다
+                name: data.name || metaName,
+                avatar_url: data.avatar_url || metaAvatar
+            });
+        }
+        return base;   // 트리거 이전 가입자 등 프로필 행이 없는 경우
     } catch (e) {
         console.warn('[TenStore] 프로필 조회 실패', e);
-        return { id: session.user.id, email: session.user.email || '', address: '', company: '', position: '', role: 'member' };
+        return base;
     }
 }
 
@@ -923,7 +998,7 @@ window.TenStore = {
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
     signInAdmin, signOutAdmin, getAdminSession,
-    signUpMember, signInMember, signOutMember, getMemberProfile, isAdminUser,
+    signUpMember, signInMember, signOutMember, signInWithGoogle, getMemberProfile, isAdminUser,
     listHandbooks: handbookApi.list, saveHandbook: handbookApi.save, deleteHandbook: handbookApi.remove,
     listLectures: lectureApi.list,  saveLecture: lectureApi.save,   deleteLecture: lectureApi.remove,
     listApps: appApi.list,          saveApp: appApi.save,           deleteApp: appApi.remove

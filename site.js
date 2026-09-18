@@ -563,11 +563,85 @@ onId('appsGrid', 'click', e => {
 });
 
 /* ============ 소셜 로그인 (데모) ============ */
+/* 프로필 사진 주소 — https 만 받는다. 구글이 주는 주소는 항상 https 다. */
+const safeImg = u => {
+    const v = String(u || '').trim();
+    return /^https:\/\//i.test(v) ? v : '';
+};
+
+/* ============ 구글 로그인 ============
+   버튼을 누르면 구글로 갔다가 /membership 으로 돌아온다.
+   돌아온 뒤 처리는 아래 handleOAuthReturn 이 맡는다. */
+onId('googleLoginBtn', 'click', async () => {
+    const btn = document.getElementById('googleLoginBtn');
+    const label = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '구글로 이동 중…';
+    try {
+        await TenStore.signInWithGoogle(location.origin + '/membership');
+        // 여기서 페이지가 구글로 넘어간다. 돌아오지 않으면 아래는 실행되지 않는다.
+    } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = label;
+        showToast(e.message || '구글 로그인을 시작하지 못했습니다.');
+    }
+});
+
+/* 아직 안 붙인 제공자(카카오)는 눌러도 안내만 */
 document.querySelectorAll('[data-social]').forEach(btn => {
     btn.addEventListener('click', () => {
-        showToast(`${btn.dataset.social} 로그인은 Supabase Auth(OAuth) 연동 후 활성화됩니다.`);
+        showToast(`${btn.dataset.social} 로그인은 준비 중입니다. 지금은 구글 또는 이메일로 이용해 주세요.`);
     });
 });
+
+/* ---- 구글에서 돌아왔을 때 ----
+   supabase-js 가 주소에 실려 온 인증 정보를 알아서 세션으로 바꾼다.
+   여기서는 두 가지만 한다 — 결과를 알려 주고, 주소를 깨끗이 한다.
+
+   주소를 지우는 이유
+     인증 흔적(#access_token=… 또는 ?code=…)이 주소창에 남으면 사용자가
+     그대로 복사해 공유할 수 있고, 새로고침할 때마다 처리되려 한다. */
+function oauthErrorText(params) {
+    const code = params.get('error_code') || '';
+    const desc = params.get('error_description') || params.get('error') || '';
+    if (/provider.*not enabled|unsupported/i.test(desc)) {
+        return '구글 로그인이 아직 켜져 있지 않습니다. 관리자에게 알려 주세요.';
+    }
+    if (/redirect|redirect_uri/i.test(desc + code)) {
+        return '로그인 후 돌아올 주소가 등록되지 않았습니다. 관리자에게 알려 주세요.';
+    }
+    return desc ? decodeURIComponent(desc.replace(/\+/g, ' ')) : '구글 로그인이 완료되지 않았습니다.';
+}
+
+async function handleOAuthReturn() {
+    const hash = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
+    const query = new URLSearchParams(location.search);
+    const hasError = hash.get('error') || query.get('error');
+    const hasAuth  = hash.get('access_token') || query.get('code');
+    if (!hasError && !hasAuth) return;
+
+    const clean = () => history.replaceState(null, '', location.pathname);
+
+    if (hasError) {
+        clean();
+        showToast(oauthErrorText(hash.get('error') ? hash : query));
+        return;
+    }
+
+    // supabase-js 가 세션을 세우기까지 잠깐 걸린다
+    let profile = null;
+    for (let i = 0; i < 20 && !profile; i++) {
+        try { profile = await TenStore.getMemberProfile(); } catch (_) {}
+        if (!profile) await new Promise(r => setTimeout(r, 150));
+    }
+    clean();
+    if (profile) {
+        await refreshMemberUI();
+        showToast(`${profile.name || profile.email || '회원'}님, 환영합니다.`);
+    } else {
+        showToast('로그인 정보를 확인하지 못했습니다. 다시 시도해 주세요.');
+    }
+}
 document.querySelectorAll('[data-login]').forEach(btn => {
     btn.addEventListener('click', () => {
         closeMobileMenu();
@@ -991,13 +1065,27 @@ async function refreshMemberUI() {
     if (profile) {
         if (authView) authView.hidden = true;
         if (profileView) profileView.hidden = false;
+
+        /* 구글로 들어온 회원은 이름·사진이 있고 주소·회사·직급이 없다.
+           빈 줄을 '-' 로 늘어놓는 대신 아예 빼서 화면을 가볍게 둔다. */
         const rows = [
-            ['이메일', profile.email || '-'],
-            ['주소', profile.address || '-'],
-            ['회사', profile.company || '-'],
-            ['직급', profile.position || '-'],
-            ['등급', profile.role === 'admin' ? '관리자' : '일반 회원']
-        ];
+            ['이름', profile.name],
+            ['이메일', profile.email],
+            ['주소', profile.address],
+            ['회사', profile.company],
+            ['직급', profile.position]
+        ].filter(([, v]) => v && String(v).trim());
+        rows.push(['등급', profile.role === 'admin' ? '관리자' : '일반 회원']);
+
+        const head = document.getElementById('profileHead');
+        if (head) {
+            const avatar = safeImg(profile.avatar_url);
+            head.innerHTML = avatar
+                ? '<img class="profile-avatar" src="' + escHtml(avatar) + '" alt="" width="52" height="52" referrerpolicy="no-referrer">'
+                : '';
+            head.hidden = !avatar;
+        }
+
         const rowsEl = document.getElementById('profileRows');
         if (rowsEl) rowsEl.innerHTML = rows.map(([k, v]) =>
             '<div class="profile-row"><span class="k">' + k + '</span><span class="v' +
@@ -1313,6 +1401,7 @@ async function initPromoBanner() {
     try { updatePromoMeta(); } catch (e) { console.warn('홍보 현황 갱신 실패', e); }
     try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
     try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
+    try { await handleOAuthReturn(); } catch (e) { console.warn('구글 로그인 복귀 처리 실패', e); }
     // 팝업은 본문이 다 그려진 뒤에 올린다
     try { await initPromoBanner(); } catch (e) { console.warn('홍보 배너 표시 실패', e); }
 })();

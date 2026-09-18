@@ -3737,3 +3737,31 @@ blockquote { letter-spacing: -0.025em; }
     .promo-pop, .promo-pop-box { transition: none; }
     .promo-pop-box { transform: none; }
 }
+
+/* =====================================================================
+   구글 로그인 — 프로필 사진과 '준비 중' 표시
+   ===================================================================== */
+.profile-head {
+    display: flex; align-items: center;
+    margin-bottom: 1rem;
+}
+.profile-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--brand-ink);
+}
+
+/* 아직 안 붙인 제공자 — 눌러도 안내만 나오므로 그렇게 보이게 둔다 */
+.social-soon {
+    font-size: 0.76rem; font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+    opacity: 0.75;
+}
+.social-btn[aria-disabled="true"] { opacity: 0.6; }
+.social-btn[aria-disabled="true"]:hover { transform: none; filter: none; }
+
+/* 로그인 진행 중에는 다시 누를 수 없게 */
+.social-btn:disabled { opacity: 0.65; cursor: progress; transform: none; filter: none; }
