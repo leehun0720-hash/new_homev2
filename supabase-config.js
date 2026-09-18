@@ -82,6 +82,7 @@ window.SUPABASE_CONFIG = {
        콘솔에 주소를 추가했으면 여기에도 같이 적어 주세요. 두 곳이
        어긋나면 그냥 예전 방식으로 동작할 뿐, 로그인이 끊기지는 않습니다. */
     googleJsOrigins: [
-        "https://deploy-preview-7--amazing-cactus-dfd8d4.netlify.app"
+        // 2026-09-18 확인: /gsi/button 200 — 구글이 이 주소를 받아 줌
+        "https://tenai.kr"
     ]
 };

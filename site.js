@@ -615,39 +615,43 @@ function loadGsiScript() {
     return gsiLoading;
 }
 
-/* 구글이 이 주소를 승인했는지 확인한다.
+/* 구글 버튼은 '등록된 주소'에서만 건다.
 
    왜 눈으로 못 고르나
      '승인된 자바스크립트 원본' 에 이 주소가 없으면 구글은 403 을 받고도
      겉보기에 똑같은 버튼을 그린다 — 로고도 글자도 다 있는데 눌러도
-     아무 일이 없다. 높이도 DOM 도 성공했을 때와 구분되지 않는다.
-     (배포 미리보기에서 실제로 확인했다: 40px, role=button, 구글 로고,
-      'Continue with Google' 까지 똑같다.)
+     아무 일이 없다. 배포 미리보기에서 직접 확인했다:
+     40px, role=button, 구글 로고 SVG, "Continue with Google" 까지 같다.
 
-   그래서 구글이 직접 뱉는 말을 듣는다
-     이때 구글은 console.error 로 '[GSI_LOGGER]: The given origin is not
-     allowed for the given client ID.' 를 남긴다. 페이지에서 잡을 수 있는
-     신호는 이것뿐이다 — 403 은 iframe 이라 performance 에 안 잡히고,
-     교차 출처라 responseStatus 도 0 으로 가려진다.
+   페이지에서 읽을 수 있는 신호를 다 재 봤지만 쓸 만한 것이 없었다.
+     · performance responseStatus → 교차 출처라 0 으로 가려짐
+     · /gsi/button 403           → iframe 이라 performance 에 안 잡힘
+     · DOM 구조·높이·글자         → 성공했을 때와 구분 안 됨
+     · [GSI_LOGGER] 콘솔 오류     → 우리 프레임으로 오지 않고, 나는
+                                    때조차 들쭉날쭉했다 (두 번 놓쳤다)
 
-   왜 이 파일이 뜨자마자 설치하나
-     구글 스크립트는 불러오는 순간 console.error 를 자기 안에 붙잡아
-     둔다. 스크립트를 부른 '뒤에' 감싸면 우리 손을 거치지 않는다.
-     (이 실수로 한 번 놓쳤다 — 미리보기에서 오류가 두 번 났는데도
-      감지하지 못했다.) 그래서 무조건 먼저 건다.
+   그래서 추측을 그만두고 설정으로 정한다. supabase-config.js 의
+   googleJsOrigins 에 적힌 주소에서만 시도한다. 그 목록은 사람이
+   구글 콘솔과 맞춰 두는 값이고, 어긋나 봐야 예전 방식으로 돌아갈 뿐이다. */
 
-   원래 함수는 항상 그대로 불러 준다 — 로그를 삼키지 않는다. */
-let gsiComplained = false;
-(function watchGsiErrors() {
-    if (typeof console === 'undefined' || typeof console.error !== 'function') return;
-    const original = console.error;
-    console.error = function (...args) {
-        try {
-            if (args.map(a => String(a)).join(' ').includes('GSI_LOGGER')) gsiComplained = true;
-        } catch (e) { /* 무슨 일이 있어도 원래 로그는 막지 않는다 */ }
-        return original.apply(this, args);
-    };
-})();
+/* 마지막 안전망 — 눌렀는데 아무 일도 없을 때.
+
+   등록된 주소만 쓰므로 여기까지 올 일은 없어야 한다. 그래도 구글
+   콘솔에서 주소가 빠지는 날이 오면 사용자는 '눌러도 안 되는 버튼'
+   앞에 서게 된다. 그때 길을 하나 더 열어 준다.
+
+   구글 버튼을 치우지는 않는다 — 창이 떠 있는 중일 수도 있으므로
+   멀쩡한 흐름을 끊지 않고, 예전 버튼만 다시 꺼내 놓는다. */
+let gsiCredentialSeen = false;
+function watchDeadClick(slot, ours) {
+    slot.addEventListener('click', () => {
+        setTimeout(() => {
+            if (gsiCredentialSeen || !ours.hidden) return;
+            ours.hidden = false;
+            showToast('구글 창이 열리지 않으면 아래 버튼으로 로그인해 주세요.');
+        }, 4000);
+    }, true);
+}
 
 const GSI_BTN_OPTS = {
     type: 'standard', theme: 'outline', size: 'large',
@@ -692,6 +696,7 @@ async function initGoogleButton() {
             cancel_on_tap_outside: true,
             itp_support: true,
             callback: async (res) => {
+                gsiCredentialSeen = true;
                 try {
                     await TenStore.signInWithGoogleIdToken(res && res.credential, nonce.raw);
                     const profile = await TenStore.getMemberProfile();
@@ -708,21 +713,17 @@ async function initGoogleButton() {
         return;                                  // 무슨 일이 있어도 우리 버튼은 남는다
     }
 
-    /* 버튼이 그려지고 나서도 한참 더 듣는다.
-       구글의 거부(403)와 그에 따른 오류 기록은 버튼이 그려진 '뒤에'
-       도착한다. 서둘러 판정하면 죽은 버튼을 진짜인 줄 알고 내건다.
-       시험용 자리는 화면 밖이라 기다리는 동안에도 우리 버튼이 그대로
-       보인다 — 늦어서 손해 보는 것은 없다. */
-    const QUIET_MS = 2400;                               // 이만큼 조용해야 받아들인다
+    /* 구글이 버튼을 다 그릴 때까지 기다린다. 시험 자리는 화면 밖이라
+       기다리는 동안에도 우리 버튼이 그대로 보인다 — 늦어서 손해 볼 것이 없다. */
+    const QUIET_MS = 1200;
     const started = Date.now();
     let drawn = false;
     while (Date.now() - started < 5000) {
-        if (gsiComplained) { cleanUp(); return; }        // 구글이 거부했다
         if (!drawn && probe.getBoundingClientRect().height > 0) drawn = true;
         if (drawn && Date.now() - started >= QUIET_MS) break;
         await new Promise(r => setTimeout(r, 120));
     }
-    if (!drawn || gsiComplained) { cleanUp(); return; }
+    if (!drawn) { cleanUp(); return; }
 
     /* 폭이 맞는지도 시험 자리에서 본다.
        구글 버튼은 min-width 가 내용 길이로 잡혀 있어, 폭을 작게 달라고
@@ -743,12 +744,12 @@ async function initGoogleButton() {
         return;
     }
     for (let i = 0; i < 20; i++) {
-        if (!gsiComplained && slot.getBoundingClientRect().height > 0) {
+        if (slot.getBoundingClientRect().height > 0) {
             slot.classList.add('is-ready');
             ours.hidden = true;
+            watchDeadClick(slot, ours);
             return;
         }
-        if (gsiComplained) break;
         await new Promise(r => setTimeout(r, 100));
     }
     slot.hidden = true;                          // 끝내 안 그려졌다 — 우리 버튼으로 간다
