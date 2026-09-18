@@ -653,9 +653,13 @@ function watchDeadClick(slot, ours) {
     }, true);
 }
 
+/* 'signin_with' = "Google 계정으로 로그인".
+   'continue_with' 보다 딱 1px 좁아서 320px 화면에서도 자리에 들어간다
+   (자리 230px 기준: continue_with 231px, signin_with 230px — 실측).
+   로그인 화면 문구로도 이쪽이 자연스럽다. */
 const GSI_BTN_OPTS = {
     type: 'standard', theme: 'outline', size: 'large',
-    text: 'continue_with', shape: 'rectangular',
+    text: 'signin_with', shape: 'rectangular',
     logo_alignment: 'center', locale: 'ko'
 };
 
@@ -676,7 +680,10 @@ async function initGoogleButton() {
     /* 버튼이 들어갈 실제 폭. 슬롯이 아직 숨겨져 있으므로 부모에서 잰다. */
     const room = Math.round((slot.parentElement || slot).getBoundingClientRect().width)
         || Math.round(slot.getBoundingClientRect().width) || 320;
-    const width = Math.min(400, Math.max(200, room));
+    /* 구글은 우리가 준 폭보다 좌우로 5px 씩 더 쓴다(테두리·포커스 링).
+       그만큼 빼서 달라고 해야 자리 안에 들어온다. 실측:
+       요청 256 → 266, 283 → 293, 400 → 410. 늘 정확히 +10 이었다. */
+    const width = Math.min(400, Math.max(200, room - 10));
 
     /* 먼저 화면 밖에서 시험 삼아 한 번 그려 본다.
        여기서 판정이 끝날 때까지 우리 버튼은 그대로 둔다 — 멀쩡한 버튼을
@@ -725,13 +732,19 @@ async function initGoogleButton() {
     }
     if (!drawn) { cleanUp(); return; }
 
-    /* 폭이 맞는지도 시험 자리에서 본다.
-       구글 버튼은 min-width 가 내용 길이로 잡혀 있어, 폭을 작게 달라고
-       해도 글자가 길면 그만큼 삐져나온다. 잘라 붙이거나 축소하느니
-       안 쓰는 편이 낫다 — 예전 버튼은 어느 폭에서도 멀쩡하다. */
-    const inner = probe.querySelector('[role="button"]');
-    const drawnW = inner ? Math.ceil(inner.getBoundingClientRect().width) : 0;
-    if (!drawnW || drawnW > room) { cleanUp(); return; }
+    /* 폭이 자리에 들어오는지 시험 자리에서 본다.
+
+       왜 담는 그릇의 넘침으로 재는가
+         구글은 처음에 평범한 div 버튼을 그렸다가 곧 iframe 으로 바꿔
+         단다. 그래서 [role=button] 을 찾아 재면 바꿔 단 뒤에는 사라져
+         0 이 나온다 — 멀쩡한 버튼을 폭 0 으로 보고 버리게 된다.
+         (프로덕션에서 이 실수로 버튼이 안 걸렸다: 150ms 293×40 →
+          600ms 0×0.) 그릇의 scrollWidth 는 어느 쪽이든 맞는다.
+
+       min-width 가 내용 길이로 잡혀 있어 좁은 화면에서는 아무리 작게
+       달라고 해도 삐져나올 수 있다. 그럴 땐 쓰지 않는다 — 잘라 붙이거나
+       축소하느니, 어느 폭에서도 멀쩡한 예전 버튼이 낫다. */
+    if (probe.scrollWidth > room) { cleanUp(); return; }
 
     cleanUp();
 
