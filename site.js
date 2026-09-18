@@ -678,6 +678,11 @@ async function initGoogleButton() {
        요청 256 → 266, 283 → 293, 400 → 410. 늘 정확히 +10 이었다. */
     const width = Math.min(400, Math.max(200, room - 10));
 
+    /* 버튼을 걸기 전의 가로 넘침을 기억해 둔다 — 나중에 이 버튼이
+       화면을 밀어냈는지 견주는 기준이 된다. */
+    const de0 = document.documentElement;
+    const pageOverBefore = Math.max(0, de0.scrollWidth - de0.clientWidth);
+
     /* 빈 슬롯은 높이 0 이라 펴 두어도 화면이 흔들리지 않는다.
        구글은 숨겨진(display:none) 자리에는 그리지 못하므로 먼저 편다. */
     slot.hidden = false;
@@ -727,16 +732,25 @@ async function initGoogleButton() {
     }
     if (!shown) { slot.hidden = true; return; }
 
-    /* 다 그려진 뒤 폭을 한 번 더 본다.
+    /* 다 그려진 뒤, 버튼 때문에 화면이 옆으로 밀리지 않는지 본다.
 
-       구글은 처음에 평범한 div 버튼을 그렸다가 곧 iframe 으로 바꿔 단다.
-       바꿔 달면서 좌우로 5px 씩 더 쓰므로, 자리가 아주 좁으면 그제서야
-       삐져나온다. 그때는 되돌린다 — 잘라 붙이거나 축소하느니, 어느
-       폭에서도 멀쩡한 예전 버튼이 낫다. ([role=button] 으로 재면 안 된다.
-       바꿔 단 뒤에는 iframe 안으로 들어가 0 이 나온다.) */
+       무엇을 재야 하나
+         슬롯 안에서만 보면 늘 5px 쯤 넘친다 — 구글이 테두리·포커스
+         링에 쓰는 여백이고, 패널 안쪽 여백에 묻혀 눈에 띄지 않는다.
+         그걸 넘침으로 세면 멀쩡한 버튼을 모바일에서 통째로 버리게
+         된다(실제로 그렇게 버렸다: 320·360·390 전부 되돌아갔다).
+         정작 사용자에게 문제가 되는 것은 '페이지가 옆으로 스크롤되는가'
+         하나뿐이므로 그것만 본다.
+
+       버튼을 걸기 전 값과 견준다. 다른 요소가 이미 넘치고 있었다면
+       그것은 이 버튼 탓이 아니다.
+
+       ([role=button] 으로 재면 안 된다 — 구글은 처음에 평범한 div 로
+        그렸다가 곧 iframe 으로 바꿔 달고, 그 뒤에는 0 이 나온다.) */
     for (let i = 0; i < 12; i++) {
         await new Promise(r => setTimeout(r, 150));
-        if (slot.scrollWidth > room) {
+        const de = document.documentElement;
+        if (de.scrollWidth - de.clientWidth > pageOverBefore) {
             slot.hidden = true;
             slot.classList.remove('is-ready');
             ours.hidden = false;
