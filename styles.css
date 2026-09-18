@@ -36,6 +36,20 @@ body {
     color: var(--white);
     line-height: 1.7;
     overflow-x: hidden;
+
+    /* 한글은 띄어쓰기에서 끊는다.
+       브라우저 기본값(word-break: normal)은 한글을 어느 글자에서든 끊어도
+       된다고 보기 때문에 '인공지 / 능', '만나보 / 세요' 처럼 낱말이 갈라진다.
+       keep-all 은 낱말을 통째로 넘긴다.
+
+       break-word 는 그 부작용을 막는 보루다. keep-all 만 두면 띄어쓰기 없는
+       긴 덩어리(주소·영문 식별자·붙여 쓴 한글)가 한 줄에 못 들어갈 때
+       상자를 밀어내는데, 그런 경우에만 강제로 끊어 준다.
+
+       두 값 모두 상속되므로 여기 한 번이면 사이트 전체에 걸린다.
+       이메일처럼 어디서든 끊어야 하는 자리는 아래에서 따로 되돌린다. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .outfit { font-family: 'Outfit', system-ui, -apple-system, sans-serif; }
@@ -1175,7 +1189,10 @@ section { padding: var(--section-padding) 5%; position: relative; }
 .app-card:hover .app-overlay { opacity: 1; }
 .app-body { padding: 1.5rem 1.6rem 1.7rem; }
 .app-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.55rem; }
-.app-name { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1.2rem; font-weight: 700; }
+/* min-width: 0 이 없으면 flex 자식은 낱말 하나보다 작아지지 못한다.
+   '국비공모파인더' 처럼 띄어쓰기 없는 긴 이름이 좁은 화면에서 옆의 분류
+   배지를 밀어낸다. 0 을 주면 필요할 때만 낱말이 쪼개지며 자리를 지킨다. */
+.app-name { font-family: 'Outfit', system-ui, -apple-system, sans-serif; font-size: 1.2rem; font-weight: 700; min-width: 0; }
 .app-badge {
     font-size: 0.78rem; font-weight: 700;
     padding: 0.24rem 0.7rem;
@@ -3665,11 +3682,6 @@ blockquote { letter-spacing: -0.025em; }
     line-height: 1.4;
     color: var(--brand-ink);
     margin: 0 0 0.75rem;
-    /* 한글은 띄어쓰기에서 끊는다 — 기본값은 낱말 중간도 끊어
-       '열었습니 / 다.' 처럼 읽기 나쁜 줄바꿈이 생긴다.
-       break-word 는 띄어쓰기 없는 긴 주소가 상자를 밀어내는 것을 막는 보루다. */
-    word-break: keep-all;
-    overflow-wrap: break-word;
 }
 .promo-pop-text {
     font-size: 0.95rem;
@@ -3677,8 +3689,6 @@ blockquote { letter-spacing: -0.025em; }
     color: #6b4b2a;
     white-space: pre-line;     /* 관리자가 넣은 줄바꿈을 살린다 */
     margin: 0;
-    word-break: keep-all;
-    overflow-wrap: break-word;
 }
 .promo-pop-cta {
     display: inline-flex; align-items: center; gap: 0.5rem;

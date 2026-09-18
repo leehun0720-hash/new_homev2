@@ -31,6 +31,10 @@
             color: var(--white);
             line-height: 1.65;
             min-height: 100vh;
+            /* 공개 사이트와 같은 규칙 — 한글은 띄어쓰기에서 끊는다.
+               break-word 는 긴 주소가 상자를 밀어내는 것을 막는 보루다. */
+            word-break: keep-all;
+            overflow-wrap: break-word;
         }
         .outfit { font-family: 'Outfit', sans-serif; }
         button { font-family: 'Noto Sans KR', sans-serif; cursor: pointer; }
