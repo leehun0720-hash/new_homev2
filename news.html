@@ -177,6 +177,17 @@
             <h2 class="section-title">소식</h2>
             <p class="section-desc">TEN AI의 공지사항, 교육 일정, 새로운 소식을 전해드립니다</p>
         </div>
+        <div class="apps-filters animate-on-scroll">
+            <div class="app-search">
+                <svg class="app-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="search" id="newsSearch" autocomplete="off" spellcheck="false"
+                       placeholder="제목·내용으로 소식 검색" aria-label="소식 검색">
+                <button type="button" class="app-search-clear" id="newsSearchClear" hidden aria-label="검색어 지우기">✕</button>
+            </div>
+            <div class="app-cats" id="newsCats" role="group" aria-label="분류 필터"></div>
+        </div>
+
+        <p class="apps-count" id="newsCount" aria-live="polite"></p>
         <div class="news-grid" id="newsGrid" aria-live="polite"></div>
     </section>
 
@@ -212,6 +223,17 @@
             </form>
             <div class="qna-list-wrap animate-on-scroll">
                 <h3>자주 나온 질문과 답변</h3>
+                <div class="apps-filters animate-on-scroll">
+                    <div class="app-search">
+                        <svg class="app-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                        <input type="search" id="qnaSearch" autocomplete="off" spellcheck="false"
+                               placeholder="질문·답변 내용으로 검색" aria-label="Q&amp;A 검색">
+                        <button type="button" class="app-search-clear" id="qnaSearchClear" hidden aria-label="검색어 지우기">✕</button>
+                    </div>
+                    <div class="app-cats" id="qnaCats" role="group" aria-label="분류 필터"></div>
+                </div>
+
+                <p class="apps-count" id="qnaCount" aria-live="polite"></p>
                 <div class="qna-list" id="qnaPublicList" aria-live="polite"></div>
             </div>
         </div>

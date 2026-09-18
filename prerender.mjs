@@ -16,12 +16,16 @@
    ===================================================================== */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { SCOPE_IDS, safeTone, COVER_OF, allDefaultRows } from './categories-default.mjs';
 
 /* 멀티페이지 — 섹션이 흩어져 있으므로 각 페이지에서 '있는 컨테이너'만 채운다.
    홈처럼 일부만 보여주는 자리는 컨테이너의 data-limit 을 그대로 따른다. */
 const PAGES = ['index', 'about', 'business', 'education', 'apps', 'news', 'membership']
   .map(n => `dist/${n}.html`);
 const TABLES = ['handbooks', 'lectures', 'apps', 'posts'];
+/* 없어도 빌드를 막지 않는 테이블 — 마이그레이션(supabase-categories.sql) 전에
+   배포되면 조회가 실패한다. 그때는 기본 분류로 심고 계속 간다. */
+const OPTIONAL_TABLES = ['categories'];
 
 /* ---------- 접속 정보: 환경변수 → .env 파일 ---------- */
 function readEnv() {
@@ -75,31 +79,43 @@ const esc = v => String(v ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-const COURSE_META = {
-  vibecoding:  { name: '바이브코딩',     tagClass: 'tag-vibe',  coverClass: 'cover-vibe',  deco: 'V' },
-  genai:       { name: '생성형 AI 실무', tagClass: 'tag-genai', coverClass: 'cover-genai', deco: 'G' },
-  ai_business: { name: 'AI 경영 전략',   tagClass: 'tag-biz',   coverClass: 'cover-biz',   deco: 'B' },
-};
 const ACCESS_META = {
   public:   { label: '전체 공개',   cls: 'access-public',   icon: '🌐' },
   member:   { label: '회원 공개',   cls: 'access-member',   icon: '👥' },
   enrolled: { label: '수강생 전용', cls: 'access-enrolled', icon: '🔒' },
 };
-const CAT_CLS = { '공지': 'news-cat-notice', '뉴스': 'news-cat-news', '교육': 'news-cat-edu' };
-/* data-store.js 의 APP_CATEGORIES 와 같은 id·이름·색조를 쓴다.
-   배지는 곧 분류다 — 자유입력 배지는 표기가 갈려(util·UTIL·유틸리티) 없앴다. */
-const APP_CAT = {
-  automation: { name: '업무 자동화',   tone: 'tag-vibe'  },
-  document:   { name: '문서·글쓰기',   tone: 'tag-biz'   },
-  data:       { name: '데이터·분석',   tone: 'tag-vibe'  },
-  esg:        { name: '탄소·ESG',     tone: 'tag-genai' },
-  edu:        { name: '교육·학습',     tone: 'tag-genai' },
-  gov:        { name: '정부지원·공모', tone: 'tag-biz'   },
-  biz:        { name: '경영·금융',     tone: 'tag-biz'   },
-  tool:       { name: '유틸리티',      tone: 'tag-vibe'  },
-};
-const catName = id => (APP_CAT[id] || {}).name || '';
-const catTone = id => (APP_CAT[id] || {}).tone || 'tag-biz';
+
+/* 분류는 categories 테이블에서 온다(관리자 콘솔 > 분류 관리).
+   테이블이 아직 없으면 categories-default.mjs 의 기본값으로 심는다 —
+   브라우저가 나중에 다시 그리므로 사람과 크롤러가 보는 것은 여전히 같다. */
+let CATS = {};                 // scope → slug → { name, tone }
+function setCategories(rows) {
+  CATS = {};
+  SCOPE_IDS.forEach(sc => { CATS[sc] = {}; });
+  const put = r => {
+    if (!CATS[r.scope]) CATS[r.scope] = {};
+    CATS[r.scope][r.slug] = { name: r.name, tone: safeTone(r.tone) };
+  };
+  // 기본값을 먼저 깔고 DB 행으로 덮는다 — DB 에 없는 분류도 이름이 나오게
+  allDefaultRows().forEach(put);
+  (rows || []).forEach(r => put({
+    scope: r.scope, slug: r.slug, name: r.name, tone: r.tone
+  }));
+}
+const catName = (scope, slug) => ((CATS[scope] || {})[slug] || {}).name || '';
+const catTone = (scope, slug) => safeTone(((CATS[scope] || {})[slug] || {}).tone);
+
+/* 핸드북 표지 — 이름·색은 분류에서, 워터마크 글자는 색조에서 */
+const DECO_OF = { 'tag-vibe': 'V', 'tag-genai': 'G', 'tag-biz': 'B' };
+function courseMeta(slug) {
+  const tone = catTone('handbook', slug);
+  return {
+    name: catName('handbook', slug) || slug || '미분류',
+    tagClass: tone,
+    coverClass: COVER_OF[tone] || 'cover-biz',
+    deco: DECO_OF[tone] || 'B'
+  };
+}
 
 const fmtDate = ts => ts
   ? new Date(Number(ts)).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -110,7 +126,7 @@ const ytThumb = id => /^[A-Za-z0-9_-]{11}$/.test(String(id || ''))
 
 function handbookHtml(rows, limit) {
   return cut(rows, limit).map((h, i) => {
-    const c = COURSE_META[h.course_tag] || COURSE_META.vibecoding;
+    const c = courseMeta(h.course_tag);
     const a = ACCESS_META[h.access_level] || ACCESS_META.public;
     const unlocked = h.access_level === 'public';
     return `
@@ -120,7 +136,7 @@ function handbookHtml(rows, limit) {
                     </div>
                     <div class="hb-body">
                         <div class="hb-meta">
-                            <span class="hb-course-tag ${c.tagClass}">${c.name}</span>
+                            <span class="hb-course-tag ${c.tagClass}">${esc(c.name)}</span>
                             <span class="hb-access ${a.cls}">${a.icon} ${a.label}</span>
                         </div>
                         <h3 class="hb-title">${esc(h.title)}</h3>
@@ -149,12 +165,12 @@ function lectureHtml(rows, limit) {
                         ${thumb
                           ? `<img class="lecture-shot" src="${thumb}" alt="" loading="lazy" decoding="async" width="480" height="360">`
                           : `<img class="thumb-mark" src="/brand/TenAI_cream.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
-                               <span class="thumb-note">${esc(v.category || 'TEN AI 강의')}</span>`}
+                               <span class="thumb-note">${esc(catName('lecture', v.category) || v.category || 'TEN AI 강의')}</span>`}
                         <div class="play"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
                         ${v.duration ? `<span class="dur outfit">${esc(v.duration)}</span>` : ''}
                     </div>
                     <div class="lecture-body">
-                        <div class="lecture-cat">${esc(v.category)}</div>
+                        <div class="lecture-cat">${esc(catName('lecture', v.category) || v.category || '')}</div>
                         <div class="lecture-title">${esc(v.title)}</div>
                     </div>
                 </${tag}>`;
@@ -188,7 +204,7 @@ function newAppsHtml(rows, limit) {
                 <span class="board-flag">${NEW_FLAG_HTML}</span>
                 <div class="board-item-head">
                     <h4 class="board-item-name">${esc(a.name)}</h4>
-                    ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${esc(catName(a.category))}</span>` : ''}
+                    ${catName('app', a.category) ? `<span class="app-badge ${catTone('app', a.category)}">${esc(catName('app', a.category))}</span>` : ''}
                 </div>
                 <p class="board-item-desc">${esc(a.oneliner)}</p>
                 <p class="board-item-date">${Number(a.released_at) ? '공개일 · ' + fmtDate(a.released_at) : '공개 준비 중'}</p>
@@ -206,7 +222,7 @@ function appHtml(rows, limit) {
   };
   return cut(rows, limit).map(a => `
             <article class="app-card visible${isNewApp(a) ? ' is-new' : ''}">
-                <div class="app-thumb tint-${catTone(a.category)}">
+                <div class="app-thumb tint-${catTone('app', a.category)}">
                     ${isNewApp(a) ? NEW_FLAG_HTML : ''}
                     <img class="thumb-mark" src="/brand/TenAI_ink.png" alt="" aria-hidden="true" loading="lazy" decoding="async" width="1040" height="440">
                     <div class="app-overlay">${esc(a.how)}</div>
@@ -214,7 +230,7 @@ function appHtml(rows, limit) {
                 <div class="app-body">
                     <div class="app-head">
                         <h3 class="app-name">${esc(a.name)}</h3>
-                        ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${esc(catName(a.category))}</span>` : ''}
+                        ${catName('app', a.category) ? `<span class="app-badge ${catTone('app', a.category)}">${esc(catName('app', a.category))}</span>` : ''}
                     </div>
                     <p class="app-oneliner">${esc(a.oneliner)}</p>
                     <div class="app-actions">
@@ -231,7 +247,7 @@ function newsHtml(rows, limit) {
   return cut(rows, limit || 6).map(p => `
                 <button class="news-card" data-post="${esc(p.id)}">
                     <div class="news-meta">
-                        <span class="news-cat ${CAT_CLS[p.category] || 'news-cat-notice'}">${esc(p.category)}</span>
+                        ${catName('post', p.category) ? `<span class="news-cat ${catTone('post', p.category)}">${esc(catName('post', p.category))}</span>` : ''}
                         ${p.pinned ? '<span class="news-pin">📌 고정</span>' : ''}
                         <span class="news-date">${fmtDate(p.created_at)}</span>
                     </div>
@@ -299,6 +315,17 @@ try {
 } catch (e) {
   bail(`데이터 조회 실패 — ${e.message}`);
 }
+for (const t of OPTIONAL_TABLES) {
+  try {
+    data[t] = await fetchTable(url, key, t);
+  } catch (e) {
+    console.log(`[prerender] ${t} 조회 실패 — 기본값으로 진행합니다 (${e.message})`);
+    data[t] = [];
+  }
+}
+
+/* 분류를 먼저 세운다 — 배지 이름과 과정 탭이 여기서 나온다 */
+setCategories(data.categories);
 
 const byCreated = (a, b) => Number(a.created_at) - Number(b.created_at);
 const handbooks = (data.handbooks || []).sort(byCreated);

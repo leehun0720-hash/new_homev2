@@ -133,13 +133,17 @@
             <p class="section-desc">중소기업·공공기관 임직원을 위한 AI 교육 핸드북입니다. AI 리터러시부터 바이브코딩까지 과정별·레벨별로 체계화했으며, 수강 단계에 맞는 교재를 바로 열어볼 수 있습니다.</p>
         </div>
 
-        <div class="academy-filters animate-on-scroll">
-            <div class="course-tabs" role="tablist" aria-label="과정 필터">
-                <button class="course-tab active" data-course="all" role="tab" aria-selected="true">전체</button>
-                <button class="course-tab" data-course="vibecoding" role="tab" aria-selected="false">바이브코딩</button>
-                <button class="course-tab" data-course="genai" role="tab" aria-selected="false">생성형 AI 실무</button>
-                <button class="course-tab" data-course="ai_business" role="tab" aria-selected="false">AI 경영 전략</button>
+        <div class="apps-filters animate-on-scroll">
+            <div class="app-search">
+                <svg class="app-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="search" id="hbSearch" autocomplete="off" spellcheck="false"
+                       placeholder="교재 제목·내용으로 검색" aria-label="핸드북 검색">
+                <button type="button" class="app-search-clear" id="hbSearchClear" hidden aria-label="검색어 지우기">✕</button>
             </div>
+            <div class="app-cats" id="hbCats" role="group" aria-label="과정 필터"></div>
+        </div>
+
+        <div class="academy-filters animate-on-scroll">
             <div class="level-chips" aria-label="레벨 필터">
                 <span class="lv-label">레벨</span>
                 <button class="level-chip active" data-level="all">All</button>
@@ -150,6 +154,7 @@
             </div>
         </div>
 
+        <p class="apps-count" id="hbCount" aria-live="polite"></p>
         <div class="handbook-grid" id="handbookGrid" aria-live="polite"></div>
 
         <div class="academy-note animate-on-scroll">
@@ -175,6 +180,17 @@
                 YouTube 채널 방문
             </a>
         </div>
+        <div class="apps-filters animate-on-scroll">
+            <div class="app-search">
+                <svg class="app-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="search" id="lecSearch" autocomplete="off" spellcheck="false"
+                       placeholder="강의 제목·분류로 검색" aria-label="강의 검색">
+                <button type="button" class="app-search-clear" id="lecSearchClear" hidden aria-label="검색어 지우기">✕</button>
+            </div>
+            <div class="app-cats" id="lecCats" role="group" aria-label="분류 필터"></div>
+        </div>
+
+        <p class="apps-count" id="lecCount" aria-live="polite"></p>
         <div class="lecture-grid" id="lectureGrid"></div>
     </section>
 
