@@ -13,6 +13,8 @@ export default defineConfig({
         apps:       resolve(__dirname, 'apps.html'),
         news:       resolve(__dirname, 'news.html'),
         membership: resolve(__dirname, 'membership.html'),
+        privacy:    resolve(__dirname, 'privacy.html'),
+        terms:      resolve(__dirname, 'terms.html'),
         admin:      resolve(__dirname, 'admin.html'),
         tenai:      resolve(__dirname, 'tenai-website.html')
       }
