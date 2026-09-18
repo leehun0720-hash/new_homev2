@@ -602,6 +602,18 @@ function loadGsiScript() {
     }
     if (gsiLoading) return gsiLoading;
     gsiLoading = new Promise(resolve => {
+        const ready = () => !!(window.google && window.google.accounts && window.google.accounts.id);
+        /* 멤버십 화면은 이 스크립트를 HTML 에서 미리 부른다. 그 편이
+           페이지와 나란히 내려와 버튼이 훨씬 빨리 걸린다. 이미 실려
+           있으면 새로 넣지 않고 끝나기만 기다린다. */
+        const pre = document.querySelector('script[src^="https://accounts.google.com/gsi/client"]');
+        if (pre) {
+            if (ready()) return resolve(true);
+            pre.addEventListener('load', () => resolve(ready()));
+            pre.addEventListener('error', () => resolve(false));
+            setTimeout(() => resolve(ready()), 8000);
+            return;
+        }
         const el = document.createElement('script');
         el.src = 'https://accounts.google.com/gsi/client';
         el.async = true;
@@ -633,25 +645,6 @@ function loadGsiScript() {
    그래서 추측을 그만두고 설정으로 정한다. supabase-config.js 의
    googleJsOrigins 에 적힌 주소에서만 시도한다. 그 목록은 사람이
    구글 콘솔과 맞춰 두는 값이고, 어긋나 봐야 예전 방식으로 돌아갈 뿐이다. */
-
-/* 마지막 안전망 — 눌렀는데 아무 일도 없을 때.
-
-   등록된 주소만 쓰므로 여기까지 올 일은 없어야 한다. 그래도 구글
-   콘솔에서 주소가 빠지는 날이 오면 사용자는 '눌러도 안 되는 버튼'
-   앞에 서게 된다. 그때 길을 하나 더 열어 준다.
-
-   구글 버튼을 치우지는 않는다 — 창이 떠 있는 중일 수도 있으므로
-   멀쩡한 흐름을 끊지 않고, 예전 버튼만 다시 꺼내 놓는다. */
-let gsiCredentialSeen = false;
-function watchDeadClick(slot, ours) {
-    slot.addEventListener('click', () => {
-        setTimeout(() => {
-            if (gsiCredentialSeen || !ours.hidden) return;
-            ours.hidden = false;
-            showToast('구글 창이 열리지 않으면 아래 버튼으로 로그인해 주세요.');
-        }, 4000);
-    }, true);
-}
 
 /* 'signin_with' = "Google 계정으로 로그인".
    'continue_with' 보다 딱 1px 좁아서 320px 화면에서도 자리에 들어간다
@@ -685,15 +678,9 @@ async function initGoogleButton() {
        요청 256 → 266, 283 → 293, 400 → 410. 늘 정확히 +10 이었다. */
     const width = Math.min(400, Math.max(200, room - 10));
 
-    /* 먼저 화면 밖에서 시험 삼아 한 번 그려 본다.
-       여기서 판정이 끝날 때까지 우리 버튼은 그대로 둔다 — 멀쩡한 버튼을
-       치워 놓고 나중에 되돌리는 일이 없도록. */
-    const probe = document.createElement('div');
-    probe.setAttribute('aria-hidden', 'true');
-    probe.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + width + 'px;pointer-events:none;';
-    document.body.appendChild(probe);
-
-    const cleanUp = () => { probe.remove(); };
+    /* 빈 슬롯은 높이 0 이라 펴 두어도 화면이 흔들리지 않는다.
+       구글은 숨겨진(display:none) 자리에는 그리지 못하므로 먼저 편다. */
+    slot.hidden = false;
 
     try {
         google.accounts.id.initialize({
@@ -703,7 +690,6 @@ async function initGoogleButton() {
             cancel_on_tap_outside: true,
             itp_support: true,
             callback: async (res) => {
-                gsiCredentialSeen = true;
                 try {
                     await TenStore.signInWithGoogleIdToken(res && res.credential, nonce.raw);
                     const profile = await TenStore.getMemberProfile();
@@ -714,58 +700,49 @@ async function initGoogleButton() {
                 }
             }
         });
-        google.accounts.id.renderButton(probe, Object.assign({ width }, GSI_BTN_OPTS));
-    } catch (e) {
-        cleanUp();
-        return;                                  // 무슨 일이 있어도 우리 버튼은 남는다
-    }
-
-    /* 구글이 버튼을 다 그릴 때까지 기다린다. 시험 자리는 화면 밖이라
-       기다리는 동안에도 우리 버튼이 그대로 보인다 — 늦어서 손해 볼 것이 없다. */
-    const QUIET_MS = 1200;
-    const started = Date.now();
-    let drawn = false;
-    while (Date.now() - started < 5000) {
-        if (!drawn && probe.getBoundingClientRect().height > 0) drawn = true;
-        if (drawn && Date.now() - started >= QUIET_MS) break;
-        await new Promise(r => setTimeout(r, 120));
-    }
-    if (!drawn) { cleanUp(); return; }
-
-    /* 폭이 자리에 들어오는지 시험 자리에서 본다.
-
-       왜 담는 그릇의 넘침으로 재는가
-         구글은 처음에 평범한 div 버튼을 그렸다가 곧 iframe 으로 바꿔
-         단다. 그래서 [role=button] 을 찾아 재면 바꿔 단 뒤에는 사라져
-         0 이 나온다 — 멀쩡한 버튼을 폭 0 으로 보고 버리게 된다.
-         (프로덕션에서 이 실수로 버튼이 안 걸렸다: 150ms 293×40 →
-          600ms 0×0.) 그릇의 scrollWidth 는 어느 쪽이든 맞는다.
-
-       min-width 가 내용 길이로 잡혀 있어 좁은 화면에서는 아무리 작게
-       달라고 해도 삐져나올 수 있다. 그럴 땐 쓰지 않는다 — 잘라 붙이거나
-       축소하느니, 어느 폭에서도 멀쩡한 예전 버튼이 낫다. */
-    if (probe.scrollWidth > room) { cleanUp(); return; }
-
-    cleanUp();
-
-    // 여기까지 왔으면 구글이 이 주소를 받아 주고 폭도 맞는다. 진짜 자리에 건다.
-    slot.hidden = false;
-    try {
         google.accounts.id.renderButton(slot, Object.assign({ width }, GSI_BTN_OPTS));
     } catch (e) {
         slot.hidden = true;
-        return;
+        return;                                  // 무슨 일이 있어도 예전 버튼은 남는다
     }
-    for (let i = 0; i < 20; i++) {
+
+    /* 그려지는 즉시 바꿔 단다.
+
+       왜 서두르는가
+         예전에는 화면 밖에서 먼저 시험 삼아 그려 보고 1.2초를 더
+         기다렸다. 그동안 예전 버튼이 그대로 보였고, 페이지 로드부터
+         재면 2.5~3초였다. 그 사이에 누른 사람은 예전 경로로 가서
+         구글 화면 제목에 supabase 주소를 보게 된다 — 고치려던 바로
+         그 증상이다. 시험 단계로는 어차피 거부를 가려낼 수 없다는 것도
+         확인했으므로(주소 허용 목록이 그 일을 한다) 통째로 걷어냈다. */
+    let shown = false;
+    for (let i = 0; i < 40; i++) {               // 최대 4초
         if (slot.getBoundingClientRect().height > 0) {
             slot.classList.add('is-ready');
             ours.hidden = true;
-            watchDeadClick(slot, ours);
-            return;
+            shown = true;
+            break;
         }
         await new Promise(r => setTimeout(r, 100));
     }
-    slot.hidden = true;                          // 끝내 안 그려졌다 — 우리 버튼으로 간다
+    if (!shown) { slot.hidden = true; return; }
+
+    /* 다 그려진 뒤 폭을 한 번 더 본다.
+
+       구글은 처음에 평범한 div 버튼을 그렸다가 곧 iframe 으로 바꿔 단다.
+       바꿔 달면서 좌우로 5px 씩 더 쓰므로, 자리가 아주 좁으면 그제서야
+       삐져나온다. 그때는 되돌린다 — 잘라 붙이거나 축소하느니, 어느
+       폭에서도 멀쩡한 예전 버튼이 낫다. ([role=button] 으로 재면 안 된다.
+       바꿔 단 뒤에는 iframe 안으로 들어가 0 이 나온다.) */
+    for (let i = 0; i < 12; i++) {
+        await new Promise(r => setTimeout(r, 150));
+        if (slot.scrollWidth > room) {
+            slot.hidden = true;
+            slot.classList.remove('is-ready');
+            ours.hidden = false;
+            return;
+        }
+    }
 }
 
 onId('googleLoginBtn', 'click', async () => {
