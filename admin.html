@@ -250,6 +250,36 @@
             border-radius: 4px;
         }
 
+        /* ---- 배너 관리 ---- */
+        .ban-img-row { display: flex; gap: 1.1rem; align-items: flex-start; flex-wrap: wrap; }
+        .ban-preview {
+            flex-shrink: 0;
+            width: 220px; height: 116px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px dashed rgba(255,255,255,0.22);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .ban-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .ban-preview-empty { font-size: 0.8rem; color: var(--gray-400); }
+        .ban-img-ctl { display: flex; flex-direction: column; gap: 0.5rem; min-width: 200px; flex: 1; }
+        .ban-img-ctl .btn { align-self: flex-start; }
+        .ban-thumb {
+            flex-shrink: 0;
+            width: 92px; height: 52px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 0.66rem; line-height: 1.3; color: var(--gray-400); text-align: center;
+        }
+        .ban-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        @media (max-width: 640px) {
+            .ban-preview { width: 100%; height: 150px; }
+        }
+
         .qna-q { font-size: 0.92rem; margin: 0.6rem 0 0.8rem; color: var(--gray-200); white-space: pre-wrap; }
         .qna-answer-box { margin-top: 0.4rem; }
         .empty {
@@ -346,6 +376,7 @@
             <button class="admin-tab" data-panel="lectures">🎬 강의 관리</button>
             <button class="admin-tab" data-panel="apps">🧩 앱 관리</button>
             <button class="admin-tab" data-panel="categories">🏷️ 분류 관리</button>
+            <button class="admin-tab" data-panel="banners">📣 배너 관리</button>
         </nav>
 
         <main>
@@ -666,6 +697,104 @@
                     <div class="item-list" id="catList"></div>
                 </div>
             </section>
+
+            <!-- ===== 배너 관리 ===== -->
+            <section class="panel" id="panel-banners">
+                <div class="card">
+                    <h2 id="banFormTitle">새 배너 만들기</h2>
+                    <p class="sub">
+                        홈페이지에 <strong>팝업</strong>으로 뜨는 홍보 배너입니다. 방문자가 처음 들어올 때 한 번 뜨고,
+                        '오늘 하루 보지 않기'를 누르면 그날은 다시 뜨지 않습니다.<br>
+                        <strong>노출 중</strong>으로 켠 배너가 여러 개면 <strong>정렬 순서</strong>가 가장 앞선 하나만 뜹니다.
+                    </p>
+                    <input type="hidden" id="banId">
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="banTitle">제목</label>
+                            <input type="text" id="banTitle" maxlength="80" placeholder="예: runiq space 오픈">
+                        </div>
+                        <div class="field">
+                            <label for="banBadge">배지 <span style="opacity:.65;font-weight:400;">(제목 위 작은 라벨 · 비워도 됨)</span></label>
+                            <input type="text" id="banBadge" maxlength="24" placeholder="예: NEW OPEN">
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="banBody">본문 (줄바꿈 반영)</label>
+                        <textarea id="banBody" style="min-height:110px;" maxlength="400" placeholder="배너에 들어갈 안내 문구"></textarea>
+                    </div>
+
+                    <!-- 이미지 -->
+                    <div class="field">
+                        <label for="banFile">이미지</label>
+                        <div class="ban-img-row">
+                            <div class="ban-preview" id="banPreview" aria-live="polite">
+                                <span class="ban-preview-empty">이미지 없음</span>
+                            </div>
+                            <div class="ban-img-ctl">
+                                <input type="file" id="banFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden>
+                                <button type="button" class="btn btn-ghost btn-sm" id="banPickBtn">📁 이미지 올리기</button>
+                                <button type="button" class="btn btn-ghost btn-sm" id="banClearImgBtn">이미지 빼기</button>
+                                <p class="sub" style="margin:0.6rem 0 0;">
+                                    PNG · JPG · WebP · GIF · SVG · 5MB 이하<br>
+                                    가로로 넓은 이미지(예: 1200×630)가 가장 잘 맞습니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="banImageUrl">이미지 주소 <span style="opacity:.65;font-weight:400;">(직접 입력하거나, 위에서 올리면 자동으로 채워집니다)</span></label>
+                        <input type="text" id="banImageUrl" placeholder="https://...">
+                    </div>
+                    <div class="field">
+                        <label for="banImageAlt">이미지 설명 <span style="opacity:.65;font-weight:400;">(화면낭독기·이미지가 안 뜰 때 대신 읽힙니다)</span></label>
+                        <input type="text" id="banImageAlt" maxlength="120" placeholder="예: runiq space — 농축협을 위한 AI 콘텐츠 스튜디오">
+                    </div>
+
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="banLinkUrl">버튼이 열 주소</label>
+                            <input type="text" id="banLinkUrl" placeholder="https://www.runiq.space/">
+                        </div>
+                        <div class="field">
+                            <label for="banLinkLabel">버튼 문구</label>
+                            <input type="text" id="banLinkLabel" maxlength="30" placeholder="자세히 보기">
+                        </div>
+                    </div>
+
+                    <div class="field-row-3">
+                        <div class="field">
+                            <label for="banStart">노출 시작 <span style="opacity:.65;font-weight:400;">(비우면 바로)</span></label>
+                            <input type="date" id="banStart">
+                        </div>
+                        <div class="field">
+                            <label for="banEnd">노출 종료 <span style="opacity:.65;font-weight:400;">(비우면 계속)</span></label>
+                            <input type="date" id="banEnd">
+                        </div>
+                        <div class="field">
+                            <label for="banOrder">정렬 순서 <span style="opacity:.65;font-weight:400;">(작을수록 먼저)</span></label>
+                            <input type="number" id="banOrder" value="10" min="0" step="10">
+                        </div>
+                    </div>
+
+                    <div class="field checkbox-line">
+                        <input type="checkbox" id="banActive">
+                        <label for="banActive" style="margin:0;">지금 노출하기 (끄면 저장만 되고 뜨지 않습니다)</label>
+                    </div>
+
+                    <div style="display:flex; gap:0.6rem;">
+                        <button class="btn btn-cyan" id="saveBanBtn">💾 배너 저장</button>
+                        <button class="btn btn-ghost" id="resetBanBtn">새로 만들기</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>배너 목록</h2>
+                    <p class="sub" id="banCount"></p>
+                    <div class="item-list" id="banList"></div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -832,6 +961,7 @@
             renderHbAdmin();
             renderLecAdmin();
             renderAppAdmin();
+            renderBanAdmin();
         }
 
         /* ===== 1) 사이트 설정 ===== */
@@ -1460,6 +1590,205 @@
                     showToast(r.moved
                         ? '분류를 삭제하고 ' + r.moved + '건을 ' + (moveTo ? '다른 분류로' : '미분류로') + ' 옮겼습니다.'
                         : '분류가 삭제되었습니다.');
+                } catch (err) { showToast(err.message || '삭제하지 못했습니다.'); }
+            }
+        });
+
+        /* =====================================================================
+           배너 관리
+           ---------------------------------------------------------------------
+           이미지는 Supabase Storage 에 올리고 공개 주소를 image_url 에 담는다.
+           직접 주소를 붙여 넣는 것도 되므로, 외부 이미지도 그대로 쓸 수 있다.
+           ===================================================================== */
+        let banPendingImage = '';     // 저장 전 미리보기용 주소
+
+        function setBanPreview(url) {
+            const box = $('banPreview');
+            if (!box) return;
+            banPendingImage = url || '';
+            box.innerHTML = banPendingImage
+                ? '<img src="' + esc(banPendingImage) + '" alt="배너 이미지 미리보기">'
+                : '<span class="ban-preview-empty">이미지 없음</span>';
+        }
+
+        function resetBanForm() {
+            $('banId').value = '';
+            $('banTitle').value = ''; $('banBadge').value = '';
+            $('banBody').value = '';
+            $('banImageUrl').value = ''; $('banImageAlt').value = '';
+            $('banLinkUrl').value = ''; $('banLinkLabel').value = '';
+            $('banStart').value = ''; $('banEnd').value = '';
+            $('banOrder').value = '10';
+            $('banActive').checked = false;
+            $('banFormTitle').textContent = '새 배너 만들기';
+            setBanPreview('');
+        }
+
+        /* 노출 기간과 활성 상태를 사람이 읽는 한 줄로 */
+        function banStatusText(b) {
+            const now = Date.now();
+            if (!b.active) return { chip: 'chip-private', text: '꺼짐' };
+            if (b.startAt && now < b.startAt) return { chip: 'chip-pending', text: '예약됨' };
+            if (b.endAt && now > b.endAt)     return { chip: 'chip-private', text: '기간 지남' };
+            return { chip: 'chip-answered', text: '노출 중' };
+        }
+
+        async function renderBanAdmin() {
+            let items = [];
+            try { items = await TenStore.listBanners(); }
+            catch (e) { items = []; }
+
+            const live = TenStore.pickLiveBanner(items, Date.now());
+            $('banCount').innerHTML = '총 ' + items.length + '개' +
+                (live ? ' · 지금 뜨는 배너: <strong>' + esc(live.title || '(제목 없음)') + '</strong>'
+                      : ' · 지금 뜨는 배너 없음');
+
+            if (!items.length) {
+                $('banList').innerHTML = '<div class="empty">배너가 없습니다. 위에서 만들어 주세요.</div>';
+                return;
+            }
+
+            $('banList').innerHTML = items.map(b => {
+                const st = banStatusText(b);
+                const isLive = live && live.id === b.id;
+                const period = (b.startAt || b.endAt)
+                    ? (b.startAt ? fmtDate(b.startAt) : '제한 없음') + ' ~ ' + (b.endAt ? fmtDate(b.endAt) : '제한 없음')
+                    : '기간 제한 없음';
+                return `
+                <div class="item-row">
+                    <div class="item-top">
+                        <div style="display:flex; gap:0.9rem; min-width:0; flex:1;">
+                            <div class="ban-thumb">${b.imageUrl
+                                ? '<img src="' + esc(b.imageUrl) + '" alt="">'
+                                : '<span>이미지<br>없음</span>'}</div>
+                            <div style="min-width:0;">
+                                <div class="item-title">
+                                    <span class="chip ${st.chip}">${st.text}</span>
+                                    ${isLive ? '<span class="chip chip-notice">현재 노출</span>' : ''}
+                                    ${b.badge ? '<span class="chip chip-pin">' + esc(b.badge) + '</span>' : ''}
+                                    ${esc(b.title || '(제목 없음)')}
+                                </div>
+                                <div class="item-meta">${esc((b.body || '').split('\n')[0].slice(0, 70))}${(b.body || '').length > 70 ? '…' : ''}</div>
+                                <div class="item-meta" style="margin-top:0.25rem;">
+                                    ${esc(period)} · 순서 ${b.sortOrder}
+                                    ${b.linkUrl ? ' · 링크 ' + esc(b.linkUrl.slice(0, 40)) : ' · 링크 없음'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="btn btn-ghost btn-sm" data-ban-toggle="${esc(b.id)}">${b.active ? '내리기' : '올리기'}</button>
+                            <button class="btn btn-ghost btn-sm" data-ban-edit="${esc(b.id)}">수정</button>
+                            <button class="btn btn-danger btn-sm" data-ban-del="${esc(b.id)}">삭제</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        /* 날짜 입력 ↔ 밀리초.
+           종료일은 그날 23:59:59 까지로 본다 — 관리자가 '9월 30일까지' 로
+           적었는데 30일 0시에 내려가면 하루를 잃는다. */
+        const banDateToStart = v => v ? new Date(v + 'T00:00:00').getTime() : 0;
+        const banDateToEnd   = v => v ? new Date(v + 'T23:59:59').getTime() : 0;
+        const banTsToDate    = ts => ts ? new Date(Number(ts)).toISOString().slice(0, 10) : '';
+
+        on($('banPickBtn'), 'click', () => $('banFile').click());
+        on($('banClearImgBtn'), 'click', () => { setBanPreview(''); $('banImageUrl').value = ''; });
+
+        on($('banFile'), 'change', async e => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const btn = $('banPickBtn');
+            const label = btn.textContent;
+            btn.disabled = true; btn.textContent = '올리는 중…';
+            try {
+                const url = await TenStore.uploadBannerImage(file);
+                $('banImageUrl').value = url;
+                setBanPreview(url);
+                showToast('이미지를 올렸습니다.');
+            } catch (err) {
+                showToast(err.message || '이미지를 올리지 못했습니다.');
+            } finally {
+                btn.disabled = false; btn.textContent = label;
+                e.target.value = '';      // 같은 파일을 다시 골라도 change 가 뜨게
+            }
+        });
+
+        // 주소를 직접 고치면 미리보기도 따라간다
+        on($('banImageUrl'), 'input', () => setBanPreview($('banImageUrl').value.trim()));
+
+        on($('saveBanBtn'), 'click', async () => {
+            const payload = {
+                id: $('banId').value || undefined,
+                title: $('banTitle').value.trim(),
+                badge: $('banBadge').value.trim(),
+                body: $('banBody').value,
+                imageUrl: $('banImageUrl').value.trim(),
+                imageAlt: $('banImageAlt').value.trim(),
+                linkUrl: $('banLinkUrl').value.trim(),
+                linkLabel: $('banLinkLabel').value.trim() || '자세히 보기',
+                active: $('banActive').checked,
+                startAt: banDateToStart($('banStart').value),
+                endAt: banDateToEnd($('banEnd').value),
+                sortOrder: Number($('banOrder').value) || 0
+            };
+            if (payload.startAt && payload.endAt && payload.endAt < payload.startAt) {
+                showToast('종료일이 시작일보다 앞섭니다. 기간을 다시 확인해 주세요.');
+                return;
+            }
+            try {
+                await TenStore.saveBanner(payload);
+                resetBanForm();
+                await renderBanAdmin();
+                showToast('배너가 저장되었습니다.');
+            } catch (err) {
+                showToast(err.message || '배너를 저장하지 못했습니다.');
+            }
+        });
+
+        on($('resetBanBtn'), 'click', resetBanForm);
+
+        on($('banList'), 'click', async e => {
+            const d = (e.target.closest('button') || {}).dataset || {};
+
+            if (d.banEdit) {
+                const items = await TenStore.listBanners();
+                const b = items.find(x => x.id === d.banEdit);
+                if (!b) return;
+                $('banId').value = b.id;
+                $('banTitle').value = b.title; $('banBadge').value = b.badge;
+                $('banBody').value = b.body;
+                $('banImageUrl').value = b.imageUrl; $('banImageAlt').value = b.imageAlt;
+                $('banLinkUrl').value = b.linkUrl; $('banLinkLabel').value = b.linkLabel;
+                $('banStart').value = banTsToDate(b.startAt);
+                $('banEnd').value = banTsToDate(b.endAt);
+                $('banOrder').value = b.sortOrder;
+                $('banActive').checked = b.active;
+                $('banFormTitle').textContent = '배너 수정';
+                setBanPreview(b.imageUrl);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            if (d.banToggle) {
+                const items = await TenStore.listBanners();
+                const b = items.find(x => x.id === d.banToggle);
+                if (!b) return;
+                try {
+                    await TenStore.saveBanner(Object.assign({}, b, { active: !b.active }));
+                    await renderBanAdmin();
+                    showToast(b.active ? '배너를 내렸습니다.' : '배너를 올렸습니다. 홈페이지에 바로 뜹니다.');
+                } catch (err) { showToast(err.message || '바꾸지 못했습니다.'); }
+                return;
+            }
+
+            if (d.banDel) {
+                if (!confirm('이 배너를 삭제할까요? 올려 둔 이미지도 함께 지워집니다. 되돌릴 수 없습니다.')) return;
+                try {
+                    await TenStore.deleteBanner(d.banDel);
+                    if ($('banId').value === d.banDel) resetBanForm();
+                    await renderBanAdmin();
+                    showToast('배너가 삭제되었습니다.');
                 } catch (err) { showToast(err.message || '삭제하지 못했습니다.'); }
             }
         });

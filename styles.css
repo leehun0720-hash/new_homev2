@@ -3605,3 +3605,125 @@ blockquote { letter-spacing: -0.025em; }
     .app-search-clear { width: 40px; height: 40px; right: 0.35rem; }
     .app-search input { padding-right: 3rem; }
 }
+
+/* =====================================================================
+   홍보 팝업 배너
+   ---------------------------------------------------------------------
+   마크업은 site.js 가 만들어 넣는다. 브랜드의 편집형 색면을 그대로 쓴다 —
+   모서리는 각지게, 그림자 대신 잉크색 테두리로 층을 만든다.
+   ===================================================================== */
+.promo-pop {
+    position: fixed; inset: 0;
+    z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 5% 5%;
+    background: rgba(58, 29, 8, 0.62);
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+.promo-pop.open { opacity: 1; visibility: visible; }
+
+.promo-pop-box {
+    width: min(460px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--brand-cream);
+    border: 2px solid var(--brand-ink);
+    border-radius: var(--radius-lg);
+    transform: translateY(14px);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.promo-pop.open .promo-pop-box { transform: translateY(0); }
+
+.promo-pop-figure {
+    border-bottom: 2px solid var(--brand-ink);
+    background: var(--brand-orange);
+    line-height: 0;
+}
+.promo-pop-figure img {
+    width: 100%; height: auto;
+    max-height: 240px;
+    object-fit: cover;
+    display: block;
+}
+
+.promo-pop-body { padding: 1.7rem 1.8rem 1.5rem; }
+
+.promo-pop-badge {
+    display: inline-block;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    /* 0.76rem(12.16px) 아래로 내리지 않는다 — 사이트 전체의 최소 글자 크기 */
+    font-size: 0.78rem; font-weight: 900;
+    letter-spacing: 0.08em;
+    padding: 0.28rem 0.7rem;
+    margin-bottom: 0.9rem;
+    background: var(--brand-ink);
+    color: var(--brand-cream);
+}
+.promo-pop-title {
+    font-size: 1.38rem; font-weight: 900;
+    line-height: 1.4;
+    color: var(--brand-ink);
+    margin: 0 0 0.75rem;
+    /* 한글은 띄어쓰기에서 끊는다 — 기본값은 낱말 중간도 끊어
+       '열었습니 / 다.' 처럼 읽기 나쁜 줄바꿈이 생긴다.
+       break-word 는 띄어쓰기 없는 긴 주소가 상자를 밀어내는 것을 막는 보루다. */
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+.promo-pop-text {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #6b4b2a;
+    white-space: pre-line;     /* 관리자가 넣은 줄바꿈을 살린다 */
+    margin: 0;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+.promo-pop-cta {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    margin-top: 1.4rem;
+    min-height: 46px;
+    padding: 0.7rem 1.3rem;
+    background: var(--brand-ink);
+    color: var(--brand-cream);
+    font-size: 0.95rem; font-weight: 800;
+    text-decoration: none;
+    border: 2px solid var(--brand-ink);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.promo-pop-cta:hover { background: var(--brand-orange); color: var(--brand-ink); }
+
+.promo-pop-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.8rem 1.1rem;
+    border-top: 1px solid #e0d2bb;
+}
+.promo-pop-today, .promo-pop-close {
+    background: none; border: 0;
+    padding: 0.5rem 0;
+    min-height: 44px;              /* 손가락으로 누를 만한 크기 (WCAG 2.5.8) */
+    font: inherit;
+    font-size: 0.86rem; font-weight: 700;
+    color: #8a6a47;
+    cursor: pointer;
+}
+.promo-pop-today { text-decoration: underline; text-underline-offset: 3px; }
+.promo-pop-today:hover, .promo-pop-close:hover { color: var(--brand-ink); }
+
+@media (max-width: 760px) {
+    .promo-pop { padding: 4% 4%; align-items: flex-end; }
+    .promo-pop-box { width: 100%; max-height: 88vh; }
+    .promo-pop-figure img { max-height: 180px; }
+    .promo-pop-body { padding: 1.4rem 1.3rem 1.2rem; }
+    .promo-pop-title { font-size: 1.24rem; }
+    .promo-pop-foot { padding: 0.8rem 1.3rem 1rem; }
+    .promo-pop-cta { width: 100%; justify-content: center; }
+}
+
+/* 감속 모드에서는 움직임 없이 나타난다 */
+@media (prefers-reduced-motion: reduce) {
+    .promo-pop, .promo-pop-box { transition: none; }
+    .promo-pop-box { transform: none; }
+}

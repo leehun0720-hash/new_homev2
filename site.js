@@ -1135,6 +1135,152 @@ async function renderTenosRank() {
     else requestAnimationFrame(() => requestAnimationFrame(fill));
 }
 
+/* =====================================================================
+   홍보 팝업 배너
+   ---------------------------------------------------------------------
+   관리자 콘솔 > 배너 관리에서 만든 배너를 팝업으로 띄운다.
+
+   마크업을 7개 페이지에 복사하지 않고 여기서 만들어 넣는 이유
+     - 페이지마다 조금씩 어긋날 일이 없다
+     - 팝업 내용은 정적 HTML 에 있으면 안 된다. 크롤러가 본문으로 읽고,
+       JS 를 끈 사용자에게는 닫을 수 없는 덩어리로 남는다
+
+   다시 보여 주는 규칙
+     '오늘 하루 보지 않기' 를 누르면 그 배너는 날짜가 바뀔 때까지 안 뜬다.
+     그냥 닫으면 이 방문(탭)에서만 안 뜬다 — 다음 방문에는 다시 보인다.
+     배너를 고쳐 다시 올리면 저장 시각이 바뀌므로 닫아 둔 사람에게도 다시 뜬다.
+   ===================================================================== */
+const BANNER_DAY_KEY = 'tenai_banner_hidden';     // { [키]: 'YYYY-MM-DD' }
+const BANNER_SESSION_KEY = 'tenai_banner_closed'; // 이 탭에서 닫은 배너 키
+
+/* 내용이 바뀌면 키도 바뀐다 — 닫아 둔 사람도 새 소식은 보게 */
+const bannerKey = b => `${b.id}:${b.createdAt || 0}`;
+
+const todayStamp = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+/* 저장소는 사생활 보호 모드나 차단 설정에서 던질 수 있다.
+   배너 하나 때문에 페이지가 죽지 않도록 전부 감싼다. */
+function bannerHidden(key) {
+    try {
+        if (sessionStorage.getItem(BANNER_SESSION_KEY) === key) return true;
+        const map = JSON.parse(localStorage.getItem(BANNER_DAY_KEY) || '{}');
+        return map[key] === todayStamp();
+    } catch (e) { return false; }
+}
+function hideBannerToday(key) {
+    try {
+        const map = JSON.parse(localStorage.getItem(BANNER_DAY_KEY) || '{}');
+        // 지난 날짜 기록은 버린다 — 저장소에 옛 배너 키가 쌓이지 않게
+        const today = todayStamp();
+        const next = {};
+        Object.keys(map).forEach(k => { if (map[k] === today) next[k] = map[k]; });
+        next[key] = today;
+        localStorage.setItem(BANNER_DAY_KEY, JSON.stringify(next));
+    } catch (e) { /* 저장 못 해도 닫히기는 한다 */ }
+}
+function hideBannerThisVisit(key) {
+    try { sessionStorage.setItem(BANNER_SESSION_KEY, key); } catch (e) { /* 무시 */ }
+}
+
+/* 배너 주소 검사 — safeUrl 은 빈 값을 '/apps' 로 바꾸므로 여기선 쓸 수 없다.
+   이미지가 없으면 빈 문자열이어야 <img> 를 아예 안 만든다. */
+const bannerImgUrl = u => {
+    const v = String(u || '').trim();
+    if (!v) return '';
+    // 로컬 모드 업로드는 data URL 로 들어온다. <img> 로 읽는 이미지 data URL 은
+    // 스크립트가 실행되지 않으므로(SVG 포함) 허용해도 안전하다.
+    if (/^data:image\//i.test(v)) return v;
+    if (v[0] === '/') return v;
+    return /^https?:\/\//i.test(v) ? v : '';
+};
+/* 링크는 더 좁게 — data:·javascript: 가 버튼에 실리면 안 된다 */
+const bannerLinkUrl = u => {
+    const v = String(u || '').trim();
+    if (!v) return '';
+    if (v[0] === '/' || v[0] === '#') return v;
+    return /^https?:\/\//i.test(v) ? v : '';
+};
+
+let bannerEl = null;
+let bannerEsc = null;
+
+function closePromoBanner(key, forToday) {
+    if (!bannerEl) return;
+    if (forToday) hideBannerToday(key); else hideBannerThisVisit(key);
+    if (bannerEsc) { document.removeEventListener('keydown', bannerEsc); bannerEsc = null; }
+    bannerEl.classList.remove('open');
+    document.body.style.overflow = '';
+    closeOverlay(bannerEl);
+    // 전환이 끝난 뒤 치운다 — 닫히는 모습이 보이게
+    setTimeout(() => { if (bannerEl) { bannerEl.remove(); bannerEl = null; } }, 300);
+}
+
+function buildPromoBanner(b) {
+    const key = bannerKey(b);
+    const img = bannerImgUrl(b.imageUrl);
+    const link = bannerLinkUrl(b.linkUrl);
+    const label = String(b.linkLabel || '자세히 보기').trim() || '자세히 보기';
+
+    const el = document.createElement('div');
+    el.className = 'promo-pop';
+    el.id = 'promoPop';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'promoPopTitle');
+    el.innerHTML = `
+        <div class="promo-pop-box">
+            ${img ? `<div class="promo-pop-figure">
+                <img src="${escHtml(img)}" alt="${escHtml(b.imageAlt || '')}" loading="eager" decoding="async">
+            </div>` : ''}
+            <div class="promo-pop-body">
+                ${b.badge ? `<span class="promo-pop-badge">${escHtml(b.badge)}</span>` : ''}
+                <h2 class="promo-pop-title" id="promoPopTitle">${escHtml(b.title)}</h2>
+                ${b.body ? `<p class="promo-pop-text">${escHtml(b.body)}</p>` : ''}
+                ${link ? `<a class="promo-pop-cta" href="${escHtml(link)}" target="_blank" rel="noopener">
+                    ${escHtml(label)}
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>` : ''}
+            </div>
+            <div class="promo-pop-foot">
+                <button type="button" class="promo-pop-today" data-close-today>오늘 하루 보지 않기</button>
+                <button type="button" class="promo-pop-close" data-close aria-label="배너 닫기">닫기 ✕</button>
+            </div>
+        </div>`;
+
+    on(el, 'click', e => {
+        if (e.target === el) { closePromoBanner(key, false); return; }          // 배경 클릭
+        if (e.target.closest('[data-close-today]')) { closePromoBanner(key, true); return; }
+        if (e.target.closest('[data-close]')) { closePromoBanner(key, false); return; }
+        // 링크를 눌러 나가는 경우도 이 방문에서는 그만 보여 준다
+        if (e.target.closest('.promo-pop-cta')) hideBannerThisVisit(key);
+    });
+    bannerEsc = e => { if (e.key === 'Escape' && bannerEl) closePromoBanner(key, false); };
+    document.addEventListener('keydown', bannerEsc);
+    return el;
+}
+
+async function initPromoBanner() {
+    let items = [];
+    try { items = await TenStore.listBanners(); } catch (e) { return; }
+    const b = TenStore.pickLiveBanner(items, Date.now());
+    if (!b) return;
+    if (bannerHidden(bannerKey(b))) return;
+
+    bannerEl = buildPromoBanner(b);
+    document.body.appendChild(bannerEl);
+
+    // 페이지가 자리를 잡은 뒤 띄운다 — 로딩 중에 끼어들면 닫기 버튼을 헛누른다
+    setTimeout(() => {
+        if (!bannerEl) return;
+        bannerEl.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        openOverlay(bannerEl);
+    }, 700);
+}
+
 /* ----- 초기 로드 ----- */
 (async function initDynamic() {
     // 분류를 가장 먼저 읽는다 — 배지 이름과 필터 칩이 여기서 나온다.
@@ -1167,6 +1313,8 @@ async function renderTenosRank() {
     try { updatePromoMeta(); } catch (e) { console.warn('홍보 현황 갱신 실패', e); }
     try { await renderPublicQna(); } catch (e) { console.warn('Q&A 로드 실패', e); }
     try { await refreshMemberUI(); } catch (e) { console.warn('회원 상태 확인 실패', e); }
+    // 팝업은 본문이 다 그려진 뒤에 올린다
+    try { await initPromoBanner(); } catch (e) { console.warn('홍보 배너 표시 실패', e); }
 })();
 
 // 외부 리더보드는 독립적으로 조회한다 — 지연되거나 실패해도 본문 로딩과 무관
