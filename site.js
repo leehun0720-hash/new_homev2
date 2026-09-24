@@ -476,6 +476,24 @@ function createFilter(opts) {
 
     const narrowed = () => !!state.q || state.cat !== 'all';
 
+    /* 좁은 화면에서는 더 적게 보여 준다.
+
+       왜 폭에 따라 다른가
+         앱 카드 한 장이 모바일에서 거의 한 화면을 차지한다. 12장이면
+         그것만으로 13.2화면이었다(프로덕션 실측). 데스크톱은 같은 12장이
+         여러 열로 깔려 6화면이라 줄일 이유가 없다. 한 숫자로는 두 화면을
+         다 맞출 수 없어 폭마다 따로 둔다. */
+    const narrowQ = window.matchMedia('(max-width: 759px)');
+    const capOf = () => {
+        const m = Number(grid.dataset.limitMobile) || 0;
+        return (narrowQ.matches && m) || Number(grid.dataset.limit) || 0;
+    };
+    /* 가로로 돌리거나 창을 넓히면 상한이 달라진다. 다만 이미 다 펼쳐 본
+       사람에게는 손대지 않는다 — 보던 것이 도로 접히면 당황스럽다. */
+    const onWidthChange = () => { if (!state.all) draw(); };
+    narrowQ.addEventListener ? narrowQ.addEventListener('change', onWidthChange)
+                             : narrowQ.addListener(onWidthChange);
+
     /* 목록 바로 아래에 '더 보기' 자리를 만든다.
        data-limit 이 붙은 목록에서만 쓴다 — 짧은 목록에는 필요 없다. */
     let moreBox = null;
@@ -522,7 +540,7 @@ function createFilter(opts) {
         /* 세는 값은 '걸러낸 전체'다 — 화면에 몇 개 보이는지가 아니라
            조건에 맞는 것이 몇 개인지를 알려 줘야 한다. 나머지는
            아래 '더 보기'가 말해 준다. */
-        const cap = Number(grid.dataset.limit) || 0;
+        const cap = capOf();
         const items = (cap && !state.all) ? picked.slice(0, cap) : picked;
         if (countEl) {
             countEl.textContent = narrowed()

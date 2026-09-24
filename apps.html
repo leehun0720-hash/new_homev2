@@ -163,8 +163,9 @@
         </div>
 
         <p class="apps-count" id="appsCount" aria-live="polite"></p>
-        <!-- 앞 12개만 보이고 나머지는 아래 '더 보기'로 편다 (site.js) -->
-        <div class="apps-grid" id="appsGrid" data-limit="12"></div>
+        <!-- 앞쪽만 보이고 나머지는 아래 '더 보기'로 편다 (site.js).
+             모바일은 카드 한 장이 거의 한 화면이라 6개까지만. -->
+        <div class="apps-grid" id="appsGrid" data-limit="12" data-limit-mobile="6"></div>
     </section>
 
     <!-- ============ 문의 CTA ============ -->
