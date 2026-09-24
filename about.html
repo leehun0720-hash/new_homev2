@@ -78,25 +78,24 @@
     <a class="skip-link" href="#main">본문 바로가기</a>
 
     <!-- ============ Navigation ============ -->
-    <nav id="nav" aria-label="주 메뉴">
-        <a href="/" class="logo" aria-label="TenAI 홈">
+    <nav id="nav" aria-label="주 메뉴" data-mode="biz">
+        <a href="/biz" class="logo" aria-label="TEN AI 회사 홈">
             <span class="brand-logo-frame">
                 <img class="brand-logo-image" src="/brand/TenAI_ink.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
             </span>
         </a>
         <ul class="nav-links">
-            <li><a href="/about">회사소개</a></li>
             <li><a href="/business">사업영역</a></li>
-            <li><a href="/education">교육</a></li>
-            <li><a class="nav-new" href="/apps">AI 앱<span class="nav-new-dot" aria-hidden="true"></span><span class="visually-hidden">(새 앱 있음)</span></a></li>
-            <li><a href="/news">뉴스</a></li>
-            <li><a href="/membership">멤버십</a></li>
+            <li><a href="/about">회사소개</a></li>
+            <li><a href="/news">소식</a></li>
+            <li><a href="/biz#contact">문의</a></li>
         </ul>
         <div class="nav-right">
-            <button class="nav-login" data-login>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                로그인
-            </button>
+            <a class="mode-switch" href="/learn" title="AI 학습 쪽으로 이동"><span class="mode-switch-label">AI 학습</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a class="nav-login nav-contact" href="/biz#contact">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/></svg>
+                문의하기
+            </a>
             <button class="mobile-menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
                 <span></span><span></span><span></span>
             </button>
@@ -105,13 +104,12 @@
 
     <!-- Mobile menu overlay -->
     <div class="mobile-menu" id="mobileMenu">
-        <a href="/about">회사소개</a>
         <a href="/business">사업영역</a>
-        <a href="/education">교육</a>
-        <a href="/apps">AI 앱</a>
-        <a href="/news">뉴스</a>
-        <a href="/membership">멤버십</a>
-        <button class="nav-login" data-login>로그인 / 회원가입</button>
+        <a href="/about">회사소개</a>
+        <a href="/news">소식</a>
+        <a href="/biz#contact">문의</a>
+        <a class="mode-switch mode-switch-mobile" href="/learn">AI 학습로 이동</a>
+        <a class="nav-login nav-contact" href="/biz#contact">문의하기</a>
     </div>
 
     <main id="main">
@@ -350,6 +348,7 @@
             <p class="footer-copyright">
                 © 2026 TEN AI. All rights reserved.
                 <span class="footer-legal">
+                    <a href="/?home">현관</a>
                     <a href="/privacy">개인정보처리방침</a>
                     <a href="/terms">이용약관</a>
                 </span>

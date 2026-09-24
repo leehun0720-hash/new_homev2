@@ -6,6 +6,17 @@
 # 깔끔한 주소 — /about 으로 들어와도 about.html 을 그대로 내보낸다.
 # Netlify 가 기본으로 해 주는 동작이지만, 내비게이션 전체가 여기에 걸려 있으므로
 # 설정에 명시해 두어 배포 환경이 바뀌어도 끊기지 않게 한다.
+# 두 갈래 홈 — 현관(/)에서 갈라진다
+[[redirects]]
+  from = "/biz"
+  to = "/biz.html"
+  status = 200
+
+[[redirects]]
+  from = "/learn"
+  to = "/learn.html"
+  status = 200
+
 [[redirects]]
   from = "/about"
   to = "/about.html"
