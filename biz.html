@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI교육 · AX플랫폼 · 바이브코딩 · AIDC 컨설팅 | TEN AI</title>
-    <meta name="description" content="중소기업·공공기관 AI교육 전문 TEN AI. 바이브코딩과 생성형 AI 실무 과정, AI 전환(AX) 컨설팅, AI 데이터센터(AIDC) 구축 자문을 제공합니다. 자체 한국어 LLM TenOS-Ko-28B 기반 AX 플랫폼을 운영합니다.">
+    <title>AI 교육 · AX 컨설팅 · AIDC 구축 자문 | TEN AI</title>
+    <meta name="description" content="중소기업·공공기관의 AI 전환을 진단부터 정착까지 한 팀이 수행합니다. AI 교육, AX 컨설팅, AIDC 컨설팅, AI 시스템 구축 — TEN AI.">
     <meta name="keywords" content="AI교육, 중소기업 AI교육, 공공기관 AI교육, AX플랫폼, AX 플랫폼, 바이브코딩, 바이브 코딩, Vibe Coding, AIDC컨설팅, AIDC 컨설팅, AI데이터센터 컨설팅, AI전환, AX컨설팅, 생성형 AI 교육, 프롬프트 엔지니어링, 기업 AI 교육, AI 강사양성, TenOS-Ko-28B, 한국어 LLM, RAG 구축, 정원훈, TEN AI, 텐에이아이">
-    <link rel="canonical" href="https://tenai.kr/">
+    <link rel="canonical" href="https://tenai.kr/biz">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="format-detection" content="telephone=no">
     <meta name="theme-color" content="#f98b5e">
     <meta name="color-scheme" content="light">
 
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://tenai.kr/">
+    <meta property="og:url" content="https://tenai.kr/biz">
     <meta property="og:site_name" content="TEN AI">
     <meta property="og:locale" content="ko_KR">
-    <meta property="og:title" content="AI교육 · AX플랫폼 · 바이브코딩 · AIDC 컨설팅 | TEN AI">
-    <meta property="og:description" content="중소기업·공공기관 AI교육 전문 TEN AI. 바이브코딩과 생성형 AI 실무 과정, AI 전환(AX) 컨설팅, AI 데이터센터(AIDC) 구축 자문을 제공합니다. 자체 한국어 LLM TenOS-Ko-28B 기반 AX 플랫폼을 운영합니다.">
+    <meta property="og:title" content="AI 교육 · AX 컨설팅 · AIDC 구축 자문 | TEN AI">
+    <meta property="og:description" content="중소기업·공공기관의 AI 전환을 진단부터 정착까지 한 팀이 수행합니다. AI 교육, AX 컨설팅, AIDC 컨설팅, AI 시스템 구축 — TEN AI.">
     <meta property="og:image" content="https://tenai.kr/brand/og-cover.jpg">
     <meta property="og:image:secure_url" content="https://tenai.kr/brand/og-cover.jpg">
     <meta property="og:image:type" content="image/jpeg">
@@ -26,8 +26,8 @@
     <meta property="og:image:alt" content="TEN AI — AI를 배우는 시대에서, AI로 배우는 시대로">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AI교육 · AX플랫폼 · 바이브코딩 · AIDC 컨설팅 | TEN AI">
-    <meta name="twitter:description" content="중소기업·공공기관 AI교육 전문 TEN AI. 바이브코딩과 생성형 AI 실무 과정, AI 전환(AX) 컨설팅, AI 데이터센터(AIDC) 구축 자문을 제공합니다. 자체 한국어 LLM TenOS-Ko-28B 기반 AX 플랫폼을 운영합니다.">
+    <meta name="twitter:title" content="AI 교육 · AX 컨설팅 · AIDC 구축 자문 | TEN AI">
+    <meta name="twitter:description" content="중소기업·공공기관의 AI 전환을 진단부터 정착까지 한 팀이 수행합니다. AI 교육, AX 컨설팅, AIDC 컨설팅, AI 시스템 구축 — TEN AI.">
     <meta name="twitter:image" content="https://tenai.kr/brand/og-cover.jpg">
     <meta name="twitter:image:alt" content="TEN AI — AI를 배우는 시대에서, AI로 배우는 시대로">
 
@@ -269,23 +269,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
     <script>
-        /* 지난번에 고른 쪽으로 곧장 보낸다.
-
-           왜 머리말에서, 왜 replace 로 하나
-             site.js 는 본문 끝에서 뜨므로 그때 옮기면 현관이 한 번
-             번쩍이고 사라진다. 그림 그리기 전에 결정해야 한다.
-             replace 를 쓰는 이유는 뒤로가기다 — push 로 쌓으면
-             뒤로가기가 현관으로 왔다가 다시 튕겨 나가 갇힌다.
-
-           현관을 다시 보고 싶으면 /?home 으로 들어온다. */
-        (function () {
-            try {
-                if (location.search.indexOf('home') >= 0) return;
-                var side = localStorage.getItem('tenai_side');
-                if (side === 'biz' || side === 'learn') location.replace('/' + side);
-            } catch (e) { /* 저장소가 막힌 브라우저 — 현관을 그대로 보여 준다 */ }
-        })();
-
         /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
            motion-fx.js 가 제때 부팅하지 못하면 안전망(fx-fallback)으로 콘텐츠를 드러낸다. */
         document.documentElement.classList.add('js-anim');
@@ -299,61 +282,192 @@
 <body>
     <a class="skip-link" href="#main">본문 바로가기</a>
 
-    <!-- ============ Navigation (현관) ============ -->
-    <nav id="nav" aria-label="주 메뉴" data-mode="gate">
-        <a href="/" class="logo" aria-label="TEN AI">
+    <!-- ============ Navigation ============ -->
+    <nav id="nav" aria-label="주 메뉴" data-mode="biz">
+        <a href="/biz" class="logo" aria-label="TEN AI 회사 홈">
             <span class="brand-logo-frame">
                 <img class="brand-logo-image" src="/brand/TenAI_ink.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
             </span>
         </a>
+        <ul class="nav-links">
+            <li><a href="/business">사업영역</a></li>
+            <li><a href="/about">회사소개</a></li>
+            <li><a href="/news">소식</a></li>
+            <li><a href="/biz#contact">문의</a></li>
+        </ul>
         <div class="nav-right">
-            <a class="mode-switch" href="mailto:leesh@tenai.kr"><span class="mode-switch-label">leesh@tenai.kr</span></a>
+            <a class="mode-switch" href="/learn" title="AI 학습 쪽으로 이동"><span class="mode-switch-label">AI 학습</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            <a class="nav-login nav-contact" href="/biz#contact">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/></svg>
+                문의하기
+            </a>
+            <button class="mobile-menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
 
+    <!-- Mobile menu overlay -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="/business">사업영역</a>
+        <a href="/about">회사소개</a>
+        <a href="/news">소식</a>
+        <a href="/biz#contact">문의</a>
+        <a class="mode-switch mode-switch-mobile" href="/learn">AI 학습로 이동</a>
+        <a class="nav-login nav-contact" href="/biz#contact">문의하기</a>
+    </div>
+
     <main id="main">
 
-    <!-- ============ 현관 ============ -->
-    <header class="gate" id="home">
+    <!-- ============ Hero (회사) ============ -->
+    <header class="hero" id="home">
         <div class="hero-bg" aria-hidden="true">
             <div class="hero-grid-bg"></div>
             <div class="hero-orb hero-orb-1"></div>
             <div class="hero-orb hero-orb-2"></div>
         </div>
-        <div class="gate-inner">
-            <p class="gate-eyebrow">TEN AI · The 10th Intelligence for Human Progress</p>
-            <h1 class="gate-title">인간의 지혜와 실천이 만나는<br><span class="highlight">10번째 인공지능</span></h1>
-            <p class="gate-lead">어느 쪽을 보러 오셨나요?</p>
-
-            <div class="gate-doors">
-                <a class="gate-door gate-door-biz" href="/biz" data-gate="biz">
-                    <span class="gate-door-kicker">기업 · 공공기관</span>
-                    <span class="gate-door-title">AI 도입을 맡기고 싶습니다</span>
-                    <span class="gate-door-desc">AI 교육 · AX 컨설팅 · AIDC 구축 자문<br>진단부터 정착까지 한 팀이 수행합니다.</span>
-                    <span class="gate-door-go">회사 소개 보기
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </span>
-                </a>
-                <a class="gate-door gate-door-learn" href="/learn" data-gate="learn">
-                    <span class="gate-door-kicker">수강생 · 개인</span>
-                    <span class="gate-door-title">AI를 배우러 왔습니다</span>
-                    <span class="gate-door-desc">교육 핸드북 · 정원훈 박사 강의 · 실전 AI 앱<br>내 강의실에서 이어서 보실 수 있습니다.</span>
-                    <span class="gate-door-go">학습 홈 보기
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </span>
-                </a>
+        <div class="hero-inner hero-inner-solo">
+            <div>
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    <span>AI 교육 · AX 컨설팅 · AIDC · AX 플랫폼</span>
+                </div>
+                <h1>
+                    <span>AI 전환, 보고서로 끝나지 않게</span><br>
+                    <span class="highlight">현장에서 끝냅니다</span>
+                </h1>
+                <p class="hero-subtitle">
+                    진단 · 교육 · 구축 · 정착을 <strong>한 팀이 이어서</strong> 수행합니다.<br>
+                    중소기업과 공공기관의 업무에 실제로 닿는 AI를 만듭니다.
+                </p>
+                <div class="hero-cta-group">
+                    <a href="#contact" class="btn-primary">
+                        도입 문의하기
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="/business" class="btn-secondary">사업영역 자세히</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="num outfit" data-counter="4">0</div>
+                        <div class="label">사업 영역</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num outfit" data-stat="handbooks" data-counter="10">0</div>
+                        <div class="label">교육 핸드북 (종)</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num outfit" data-counter="28" data-suffix="B">0</div>
+                        <div class="label">TenOS-Ko 파라미터</div>
+                    </div>
+                </div>
             </div>
-
-            <p class="gate-note">
-                TEN AI는 한국어 특화 언어모델 <strong>TenOS-Ko-28B</strong>를 개발하고,
-                중소기업·공공기관을 대상으로 실천형 AI 교육과 AI 전환(AX) 컨설팅을 제공합니다.
-                문의 <a href="mailto:leesh@tenai.kr">leesh@tenai.kr</a>
-            </p>
         </div>
     </header>
+    <!-- ============ Marquee ============ -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track" id="marqueeTrack">
+            <span class="marquee-item"><em>VibeCoding</em>&nbsp;바이브코딩 코스</span>
+            <span class="marquee-item"><em>GenAI</em>&nbsp;생성형 AI 실무</span>
+            <span class="marquee-item"><em>Strategy</em>&nbsp;AI 경영 전략</span>
+            <span class="marquee-item"><em>TenOS-Ko-28B</em>&nbsp;한국어 특화 LLM</span>
+            <span class="marquee-item"><em>Handbook</em>&nbsp;10+ 교육 핸드북</span>
+            <span class="marquee-item"><em>Lecture</em>&nbsp;정원훈 박사의 챗GPT 연구소</span>
+        </div>
+    </div>
+
+    <!-- ============ 사업영역 요약 ============ -->
+    <section class="business">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">01 · Business Areas</p>
+            <h2 class="section-title">사업영역</h2>
+            <p class="section-desc">AI 교육 · AX 컨설팅 · AIDC 컨설팅 · AX 플랫폼 — 진단부터 정착까지 한 팀이 수행합니다.</p>
+        </div>
+        <div class="business-grid stagger animate-on-scroll">
+            <div class="biz-card">
+                <div class="biz-icon">📚</div>
+                <h3 class="biz-title">AI 교육</h3>
+                <p class="biz-subtitle">중소기업·공공기관을 위한 실무형 AI 교육</p>
+                <p class="biz-desc">중소기업, 공공기관, 대학을 대상으로 실무형 AI 교육을 제공합니다. AI 리터러시부터 바이브코딩, AI 경영 전략까지 레벨별 커리큘럼으로 표준화했습니다.</p>
+                <ul class="biz-features">
+                    <li>AI 리터러시 (전 직원)</li>
+                    <li>생성형 AI 실무 활용법</li>
+                    <li>바이브코딩 — 비개발자 대상</li>
+                    <li>AI 경영 전략 (경영진)</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">💼</div>
+                <h3 class="biz-title">AX 컨설팅</h3>
+                <p class="biz-subtitle">AI 전환(AX), 진단부터 정착까지</p>
+                <p class="biz-desc">정부·지자체·중소기업의 AI 전환(AX) 전략을 수립하고, RAG 기반 LLM 솔루션 구축과 조직 내재화까지 지원합니다.</p>
+                <ul class="biz-features">
+                    <li>정부·지자체 AI 자문</li>
+                    <li>RAG 기반 LLM 솔루션</li>
+                    <li>AI 데이터센터 구축 자문</li>
+                    <li>산업 전환 전략 컨설팅</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">🏢</div>
+                <h3 class="biz-title">AIDC 컨설팅</h3>
+                <p class="biz-subtitle">AI 데이터센터, 짓기 전에 설계한다</p>
+                <p class="biz-desc">AI 데이터센터(AIDC)의 GPU 수요 산정부터 전력·냉각 설계 검토, 보안 아키텍처, 운영 전략까지 자문합니다. 과잉 투자를 막는 것이 첫 번째 목표입니다.</p>
+                <ul class="biz-features">
+                    <li>GPU 수요 · 용량 산정</li>
+                    <li>전력 · 냉각 설계 자문</li>
+                    <li>보안 · 망분리 규제 대응</li>
+                    <li>RE100 재생에너지 연계</li>
+                </ul>
+            </div>
+            <div class="biz-card">
+                <div class="biz-icon">⚙️</div>
+                <h3 class="biz-title">AI 시스템 구축 (SI)</h3>
+                <p class="biz-subtitle">전략을 실제 작동하는 시스템으로</p>
+                <p class="biz-desc">컨설팅으로 그린 전략을 내부망과 현장 위에 실제로 올립니다. 자체 한국어 모델 TenOS-Ko-28B를 온프레미스로 배포해 망분리 환경에서도 외부 유출 없이 운영합니다.</p>
+                <ul class="biz-features">
+                    <li>RAG 기반 지식 검색</li>
+                    <li>문서 작성 · 검토 자동화</li>
+                    <li>AI 콜센터 (웹 · 전화)</li>
+                    <li>QR 기반 무인 주차</li>
+                </ul>
+            </div>
+        </div>
+        <div class="section-more">
+            <a class="board-link" href="/business">사업영역 8개 전체 보기 →</a>
+        </div>
+    </section>
+
+    <!-- ============ 최신 소식 ============ -->
+    <section class="news" id="home-news">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">04 · News</p>
+            <h2 class="section-title">최신 소식</h2>
+            <p class="section-desc">TEN AI의 공지사항, 교육 일정, 새로운 소식을 전해드립니다</p>
+        </div>
+        <div class="news-grid" id="newsGrid" data-limit="3" aria-live="polite"></div>
+        <div class="section-more">
+            <a class="board-link" href="/news">소식 전체 보기 →</a>
+        </div>
+    </section>
+
+    <!-- ============ 문의 CTA ============ -->
+    <section class="cta" id="contact">
+        <div class="cta-bg" aria-hidden="true"></div>
+        <div class="cta-content animate-on-scroll">
+            <h2>AI가 삶에 닿을 때,<br>혁신은 현실이 됩니다</h2>
+            <p>TEN AI와 함께 실천적 지능의 시대를 열어가세요.<br>교육, 컨설팅, 플랫폼 구축까지 맞춤형 솔루션을 제공합니다.</p>
+            <div class="hero-cta-group">
+                <a href="mailto:leesh@tenai.kr" class="btn-primary" data-mail>
+                    상담 신청하기
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="/education" class="btn-secondary">교육 과정 둘러보기</a>
+            </div>
+        </div>
+    </section>
 
     </main>
-
 
     <footer>
         <div class="footer-content">
@@ -382,7 +496,7 @@
                     <li><a href="/about#tenos">TenOS-Ko-28B</a></li>
                     <li><a href="/business">사업영역</a></li>
                     <li><a href="/about#profile">회사소개서</a></li>
-                    <li><a href="/biz#contact">파트너십 문의</a></li>
+                    <li><a href="#contact">파트너십 문의</a></li>
                 </ul>
             </div>
             <div>
@@ -390,7 +504,7 @@
                 <ul class="footer-links">
                     <li><a href="mailto:leesh@tenai.kr" data-mail>leesh@tenai.kr</a></li>
                     <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
-                    <li><a href="/biz#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
+                    <li><a href="#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
                     <li><a href="/admin.html" style="opacity:0.85;">관리자 콘솔</a></li>
                 </ul>
             </div>
@@ -399,6 +513,7 @@
             <p class="footer-copyright">
                 © 2026 TEN AI. All rights reserved.
                 <span class="footer-legal">
+                    <a href="/?home">현관</a>
                     <a href="/privacy">개인정보처리방침</a>
                     <a href="/terms">이용약관</a>
                 </span>

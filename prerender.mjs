@@ -20,7 +20,7 @@ import { SCOPE_IDS, safeTone, COVER_OF, allDefaultRows } from './categories-defa
 
 /* 멀티페이지 — 섹션이 흩어져 있으므로 각 페이지에서 '있는 컨테이너'만 채운다.
    홈처럼 일부만 보여주는 자리는 컨테이너의 data-limit 을 그대로 따른다. */
-const PAGES = ['index', 'about', 'business', 'education', 'apps', 'news', 'membership']
+const PAGES = ['index', 'biz', 'learn', 'about', 'business', 'education', 'apps', 'news', 'membership']
   .map(n => `dist/${n}.html`);
 const TABLES = ['handbooks', 'lectures', 'apps', 'posts'];
 /* 없어도 빌드를 막지 않는 테이블 — 마이그레이션(supabase-categories.sql) 전에

@@ -903,22 +903,27 @@ function closeOverlay(container) {
     fxLastFocused = null;
 }
 
+/* 현관에는 메뉴가 없다 — 고를 것이 둘뿐인 화면에 메뉴까지 두면
+   다시 복잡해지므로 아예 넣지 않았다. 그러니 없을 수 있다고 보고 쓴다. */
 function closeMobileMenu() {
+    if (!menuBtn || !mobileMenu) return;
     menuBtn.classList.remove('open');
     mobileMenu.classList.remove('open');
     menuBtn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
     closeOverlay(mobileMenu);
 }
-menuBtn.addEventListener('click', () => {
-    const opening = !mobileMenu.classList.contains('open');
-    menuBtn.classList.toggle('open', opening);
-    mobileMenu.classList.toggle('open', opening);
-    menuBtn.setAttribute('aria-expanded', String(opening));
-    document.body.style.overflow = opening ? 'hidden' : '';
-    if (opening) openOverlay(mobileMenu); else closeOverlay(mobileMenu);
-});
-mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
+if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener('click', () => {
+        const opening = !mobileMenu.classList.contains('open');
+        menuBtn.classList.toggle('open', opening);
+        mobileMenu.classList.toggle('open', opening);
+        menuBtn.setAttribute('aria-expanded', String(opening));
+        document.body.style.overflow = opening ? 'hidden' : '';
+        if (opening) openOverlay(mobileMenu); else closeOverlay(mobileMenu);
+    });
+    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
+}
 
 /* ============ 현재 페이지 메뉴 표시 ============
    멀티페이지이므로 스크롤 위치가 아니라 주소로 활성 메뉴를 정한다.
@@ -1246,7 +1251,10 @@ document.querySelectorAll('.auth-tab').forEach(tab => {
 
 // 로그인 상태에 따라 패널/네비 갱신
 async function refreshMemberUI() {
-    const navLoginBtns = document.querySelectorAll('.nav-login');
+    /* data-login 이 붙은 것만 로그인 버튼이다.
+       회사 홈의 '문의하기' 는 모양만 같을 뿐 로그인과 무관한데,
+       클래스로 고르면 그것까지 '로그인' 으로 덮어써 버린다. */
+    const navLoginBtns = document.querySelectorAll('.nav-login[data-login]');
     let profile = null;
     try { profile = await TenStore.getMemberProfile(); } catch (e) { console.warn(e); }
     if (profile) {
@@ -1352,15 +1360,21 @@ onId('memberLogoutBtn', 'click', async () => {
 });
 
 /* ----- 상단 통계 자동 연동 (핸드북 수 · 과정 수) ----- */
+/* 히어로의 숫자를 실제 자료로 바꾼다.
+
+   자리 순서로 고르지 않는 이유
+     예전에는 첫째·둘째 칸을 그냥 집었다. 홈이 하나일 때는 맞았지만
+     회사 홈이 생기면서 첫 칸이 '사업 영역'이 되자, 거기에 핸드북 수가
+     들어가 라벨과 숫자가 어긋났다. 이름표를 보고 고른다. */
 function updateHeroStats() {
-    const counters = document.querySelectorAll('.hero-stats [data-counter]');
-    if (counters.length < 2) return;
-    const hbCount = HANDBOOKS.length;
-    const courseCount = new Set(HANDBOOKS.map(h => h.course_tag)).size;
-    counters[0].textContent = hbCount + '+';
-    counters[0].dataset.counter = hbCount;
-    counters[1].textContent = courseCount + '+';
-    counters[1].dataset.counter = courseCount;
+    const set = (name, value) => {
+        const el = document.querySelector(`.hero-stats [data-stat="${name}"]`);
+        if (!el) return;
+        el.textContent = value + '+';
+        el.dataset.counter = value;
+    };
+    set('handbooks', HANDBOOKS.length);
+    set('courses', new Set(HANDBOOKS.map(h => h.course_tag)).size);
 }
 
 /* =====================================================
@@ -1540,6 +1554,13 @@ function buildPromoBanner(b) {
 }
 
 async function initPromoBanner() {
+    /* 현관에는 띄우지 않는다.
+       현관은 '어느 쪽으로 갈지' 하나만 고르는 화면이다. 그 위에 팝업이
+       덮이면 고를 것이 셋이 되고, 복잡해서 나눈 의미가 없어진다.
+       안으로 한 발 들어온 뒤(회사 홈·학습 홈)에 보여 준다. */
+    const nav = document.getElementById('nav');
+    if (nav && nav.dataset && nav.dataset.mode === 'gate') return;
+
     let items = [];
     try { items = await TenStore.listBanners(); } catch (e) { return; }
     const b = TenStore.pickLiveBanner(items, Date.now());
@@ -1557,6 +1578,26 @@ async function initPromoBanner() {
         openOverlay(bannerEl);
     }, 700);
 }
+
+/* ============ 어느 쪽을 보고 있는지 기억 ============
+   현관에서 한 번 고르면 다음 방문부터는 곧장 그쪽으로 간다.
+   (건너뛰는 처리는 index.html 머리말에 있다 — 그림 그리기 전에 해야 하므로)
+
+   고른 즉시 적어 두는 이유
+     문을 누르는 순간과 다음 화면이 뜨는 순간 사이에 네트워크가 끼어든다.
+     도착해서 적으면 그 사이에 닫아 버린 사람은 기억되지 않는다. */
+(function rememberSide() {
+    const save = side => {
+        try { localStorage.setItem('tenai_side', side); } catch (e) { /* 저장소가 막힌 브라우저 */ }
+    };
+    const nav = document.getElementById('nav');
+    const mode = nav && nav.dataset ? nav.dataset.mode : '';
+    if (mode === 'biz' || mode === 'learn') save(mode);
+
+    document.querySelectorAll('[data-gate]').forEach(door => {
+        door.addEventListener('click', () => save(door.dataset.gate));
+    });
+})();
 
 /* ----- 초기 로드 ----- */
 (async function initDynamic() {
