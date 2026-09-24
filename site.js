@@ -99,6 +99,7 @@ function initHandbookFilter() {
         getCat: h => h.course_tag,
         getFields: h => [h.title, h.desc, catName('handbook', h.course_tag)],
         extra: h => curLevel === 'all' || h.level_tier === Number(curLevel),
+        onCat: renderLevelChips,
         renderEmpty: g => {
             g.innerHTML = '<div class="handbook-empty">등록된 핸드북이 없습니다.<br>새 교재는 관리자 콘솔 업로드 즉시 이곳에 반영됩니다.</div>';
         },
@@ -115,14 +116,62 @@ function renderHandbooks() {
         : '<div class="handbook-empty">해당 레벨의 핸드북이 아직 없습니다.<br>새 교재는 관리자 콘솔 업로드 즉시 이곳에 반영됩니다.</div>';
 }
 
-/* 레벨은 분류와는 다른 축이라 칩 줄을 따로 둔다 */
-document.querySelectorAll('.level-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('.level-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        curLevel = chip.dataset.level;
-        renderHandbooks();
+/* ---- 레벨 고르기 (2단계) ----
+
+   왜 두 단계인가
+     과정 칩과 레벨 칩을 한꺼번에 늘어놓으니 버튼이 26개였다. 처음 온
+     사람은 무엇부터 눌러야 할지 모른다. 과정을 고르기 전에는 레벨을
+     묻지 않고, 고른 뒤에는 '그 과정에 실제로 있는 레벨'만 낸다.
+     L1~L4 를 늘 네 개 다 보여 주면 빈 레벨을 눌러 헛걸음한다. */
+const hbLevelBox  = document.getElementById('hbLevels');
+const hbLevelStep = document.getElementById('hbLevelStep');
+
+function renderLevelChips(cat) {
+    if (!hbLevelBox) return;
+    const chosen = cat !== undefined ? cat : (hbFilter ? hbFilter.state.cat : 'all');
+
+    // 과정을 바꾸면 레벨은 처음으로 돌린다 — 지난 레벨이 새 과정에 없을 수 있다
+    curLevel = 'all';
+
+    if (chosen === 'all') {                       // 아직 1단계 — 레벨은 묻지 않는다
+        hbLevelBox.hidden = true; hbLevelBox.innerHTML = '';
+        if (hbLevelStep) hbLevelStep.hidden = true;
+        return;
+    }
+
+    const inCourse = HANDBOOKS.filter(h => String(h.course_tag || '') === chosen);
+    const counts = new Map();
+    inCourse.forEach(h => {
+        const lv = Number(h.level_tier);
+        if (lv) counts.set(lv, (counts.get(lv) || 0) + 1);
     });
+    const levels = [...counts.keys()].sort((a, b) => a - b);
+
+    // 레벨이 하나뿐이면 고를 것이 없다 — 줄을 통째로 접는다
+    if (levels.length < 2) {
+        hbLevelBox.hidden = true; hbLevelBox.innerHTML = '';
+        if (hbLevelStep) hbLevelStep.hidden = true;
+        return;
+    }
+
+    hbLevelBox.hidden = false;
+    if (hbLevelStep) hbLevelStep.hidden = false;
+    hbLevelBox.innerHTML = '<span class="lv-label">레벨</span>'
+        + `<button type="button" class="level-chip active" data-level="all" aria-pressed="true">전체 <span class="cat-chip-n">${inCourse.length}</span></button>`
+        + levels.map(lv =>
+            `<button type="button" class="level-chip" data-level="${lv}" aria-pressed="false">L${lv} <span class="cat-chip-n">${counts.get(lv)}</span></button>`
+          ).join('');
+}
+
+on(hbLevelBox, 'click', e => {
+    const chip = e.target.closest('[data-level]');
+    if (!chip) return;
+    hbLevelBox.querySelectorAll('.level-chip').forEach(c => {
+        c.classList.remove('active'); c.setAttribute('aria-pressed', 'false');
+    });
+    chip.classList.add('active'); chip.setAttribute('aria-pressed', 'true');
+    curLevel = chip.dataset.level;
+    renderHandbooks();
 });
 
 on(grid, 'click', async e => {
@@ -373,7 +422,10 @@ function createFilter(opts) {
     const pc = (opts.params && opts.params.cat) || 'cat';
     const unit = opts.unit || '건';
 
-    const state = { q: '', cat: 'all' };
+    /* all: 목록을 다 펼쳤는가.
+       긴 목록은 앞쪽만 보이고 나머지는 '더 보기'로 편다. 앱 19개가
+       모바일에서 16화면이었는데, 그중 대부분은 스크롤로만 지나친다. */
+    const state = { q: '', cat: 'all', all: false };
 
     const slugOf = item => String(opts.getCat(item) || '');
 
@@ -424,24 +476,62 @@ function createFilter(opts) {
 
     const narrowed = () => !!state.q || state.cat !== 'all';
 
+    /* 목록 바로 아래에 '더 보기' 자리를 만든다.
+       data-limit 이 붙은 목록에서만 쓴다 — 짧은 목록에는 필요 없다. */
+    let moreBox = null;
+    function drawMore(total, shown) {
+        const hidden = total - shown;
+        if (hidden <= 0) { if (moreBox) moreBox.innerHTML = ''; return; }
+        if (!moreBox) {
+            moreBox = document.createElement('div');
+            moreBox.className = 'grid-more';
+            grid.insertAdjacentElement('afterend', moreBox);
+            moreBox.addEventListener('click', e => {
+                if (!e.target.closest('[data-show-all]')) return;
+                state.all = true;
+                draw();
+                /* 방금 펼쳐진 첫 항목으로 초점을 옮긴다 —
+                   키보드·화면낭독기 사용자가 목록 끝에 남지 않도록 */
+                const next = grid.children[shown];
+                if (next) {
+                    const target = next.querySelector('a, button') || next;
+                    target.setAttribute('tabindex', '-1');
+                    target.focus({ preventScroll: true });
+                    next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+        moreBox.innerHTML = `<button type="button" class="btn-secondary more-btn" data-show-all>
+                ${hidden}${unit} 더 보기
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </button>`;
+    }
+
     function draw() {
         const all = opts.getItems();
         renderCats();
 
         if (!all.length) {
             if (countEl) countEl.textContent = '';
+            drawMore(0, 0);
             opts.renderEmpty ? opts.renderEmpty(grid) : (grid.innerHTML = '');
             return;
         }
 
-        const items = limited(selected(), grid);
+        const picked = selected();
+        /* 세는 값은 '걸러낸 전체'다 — 화면에 몇 개 보이는지가 아니라
+           조건에 맞는 것이 몇 개인지를 알려 줘야 한다. 나머지는
+           아래 '더 보기'가 말해 준다. */
+        const cap = Number(grid.dataset.limit) || 0;
+        const items = (cap && !state.all) ? picked.slice(0, cap) : picked;
         if (countEl) {
             countEl.textContent = narrowed()
-                ? `전체 ${all.length}${unit} 중 ${items.length}${unit}`
+                ? `전체 ${all.length}${unit} 중 ${picked.length}${unit}`
                 : `전체 ${all.length}${unit}`;
         }
 
         if (!items.length && narrowed()) {
+            drawMore(0, 0);
             grid.innerHTML = `<div class="filter-empty">
                 ${state.q ? `'${escHtml(state.q)}'에 해당하는 결과가 없습니다.` : '이 분류에 해당하는 결과가 없습니다.'}<br>
                 다른 낱말로 찾아보시거나 <button type="button" class="link-btn" data-reset-filter>전체 목록 보기</button>를 눌러 주세요.
@@ -449,10 +539,11 @@ function createFilter(opts) {
             return;
         }
         opts.render(items, grid);
+        drawMore(picked.length, items.length);
     }
 
     function reset() {
-        state.q = ''; state.cat = 'all';
+        state.q = ''; state.cat = 'all'; state.all = false;
         if (input) input.value = '';
         if (clear) clear.hidden = true;
         syncUrl(); draw();
@@ -473,6 +564,7 @@ function createFilter(opts) {
         let timer;
         const commit = () => {
             state.q = input.value;
+            state.all = false;             // 조건이 바뀌면 다시 접는다
             if (clear) clear.hidden = !state.q;
             syncUrl(); draw();
         };
@@ -486,6 +578,8 @@ function createFilter(opts) {
         const btn = e.target.closest('[data-cat]');
         if (!btn) return;
         state.cat = btn.dataset.cat;
+        state.all = false;                 // 조건이 바뀌면 다시 접는다
+        if (opts.onCat) opts.onCat(state.cat);
         syncUrl(); draw();
     });
     on(grid, 'click', e => { if (e.target.closest('[data-reset-filter]')) reset(); });
@@ -1614,6 +1708,9 @@ async function initPromoBanner() {
 
     try {
         HANDBOOKS = await TenStore.listHandbooks();
+        /* 자료가 들어온 뒤에 레벨 칩을 세운다. 주소에 ?course= 가 실려 온
+           경우에도(공유 링크·북마크) 2단계가 제대로 펴지도록. */
+        renderLevelChips();
         renderHandbooks();
         updateHeroStats();
         updatePromoMeta();

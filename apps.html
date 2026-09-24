@@ -163,7 +163,8 @@
         </div>
 
         <p class="apps-count" id="appsCount" aria-live="polite"></p>
-        <div class="apps-grid" id="appsGrid"></div>
+        <!-- 앞 12개만 보이고 나머지는 아래 '더 보기'로 편다 (site.js) -->
+        <div class="apps-grid" id="appsGrid" data-limit="12"></div>
     </section>
 
     <!-- ============ 문의 CTA ============ -->

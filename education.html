@@ -138,18 +138,21 @@
                        placeholder="교재 제목·내용으로 검색" aria-label="핸드북 검색">
                 <button type="button" class="app-search-clear" id="hbSearchClear" hidden aria-label="검색어 지우기">✕</button>
             </div>
-            <div class="app-cats" id="hbCats" role="group" aria-label="과정 필터"></div>
-        </div>
 
-        <div class="academy-filters animate-on-scroll">
-            <div class="level-chips" aria-label="레벨 필터">
-                <span class="lv-label">레벨</span>
-                <button class="level-chip active" data-level="all">All</button>
-                <button class="level-chip" data-level="1">L1</button>
-                <button class="level-chip" data-level="2">L2</button>
-                <button class="level-chip" data-level="3">L3</button>
-                <button class="level-chip" data-level="4">L4</button>
+            <!-- 두 단계로 고른다. 예전에는 과정 칩과 레벨 칩을 한꺼번에
+                 늘어놓아 버튼이 26개였다. 과정을 고르기 전에는 레벨을
+                 묻지 않고, 고른 뒤에는 그 과정에 실제로 있는 레벨만 낸다. -->
+            <div class="pick-step">
+                <span class="pick-step-n" aria-hidden="true">1</span>
+                <span class="pick-step-label">과정 고르기</span>
             </div>
+            <div class="app-cats" id="hbCats" role="group" aria-label="과정 고르기"></div>
+
+            <div class="pick-step" id="hbLevelStep" hidden>
+                <span class="pick-step-n" aria-hidden="true">2</span>
+                <span class="pick-step-label">레벨 고르기</span>
+            </div>
+            <div class="level-chips" id="hbLevels" role="group" aria-label="레벨 고르기" hidden></div>
         </div>
 
         <p class="apps-count" id="hbCount" aria-live="polite"></p>

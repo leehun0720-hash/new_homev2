@@ -4021,3 +4021,40 @@ nav[data-mode="gate"] .nav-right { margin-left: auto; }
 .hero-inner-solo { grid-template-columns: minmax(0, 1fr); }
 .hero-inner-solo h1 { max-width: 20ch; }
 .hero-inner-solo .hero-subtitle { max-width: 56ch; }
+
+/* =====================================================================
+   더 보기 · 단계별 고르기
+   ---------------------------------------------------------------------
+   긴 목록을 앞쪽만 보여 주고, 고르는 일을 두 단계로 나눈다.
+   앱 19개가 모바일에서 16화면, 핸드북 탐색기 버튼이 26개였다.
+   ===================================================================== */
+.grid-more {
+    display: flex; justify-content: center;
+    margin-top: clamp(1.4rem, 3vw, 2rem);
+}
+.grid-more:empty { display: none; }             /* 다 펼쳤으면 자리도 없앤다 */
+.more-btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    min-height: 48px; padding: 0.85rem 1.8rem;
+    font-size: 0.95rem; font-weight: 800;
+    cursor: pointer;
+}
+.more-btn svg { transition: transform 0.2s ease; }
+.more-btn:hover svg { transform: translateY(2px); }
+
+/* 1 · 2 단계 표시 — 무엇부터 눌러야 하는지 눈에 보이게 */
+.pick-step {
+    display: flex; align-items: center; gap: 0.55rem;
+    margin: clamp(0.9rem, 2.4vw, 1.4rem) 0 0.6rem;
+}
+.pick-step-n {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    background: var(--brand-ink); color: var(--brand-cream);
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-size: 0.78rem; font-weight: 800; line-height: 1;
+}
+.pick-step-label {
+    font-size: 0.82rem; font-weight: 800;
+    letter-spacing: 0.02em; color: var(--brand-accent);
+}
