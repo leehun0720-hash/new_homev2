@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI교육 · AX플랫폼 · 바이브코딩 · AIDC 컨설팅 | TEN AI</title>
+    <title>TEN AI | AI·AX Hub — AI교육부터 실행까지</title>
     <meta name="description" content="중소기업·공공기관 AI교육 전문 TEN AI. 바이브코딩과 생성형 AI 실무 과정, AI 전환(AX) 컨설팅, AI 데이터센터(AIDC) 구축 자문을 제공합니다. 자체 한국어 LLM TenOS-Ko-28B 기반 AX 플랫폼을 운영합니다.">
     <meta name="keywords" content="AI교육, 중소기업 AI교육, 공공기관 AI교육, AX플랫폼, AX 플랫폼, 바이브코딩, 바이브 코딩, Vibe Coding, AIDC컨설팅, AIDC 컨설팅, AI데이터센터 컨설팅, AI전환, AX컨설팅, 생성형 AI 교육, 프롬프트 엔지니어링, 기업 AI 교육, AI 강사양성, TenOS-Ko-28B, 한국어 LLM, RAG 구축, 정원훈, TEN AI, 텐에이아이">
     <link rel="canonical" href="https://tenai.kr/">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="format-detection" content="telephone=no">
-    <meta name="theme-color" content="#f98b5e">
+    <meta name="theme-color" content="#c9f379">
     <meta name="color-scheme" content="light">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tenai.kr/">
     <meta property="og:site_name" content="TEN AI">
     <meta property="og:locale" content="ko_KR">
-    <meta property="og:title" content="AI교육 · AX플랫폼 · 바이브코딩 · AIDC 컨설팅 | TEN AI">
+    <meta property="og:title" content="TEN AI | AI·AX Hub — AI교육부터 실행까지">
     <meta property="og:description" content="중소기업·공공기관 AI교육 전문 TEN AI. 바이브코딩과 생성형 AI 실무 과정, AI 전환(AX) 컨설팅, AI 데이터센터(AIDC) 구축 자문을 제공합니다. 자체 한국어 LLM TenOS-Ko-28B 기반 AX 플랫폼을 운영합니다.">
     <meta property="og:image" content="https://tenai.kr/brand/og-cover.jpg">
     <meta property="og:image:secure_url" content="https://tenai.kr/brand/og-cover.jpg">
@@ -26,7 +26,7 @@
     <meta property="og:image:alt" content="TEN AI — AI를 배우는 시대에서, AI로 배우는 시대로">
 
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="AI교육 · AX플랫폼 · 바이브코딩 · AIDC 컨설팅 | TEN AI">
+    <meta name="twitter:title" content="TEN AI | AI·AX Hub — AI교육부터 실행까지">
     <meta name="twitter:description" content="중소기업·공공기관 AI교육 전문 TEN AI. 바이브코딩과 생성형 AI 실무 과정, AI 전환(AX) 컨설팅, AI 데이터센터(AIDC) 구축 자문을 제공합니다. 자체 한국어 LLM TenOS-Ko-28B 기반 AX 플랫폼을 운영합니다.">
     <meta name="twitter:image" content="https://tenai.kr/brand/og-cover.jpg">
     <meta name="twitter:image:alt" content="TEN AI — AI를 배우는 시대에서, AI로 배우는 시대로">
@@ -268,24 +268,8 @@
     <link rel="preconnect" href="https://i.ytimg.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/ax-lab.css">
     <script>
-        /* 지난번에 고른 쪽으로 곧장 보낸다.
-
-           왜 머리말에서, 왜 replace 로 하나
-             site.js 는 본문 끝에서 뜨므로 그때 옮기면 현관이 한 번
-             번쩍이고 사라진다. 그림 그리기 전에 결정해야 한다.
-             replace 를 쓰는 이유는 뒤로가기다 — push 로 쌓으면
-             뒤로가기가 현관으로 왔다가 다시 튕겨 나가 갇힌다.
-
-           현관을 다시 보고 싶으면 /?home 으로 들어온다. */
-        (function () {
-            try {
-                if (location.search.indexOf('home') >= 0) return;
-                var side = localStorage.getItem('tenai_side');
-                if (side === 'biz' || side === 'learn') location.replace('/' + side);
-            } catch (e) { /* 저장소가 막힌 브라우저 — 현관을 그대로 보여 준다 */ }
-        })();
-
         /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
            motion-fx.js 가 제때 부팅하지 못하면 안전망(fx-fallback)으로 콘텐츠를 드러낸다. */
         document.documentElement.classList.add('js-anim');
@@ -313,44 +297,51 @@
 
     <main id="main">
 
-    <!-- ============ 현관 ============ -->
-    <header class="gate" id="home">
-        <div class="hero-bg" aria-hidden="true">
-            <div class="hero-grid-bg"></div>
-            <div class="hero-orb hero-orb-1"></div>
-            <div class="hero-orb hero-orb-2"></div>
-        </div>
-        <div class="gate-inner">
-            <p class="gate-eyebrow">TEN AI · The 10th Intelligence for Human Progress</p>
-            <h1 class="gate-title">인간의 지혜와 실천이 만나는<br><span class="highlight">10번째 인공지능</span></h1>
-            <p class="gate-lead">어느 쪽을 보러 오셨나요?</p>
-
-            <div class="gate-doors">
-                <a class="gate-door gate-door-biz" href="/biz" data-gate="biz">
-                    <span class="gate-door-kicker">기업 · 공공기관</span>
-                    <span class="gate-door-title">AI 도입을 맡기고 싶습니다</span>
-                    <span class="gate-door-desc">AI 교육 · AX 컨설팅 · AIDC 구축 자문<br>진단부터 정착까지 한 팀이 수행합니다.</span>
-                    <span class="gate-door-go">회사 소개 보기
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </span>
-                </a>
-                <a class="gate-door gate-door-learn" href="/learn" data-gate="learn">
-                    <span class="gate-door-kicker">수강생 · 개인</span>
-                    <span class="gate-door-title">AI를 배우러 왔습니다</span>
-                    <span class="gate-door-desc">교육 핸드북 · 정원훈 박사 강의 · 실전 AI 앱<br>내 강의실에서 이어서 보실 수 있습니다.</span>
-                    <span class="gate-door-go">학습 홈 보기
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </span>
-                </a>
+    <!-- ============ AI·AX HUB ============ -->
+    <header class="hero" id="home">
+        <div class="hero-inner">
+            <div class="hero-badge"><span class="hero-badge-dot"></span>AI × PEOPLE × REAL WORK</div>
+            <div class="hero-visual" aria-hidden="true">✳</div>
+            <h1><span>MAKE</span><br><span class="hero-indent">AX</span><br><span class="highlight">HAPPEN.</span></h1>
+            <div class="hero-bottom">
+                <p class="hero-subtitle">AI를 설명하는 곳은 많습니다.<br>TEN AI는 <strong>당신의 일에서 작동하게</strong> 만듭니다.</p>
+                <div class="hero-cta-group">
+                    <a class="btn-primary" href="#ax-lab">나의 AX 조합하기 <span aria-hidden="true">↘</span></a>
+                    <a class="btn-secondary" href="/learn">학습 홈 보기 <span aria-hidden="true">↗</span></a>
+                </div>
             </div>
-
-            <p class="gate-note">
-                TEN AI는 한국어 특화 언어모델 <strong>TenOS-Ko-28B</strong>를 개발하고,
-                중소기업·공공기관을 대상으로 실천형 AI 교육과 AI 전환(AX) 컨설팅을 제공합니다.
-                문의 <a href="mailto:leesh@tenai.kr">leesh@tenai.kr</a>
-            </p>
+            <div class="hero-stats" aria-label="TEN AI 핵심 분야"><span>AI EDUCATION</span><span>AX CONSULTING</span><span>TenOS · PLATFORM</span></div>
         </div>
     </header>
+
+    <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack">
+        <span class="marquee-item"><em>AI EDUCATION</em> · 중소기업 AI교육</span>
+        <span class="marquee-item"><em>VIBE CODING</em> · 바이브코딩</span>
+        <span class="marquee-item"><em>AX CONSULTING</em> · 조직 전환</span>
+        <span class="marquee-item"><em>TenOS-Ko-28B</em> · 한국어 LLM</span>
+        <span class="marquee-item"><em>AI EDUCATION</em> · 중소기업 AI교육</span>
+        <span class="marquee-item"><em>VIBE CODING</em> · 바이브코딩</span>
+        <span class="marquee-item"><em>AX CONSULTING</em> · 조직 전환</span>
+        <span class="marquee-item"><em>TenOS-Ko-28B</em> · 한국어 LLM</span>
+    </div></div>
+
+    <section class="ax-lab" id="ax-lab" aria-labelledby="axLabTitle"><div class="ax-lab-inner">
+        <div class="ax-lab-heading"><div><span class="ax-lab-kicker">/ THE INTERACTIVE AX LAB</span><h2 id="axLabTitle">당신의 조직에<br>필요한 첫 조각은?</h2></div><p>지금 가장 필요한 변화를 선택해 보세요. 교육, 컨설팅, 구축 중 어디서 출발하느냐에 따라 AX 허브의 조합이 달라집니다.</p></div>
+        <div class="ax-console"><div class="ax-controls"><span class="ax-lab-kicker">SELECT YOUR STARTING POINT</span><h3>지금 필요한<br>변화는 무엇인가요?</h3>
+            <div class="ax-choices" role="group" aria-label="AX 시작점 선택"><button class="ax-choice active" type="button" data-ax-choice="learn" aria-pressed="true">01. 팀이 AI를 배워야 해요 <span aria-hidden="true">↗</span></button><button class="ax-choice" type="button" data-ax-choice="plan" aria-pressed="false">02. AX 방향을 찾고 싶어요 <span aria-hidden="true">↗</span></button><button class="ax-choice" type="button" data-ax-choice="build" aria-pressed="false">03. AI 시스템이 필요해요 <span aria-hidden="true">↗</span></button></div>
+            <p class="ax-hint">선택하면 오른쪽의 조합이 바뀝니다.</p></div>
+        <div class="ax-output" id="axOutput"><div class="ax-output-top"><span>TEN AI / AX COMBINATOR</span><span id="axStatus">PATH 01 ACTIVE</span></div><div class="ax-pieces" aria-hidden="true"><span class="ax-piece" id="axPiece1">AI 교육</span><b>+</b><span class="ax-piece" id="axPiece2">바이브코딩</span><b>+</b><span class="ax-piece" id="axPiece3">핸드북</span></div><div class="ax-result" aria-live="polite"><span id="axResultTag">YOUR NEXT MOVE / 01</span><h3 id="axResultTitle">팀의 AI 근육부터 만듭니다.</h3><p id="axResultDescription">직무에 맞춘 실무 교육과 바이브코딩으로, 배운 내용을 바로 업무에 적용하는 첫 경험을 설계합니다.</p><a id="axResultLink" href="/education">AI 교육 살펴보기 ↗</a></div></div></div>
+    </div></section>
+
+    <section class="hub-path" aria-labelledby="hubPathTitle"><div class="hub-shell"><span class="hub-kicker">/ MORE THAN A SINGLE SERVICE</span><h2 id="hubPathTitle">따로 놀던 AI를,<br>하나의 일로 엮습니다.</h2><div class="hub-path-grid">
+        <article><span class="hub-no">01 / LEARN</span><span class="hub-symbol" aria-hidden="true">↗</span><h3>사람의 역량</h3><p>중소기업 AI교육, 바이브코딩, 강사 양성. 조직 안에 활용 능력을 남깁니다.</p><a href="/education">교육 아카데미 ↗</a></article>
+        <article><span class="hub-no">02 / THINK</span><span class="hub-symbol" aria-hidden="true">✳</span><h3>조직의 전략</h3><p>AX 컨설팅, 업무 진단, AIDC 자문. 투자보다 먼저 문제를 정의합니다.</p><a href="/business">사업 영역 보기 ↗</a></article>
+        <article><span class="hub-no">03 / DO</span><span class="hub-symbol" aria-hidden="true">⌘</span><h3>현장의 시스템</h3><p>TenOS-Ko-28B, RAG, AX 플랫폼과 AI 앱. 업무에서 돌아가는 도구를 만듭니다.</p><a href="/apps">AI 앱 쇼케이스 ↗</a></article>
+    </div></div></section>
+
+    <section class="hub-next" aria-labelledby="hubNextTitle"><div class="hub-shell"><span class="hub-kicker">/ EXPLORE YOUR WAY</span><h2 id="hubNextTitle">어디서 시작할지<br>정하셨나요?</h2><div class="hub-next-links"><a href="/biz"><small>FOR ORGANIZATIONS</small><strong>기업 · 공공기관</strong><span>AX 프로젝트 살펴보기 ↗</span></a><a href="/learn"><small>FOR LEARNERS</small><strong>수강생 · 개인</strong><span>학습 홈 살펴보기 ↗</span></a></div></div></section>
+
+    <section class="cta" id="contact"><div class="cta-content"><h2>당신의 AX,<br>함께 실험해볼까요?</h2><p>AI 교육, AX·AIDC 컨설팅, TenOS 기반 시스템 구축까지. 지금 필요한 변화부터 함께 설계합니다.</p><div class="hero-cta-group"><a class="btn-primary" href="mailto:leesh@tenai.kr">TEN AI에 이야기하기 ↗</a><a class="btn-secondary" href="/about#profile">회사소개서 보기 ↗</a></div></div></section>
 
     </main>
 
@@ -428,5 +419,6 @@
     <script type="module" src="/motion-fx.js"></script>
     <script type="module" src="/data-store.js"></script>
     <script type="module" src="/site.js"></script>
+    <script type="module" src="/ax-lab.js"></script>
 </body>
 </html>
