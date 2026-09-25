@@ -31,7 +31,7 @@ nav,nav.scrolled{background:var(--brand-lime);border-bottom:2px solid var(--bran
 .hero-badge-dot{background:var(--brand-ink);width:7px;height:7px}
 .hero h1{position:relative;z-index:2;max-width:none;margin:clamp(35px,5vw,78px) 0 0;font-family:'Outfit','Noto Sans KR',sans-serif;font-size:clamp(72px,11vw,178px);font-weight:900;line-height:.83;letter-spacing:-.105em;color:var(--brand-ink);word-break:normal;white-space:nowrap}
 .hero h1 .hero-indent{display:inline-block;padding-left:12vw}
-.hero h1 .highlight,.fx-on .hero h1 .highlight{background:none!important;color:transparent!important;-webkit-text-fill-color:transparent!important;-webkit-text-stroke:2px var(--brand-ink);text-shadow:none;animation:none!important}
+.hero h1 .highlight,.fx-on .hero h1 .highlight{background:none!important;color:transparent!important;-webkit-text-fill-color:transparent!important;-webkit-text-stroke:1.5px var(--brand-ink);letter-spacing:-.025em;text-shadow:none;animation:none!important}
 .hero-visual{position:absolute;z-index:1;right:2%;top:4%;width:auto;height:auto;max-width:none;margin:0;background:none;color:var(--brand-orange);font-family:'Outfit',sans-serif;font-size:clamp(190px,28vw,450px);line-height:1;transform:rotate(-18deg);pointer-events:none;text-shadow:none}
 .hero-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px;margin-top:55px;position:relative;z-index:2}
 .hero-subtitle{max-width:640px;margin:0;color:var(--brand-ink);font-size:clamp(18px,2.1vw,29px);line-height:1.5;font-weight:800;letter-spacing:-.05em;word-break:keep-all}
