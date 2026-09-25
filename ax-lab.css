@@ -163,10 +163,16 @@ footer{background:var(--brand-ink);color:#dce0fb}
   .ax-output{min-height:430px}.ax-piece{font-size:clamp(18px,4vw,27px);padding:12px}.ax-pieces{min-height:160px;gap:8px}.ax-pieces b{font-size:19px}
   .section-title,.partners-head h3,.lectures-head h2{font-size:clamp(2.4rem,8.5vw,4rem)}
 }
+@media(max-width:520px){
+  .ax-pieces{display:grid;grid-template-columns:1fr;justify-items:center;gap:8px;min-height:0;padding:12px 0 18px}
+  .ax-pieces b{font-size:17px;line-height:1}
+}
 @media(max-width:420px){
-  .hero h1{font-size:clamp(51px,13.1vw,64px)}.hero-visual{top:11%;font-size:150px}
+  .hero h1{font-size:clamp(51px,13.1vw,64px)}.hero-visual{top:0;right:8px;font-size:72px;opacity:.75}
   .hero-cta-group{gap:8px}.hero .btn-primary,.hero .btn-secondary{padding:9px 10px}
-  .ax-output-top{font-size:9px}.ax-piece{font-size:16px;padding:10px}.ax-pieces b{font-size:16px}
+  .hero-stats{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:6px;font-size:9px;letter-spacing:.025em;text-align:center}
+  .ax-lab h2{font-size:clamp(31px,9vw,38px);line-height:1.13;letter-spacing:-.07em}
+  .ax-output-top{font-size:9px}.ax-piece{font-size:16px;padding:10px}
 }
 @media(prefers-reduced-motion:reduce){.ax-piece,.ax-choice{transition:none}}
 

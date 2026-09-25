@@ -82,3 +82,11 @@ footer{background:var(--brand-ink);color:#dce0fb}
 .footer-title,.footer-links a,.footer-desc,.footer-copyright{color:#e4e7fa}
 .footer-links a:hover,.footer-slogan{color:var(--brand-lime)}
 .footer-bottom{border-top-color:#6c70a5}
+@media(max-width:420px){
+  .section-title,.partners-head h3,.lectures-head h2{font-size:clamp(30px,9vw,38px);line-height:1.12;letter-spacing:-.07em;word-break:keep-all}
+  .academy .section-title{font-size:clamp(29px,8.6vw,36px);overflow-wrap:normal}
+}
+@media(max-width:760px){
+  .cat-chip{min-height:44px}
+  .app-search-clear{width:44px;height:44px}
+}
