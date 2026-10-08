@@ -440,6 +440,58 @@
         </div>
     </section>
 
+    <!-- ============ 개발 중인 AI 제품 ============
+         새 제품이 생기면 .lab-item 한 덩어리를 복사해 아래에 붙인다.
+         그림은 실제 화면이 아니라 개념도다 — 화면이 나오면 바꾼다. -->
+    <section class="lab" id="lab" aria-labelledby="lab-title">
+        <div class="section-header animate-on-scroll">
+            <p class="section-label">02 · In Development</p>
+            <h2 class="section-title" id="lab-title">개발 중인 AI 제품</h2>
+            <p class="section-desc">TEN AI가 직접 만들고 있는 AI 제품을 먼저 소개합니다.</p>
+        </div>
+
+        <div class="lab-list">
+            <article class="lab-item animate-on-scroll">
+                <div class="lab-text">
+                    <p class="lab-meta">
+                        <span class="lab-flag">개발 중</span>
+                        <span class="lab-kicker">Interior · 3D Proposal</span>
+                    </p>
+                    <h3 class="lab-name">인테리어 3D 제안서</h3>
+                    <p class="lab-desc">인테리어 제안을 3D로 보여 주는 제안서 앱입니다. 도면과 말로 설명하던 공간을 입체로 미리 보여 줘, 고객이 완성된 모습을 그려 보며 결정할 수 있게 하는 것이 목표입니다.</p>
+                    <a class="lab-cta" href="mailto:leesh@tenai.kr?subject=%EC%9D%B8%ED%85%8C%EB%A6%AC%EC%96%B4%203D%20%EC%A0%9C%EC%95%88%EC%84%9C%20%EB%AC%B8%EC%9D%98"
+                       data-mail-subject="인테리어 3D 제안서 문의">
+                        먼저 써 보기 문의
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+
+                <figure class="lab-visual">
+                    <!-- 등각 투상으로 그린 방 하나: 바닥 · 두 벽 · 창 · 소파 · 탁자 -->
+                    <svg viewBox="0 0 320 240" role="img" aria-label="입체로 그린 방의 개념도">
+                        <!-- 바닥 마름모의 뒤 꼭짓점 (160,100) 에서 왼쪽 축 (-2,+1), 오른쪽 축 (+2,+1) 로 잰다 -->
+                        <g class="lab-room" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                            <path class="lab-floor" d="M160 220 L40 160 L160 100 L280 160 Z"/>
+                            <path class="lab-wall"  d="M40 160 L40 80 L160 20 L160 100 Z"/>
+                            <path class="lab-wall lab-wall-r" d="M160 100 L160 20 L280 80 L280 160 Z"/>
+                            <path class="lab-window" d="M195 50 L245 75 L245 110 L195 85 Z"/>
+                            <path fill="none" stroke-width="1.5" d="M220 62.5 L220 97.5 M195 67.5 L245 92.5"/>
+                        </g>
+                        <g class="lab-furniture" stroke="currentColor" stroke-width="2" stroke-linejoin="round">
+                            <path class="lab-sofa-back"  d="M140 108 L80 138 L80 116 L140 86 Z"/>
+                            <path class="lab-sofa-top"   d="M140 108 L80 138 L110 153 L170 123 Z"/>
+                            <path class="lab-sofa-front" d="M110 153 L170 123 L170 135 L110 165 Z"/>
+                            <path class="lab-sofa-side"  d="M80 138 L110 153 L110 165 L80 150 Z"/>
+                            <path class="lab-table-top"  d="M180 132 L150 147 L180 162 L210 147 Z"/>
+                            <path fill="none" stroke-width="1.5" d="M150 147 L150 165 M180 162 L180 180 M210 147 L210 165"/>
+                        </g>
+                    </svg>
+                    <figcaption>개념도 · 실제 화면은 출시 때 공개합니다</figcaption>
+                </figure>
+            </article>
+        </div>
+    </section>
+
     <!-- ============ 최신 소식 ============ -->
     <section class="news" id="home-news">
         <div class="section-header animate-on-scroll">

@@ -323,11 +323,15 @@
             padding: 0.85rem 1.7rem;
             font-size: 0.9rem;
             z-index: 900;
-            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
             box-shadow: 0 16px 44px rgba(0,0,0,0.5);
             max-width: 90vw; text-align: center;
+            /* 비어 있을 때는 확실히 숨긴다. translateY(140%) 만으로는 모자랐다 —
+               글이 없으면 높이가 29px 이라 140% 가 41px 뿐이어서, 아래 여백(32px)을
+               넘지 못하고 20px 이 화면에 남았다. 공개 사이트(styles.css)와 같은 고침. */
+            opacity: 0; visibility: hidden; pointer-events: none;
         }
-        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
 
         @media (max-width: 860px) {
             .admin-layout { grid-template-columns: 1fr; }
@@ -335,6 +339,103 @@
             .admin-tab { white-space: nowrap; }
             .field-row, .field-row-3 { grid-template-columns: 1fr; }
         }
+        /* ===== 접속 통계 =====
+           그래프 색은 dataviz 검증기로 이 바탕(#0e1a2e)에 대어 통과한 값만 쓴다.
+             막대(단일 계열)  #0aa2c4 — 화면 강조색 #00d4ff 는 명도 범위(0.48–0.67) 초과로 탈락,
+                                        같은 시안 계열에서 범위 안 가장 밝은 단계로 내렸다.
+             기기 3종         #3987e5 · #d95926 · #199e70 — 모든 쌍 비교·색약 시뮬레이션 통과.
+           색은 기기에 붙는다(모바일은 언제나 파랑). 순위가 바뀌어도 색은 그대로다. */
+        #panel-stats {
+            --viz-surface: #0e1a2e;
+            --viz-grid: #22314a;
+            --viz-series: #0aa2c4;
+            --dev-mobile: #3987e5;
+            --dev-tablet: #d95926;
+            --dev-desktop: #199e70;
+        }
+        .vs-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .vs-head .sub { margin-bottom: 0; }
+        .vs-filters { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+        .vs-seg {
+            min-height: 36px; padding: 0.45rem 0.95rem;
+            border-radius: 999px; border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.04); color: var(--gray-200);
+            font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+        .vs-seg:hover { border-color: var(--cyan-glow); color: var(--cyan-glow); }
+        .vs-seg[aria-pressed="true"] { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.45); color: var(--cyan-glow); }
+        .vs-seg:focus-visible, .vs-chart:focus-visible { outline: 2px solid var(--cyan-glow); outline-offset: 3px; }
+
+        .vs-notice {
+            margin-bottom: 1.2rem; padding: 0.85rem 1rem;
+            border-left: 3px solid var(--cyan-glow); border-radius: 0 10px 10px 0;
+            background: rgba(0,212,255,0.06);
+            font-size: 0.88rem; line-height: 1.7; color: var(--gray-200);
+        }
+        .vs-notice.err { border-left-color: var(--red); background: rgba(255,107,129,0.08); }
+        .vs-notice a { color: var(--cyan-glow); }
+
+        /* 큰 칸(오늘 방문자)이 왼쪽 두 줄을 차지하고 나머지 6칸이 3×2 로 빈틈없이 찬다.
+           카드 폭이 좁아지면 2열로 바꿔, 큰 칸은 한 줄을 통째로 쓴다(1 + 3×2 줄). */
+        #panel-stats > .card:first-child { container-type: inline-size; }
+        .vs-tiles { display: grid; grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr)); gap: 0.8rem; }
+        .vs-tile { background: var(--viz-surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1rem 1.1rem; min-width: 0; }
+        .vs-tile.hero { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
+        @container (max-width: 640px) {
+            .vs-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .vs-tile.hero { grid-row: auto; grid-column: 1 / -1; }
+        }
+        .vs-tile-label { font-size: 0.8rem; font-weight: 600; color: var(--gray-400); }
+        .vs-tile-value { margin-top: 0.3rem; font-size: 1.7rem; font-weight: 600; line-height: 1.1; color: var(--white); }
+        .vs-tile.hero .vs-tile-value { font-size: 3.2rem; }
+        .vs-tile-note { margin-top: 0.4rem; font-size: 0.78rem; color: var(--gray-400); }
+        .vs-loading .vs-tile-value, .vs-loading .vs-tile-note {
+            color: transparent; background: rgba(255,255,255,0.07); border-radius: 6px;
+            animation: vsPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes vsPulse { 50% { opacity: 0.45; } }
+
+        .vs-chart-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .vs-chart-head h2 { margin-bottom: 0; }
+        .vs-chart { position: relative; min-height: 236px; padding: 0.6rem 0.4rem 0.2rem; background: var(--viz-surface); border-radius: 14px; }
+        .vs-chart svg { display: block; width: 100%; height: auto; }
+        .vs-chart text { font-family: 'Noto Sans KR', system-ui, sans-serif; }
+        .vs-tip {
+            position: absolute; z-index: 5; pointer-events: none;
+            transform: translate(-50%, calc(-100% - 10px));
+            padding: 0.55rem 0.75rem; border-radius: 10px;
+            background: #071021; border: 1px solid rgba(255,255,255,0.18);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+            font-size: 0.8rem; line-height: 1.6; color: var(--white); white-space: nowrap;
+        }
+        .vs-tip .k { color: var(--gray-400); margin-right: 0.35rem; }
+        .vs-tip b { font-weight: 700; font-variant-numeric: tabular-nums; }
+        .vs-table-wrap { margin-top: 0.9rem; }
+        .vs-table-wrap summary { cursor: pointer; font-size: 0.84rem; font-weight: 700; color: var(--gray-200); padding: 0.4rem 0; }
+        .vs-table { width: 100%; margin-top: 0.4rem; border-collapse: collapse; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+        .vs-table th, .vs-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.06); text-align: right; }
+        .vs-table th:first-child, .vs-table td:first-child { text-align: left; }
+        .vs-table th { color: var(--gray-400); font-weight: 600; }
+
+        .vs-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .vs-grid2 > .card { margin-bottom: 0; }
+        @media (max-width: 900px) { .vs-grid2 { grid-template-columns: 1fr; } }
+
+        .vs-rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+        .vs-rank li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.35rem 0.8rem; align-items: baseline; }
+        .vs-rank-name { min-width: 0; font-size: 0.88rem; font-weight: 600; color: var(--white); overflow-wrap: anywhere; }
+        .vs-rank-name small { margin-left: 0.4rem; font-weight: 400; color: var(--gray-400); }
+        .vs-rank-val { font-size: 0.84rem; color: var(--gray-200); font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .vs-rank-bar { grid-column: 1 / -1; height: 8px; }
+        .vs-rank-bar span { display: block; height: 100%; min-width: 2px; background: var(--viz-series); border-radius: 0 4px 4px 0; }
+        .vs-empty { font-size: 0.86rem; color: var(--gray-400); }
+
+        .vs-devbar { display: flex; gap: 2px; height: 22px; padding: 0; background: var(--viz-surface); border-radius: 4px; overflow: hidden; }
+        .vs-devbar span { height: 100%; }
+        .vs-legend { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; margin-top: 0.9rem; font-size: 0.86rem; color: var(--gray-200); }
+        .vs-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 0.45rem; border-radius: 2px; vertical-align: -1px; }
+        .vs-legend b { color: var(--white); font-weight: 700; margin-left: 0.3rem; }
     </style>
 </head>
 <body>
@@ -376,6 +477,7 @@
     <div class="admin-layout">
         <nav class="admin-tabs" aria-label="관리 메뉴">
             <button class="admin-tab active" data-panel="settings">⚙️ 사이트 설정</button>
+            <button class="admin-tab" data-panel="stats">📊 접속 통계</button>
             <button class="admin-tab" data-panel="posts">📋 게시물 관리</button>
             <button class="admin-tab" data-panel="qna">💬 Q&amp;A 관리</button>
             <button class="admin-tab" data-panel="handbooks">📚 핸드북 관리</button>
@@ -799,6 +901,62 @@
                     <h2>배너 목록</h2>
                     <p class="sub" id="banCount"></p>
                     <div class="item-list" id="banList"></div>
+                </div>
+            </section>
+
+            <!-- ============ 접속 통계 (supabase-visits.sql) ============
+                 탭을 처음 열 때 불러온다. 관리자가 아니면 DB 가 거절한다. -->
+            <section class="panel" id="panel-stats" aria-labelledby="vsTitle">
+                <div class="card">
+                    <div class="vs-head">
+                        <div>
+                            <h2 id="vsTitle">접속 통계</h2>
+                            <p class="sub">tenai.kr 방문을 개인을 알아볼 수 없는 형태로 센 값입니다. 날짜는 한국 시간 자정 기준입니다.</p>
+                        </div>
+                        <div class="vs-filters" role="group" aria-label="기간">
+                            <button type="button" class="vs-seg" data-days="7" aria-pressed="true">7일</button>
+                            <button type="button" class="vs-seg" data-days="30" aria-pressed="false">30일</button>
+                            <button type="button" class="vs-seg" data-days="90" aria-pressed="false">90일</button>
+                            <button type="button" class="btn btn-ghost btn-sm" id="vsReload">새로고침</button>
+                        </div>
+                    </div>
+                    <div class="vs-notice" id="vsNotice" role="status" hidden></div>
+                    <div class="vs-tiles" id="vsTiles"></div>
+                </div>
+
+                <div class="card">
+                    <div class="vs-chart-head">
+                        <h2 id="vsChartTitle">날짜별 방문자</h2>
+                        <div class="vs-filters" role="group" aria-label="지표">
+                            <button type="button" class="vs-seg" data-metric="visitors" aria-pressed="true">방문자</button>
+                            <button type="button" class="vs-seg" data-metric="views" aria-pressed="false">페이지뷰</button>
+                        </div>
+                    </div>
+                    <div class="vs-chart" id="vsChart" tabindex="0"
+                         aria-label="날짜별 그래프. 왼쪽·오른쪽 화살표로 날짜를 옮겨 볼 수 있습니다."></div>
+                    <details class="vs-table-wrap">
+                        <summary>표로 보기</summary>
+                        <table class="vs-table" id="vsTable"></table>
+                    </details>
+                </div>
+
+                <div class="vs-grid2">
+                    <div class="card">
+                        <h2>많이 본 쪽</h2>
+                        <p class="sub">페이지뷰 기준 상위 10곳</p>
+                        <ol class="vs-rank" id="vsPages"></ol>
+                    </div>
+                    <div class="card">
+                        <h2>어디서 왔나</h2>
+                        <p class="sub">새로 들어온 방문 기준 · 검색어와 주소의 나머지는 남기지 않습니다</p>
+                        <ol class="vs-rank" id="vsRefs"></ol>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>기기</h2>
+                    <p class="sub">방문자 기준</p>
+                    <div id="vsDevices"></div>
                 </div>
             </section>
         </main>
@@ -1886,6 +2044,373 @@
                 showToast('앱이 삭제되었습니다.');
             }
         });
+    </script>
+    <!-- ============ 접속 통계 탭 (supabase-visits.sql · data-store.js getVisitStats) ============
+         다른 탭의 코드와 섞이지 않도록 따로 둔다. 탭을 처음 열 때 한 번 불러오고,
+         기간·새로고침을 누를 때 다시 부른다. -->
+    <script type="module">
+        'use strict';
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const nf = n => Number(n || 0).toLocaleString('ko-KR');
+        const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+        const STATS_FROM = '2026년 10월 16일';   // 개인정보 처리방침 '마. 방문 통계' 시행일
+
+        const PAGE_NAMES = {
+            '/': '현관', '/biz': '회사 홈', '/learn': '학습 홈', '/about': '회사 소개',
+            '/business': '사업영역', '/education': '교육', '/apps': 'AI 앱', '/news': '소식',
+            '/membership': '멤버십·로그인', '/privacy': '개인정보 처리방침', '/terms': '이용약관'
+        };
+        const REF_NAMES = [
+            [/(^|\.)google\./, 'Google'],
+            [/^(m\.)?search\.naver\.com$/, '네이버 검색'],
+            [/(^|\.)blog\.naver\.com$/, '네이버 블로그'],
+            [/(^|\.)cafe\.naver\.com$/, '네이버 카페'],
+            [/(^|\.)naver\.com$/, '네이버'],
+            [/(^|\.)daum\.net$/, '다음'],
+            [/kakao/, '카카오'],
+            [/(^|\.)facebook\.com$/, '페이스북'],
+            [/(^|\.)instagram\.com$/, '인스타그램'],
+            [/(^|\.)(youtube\.com|youtu\.be)$/, '유튜브'],
+            [/(^|\.)bing\.com$/, 'Bing'],
+            [/(^|\.)(chatgpt\.com|openai\.com)$/, 'ChatGPT'],
+            [/(^|\.)github\.com$/, 'GitHub']
+        ];
+        const refName = h => {
+            if (!h) return '직접 방문 · 즐겨찾기';
+            const hit = REF_NAMES.find(([re]) => re.test(h));
+            return hit ? hit[1] : h;
+        };
+        // 순서가 곧 색의 순서다. 색은 기기에 붙고, 많고 적음에 따라 바뀌지 않는다.
+        const DEVICES = [
+            ['mobile', '모바일', 'var(--dev-mobile)'],
+            ['tablet', '태블릿', 'var(--dev-tablet)'],
+            ['desktop', '데스크톱', 'var(--dev-desktop)']
+        ];
+        const WEEK = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayLabel = (iso, withWeek) => {
+            const d = new Date(iso + 'T00:00:00Z');
+            const s = `${d.getUTCMonth() + 1}/${d.getUTCDate()}`;
+            return withWeek ? `${s} (${WEEK[d.getUTCDay()]})` : s;
+        };
+
+        const state = { days: 7, metric: 'visitors', data: null, active: -1, loading: false };
+
+        function notice(html, isErr) {
+            const n = $('vsNotice');
+            n.hidden = !html;
+            n.classList.toggle('err', !!isErr);
+            n.innerHTML = html || '';
+        }
+
+        function clearViews() {
+            ['vsTiles', 'vsChart', 'vsTable', 'vsPages', 'vsRefs', 'vsDevices'].forEach(id => { $(id).innerHTML = ''; });
+        }
+
+        function sqlLink() {
+            const url = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '';
+            const m = url.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/);
+            return m ? `https://supabase.com/dashboard/project/${m[1]}/sql/new` : 'https://supabase.com/dashboard';
+        }
+
+        async function loadStats() {
+            if (state.loading) return;
+            state.loading = true;
+            const panel = $('panel-stats');
+            panel.classList.add('vs-loading');
+            if (!state.data) renderSkeleton();
+            notice('');
+            let data;
+            try {
+                data = await TenStore.getVisitStats(state.days);
+            } catch (e) {
+                notice(`통계를 불러오지 못했습니다 — ${esc(e && e.message || e)}<br>잠시 뒤 <b>새로고침</b>을 눌러 다시 시도해 주세요.`, true);
+                panel.classList.remove('vs-loading');
+                state.loading = false;
+                return;
+            } finally {
+                state.loading = false;
+            }
+            panel.classList.remove('vs-loading');
+
+            if (!data || data.local) {
+                clearViews();
+                notice('로컬 모드에서는 접속 통계를 볼 수 없습니다. Supabase 에 연결된 상태에서 열어 주세요.');
+                return;
+            }
+            if (data.missing) {
+                clearViews();
+                notice(`접속 통계 SQL 을 아직 실행하지 않았습니다.<br>
+                    저장소의 <code>supabase-visits.sql</code> 전체를
+                    <a href="${sqlLink()}" target="_blank" rel="noopener">Supabase SQL Editor</a> 에 붙여 넣고 <b>Run</b> 을 누른 뒤,
+                    여기서 <b>새로고침</b>을 눌러 주세요.`);
+                return;
+            }
+            if (data.forbidden) {
+                clearViews();
+                notice('관리자 계정으로 로그인해야 볼 수 있습니다.', true);
+                return;
+            }
+
+            state.data = data;
+            if (!data.totals.all_views) {
+                notice(`아직 기록이 없습니다. 개인정보 처리방침 시행일인 <b>${STATS_FROM}</b>부터
+                    tenai.kr 방문이 쌓입니다. (배포 미리보기·자동화 브라우저·'추적 안 함'을 켠 방문은 세지 않습니다.)`);
+            }
+            renderAll();
+        }
+
+        function renderAll() {
+            renderTiles();
+            renderChart();
+            renderTable();
+            renderRanks();
+            renderDevices();
+        }
+
+        function renderSkeleton() {
+            $('vsTiles').innerHTML = ['hero', '', '', '', '', '', ''].map(c =>
+                `<div class="vs-tile ${c}"><div class="vs-tile-label">&nbsp;</div><div class="vs-tile-value">0</div><div class="vs-tile-note">&nbsp;</div></div>`
+            ).join('');
+        }
+
+        /* ---------- 숫자 칸 ---------- */
+        function renderTiles() {
+            const { totals: t, daily, days, first } = state.data;
+            const yesterday = daily.length >= 2 ? daily[daily.length - 2].visitors : 0;
+            const since = first ? `${first.replace(/-/g, '.')} 부터` : '기록 전';
+            const tiles = [
+                { cls: 'hero', label: '오늘 방문자', value: t.today_visitors, note: `어제 ${nf(yesterday)}명` },
+                { label: '오늘 페이지뷰', value: t.today_views, note: '오늘 연 쪽 수' },
+                { label: `최근 ${days}일 방문자`, value: t.visitors, note: '하루 방문자를 더한 값' },
+                { label: '누적 방문자', value: t.all_visitors, note: since },
+                { label: `최근 ${days}일 방문 수`, value: t.visits, note: '새로 들어온 횟수' },
+                { label: `최근 ${days}일 페이지뷰`, value: t.views, note: t.visits ? `방문당 ${(t.views / t.visits).toFixed(1)}쪽` : '—' },
+                { label: '누적 페이지뷰', value: t.all_views, note: since }
+            ];
+            $('vsTiles').innerHTML = tiles.map(x => `
+                <div class="vs-tile ${x.cls || ''}">
+                    <div class="vs-tile-label">${esc(x.label)}</div>
+                    <div class="vs-tile-value">${nf(x.value)}</div>
+                    <div class="vs-tile-note">${esc(x.note)}</div>
+                </div>`).join('');
+        }
+
+        /* ---------- 날짜별 막대 ---------- */
+        // 눈금을 1·2·5 × 10ⁿ 으로 맞춰 4칸 남짓이 되게 한다
+        function niceScale(max) {
+            if (max <= 4) return { top: 4, step: 1 };
+            const raw = max / 4;
+            const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+            const step = [1, 2, 5, 10].map(k => k * mag).find(s => s >= raw);
+            return { top: Math.ceil(max / step) * step, step };
+        }
+        // 윗모서리만 4px 둥글게, 밑변은 기준선에 각지게 붙인다
+        function barPath(x, yTop, w, h) {
+            if (h <= 0) return '';
+            const r = Math.min(4, w / 2, h);
+            return `M${x},${yTop + h}V${yTop + r}Q${x},${yTop} ${x + r},${yTop}H${x + w - r}Q${x + w},${yTop} ${x + w},${yTop + r}V${yTop + h}Z`;
+        }
+
+        function renderChart() {
+            const box = $('vsChart');
+            const d = state.data.daily;
+            const key = state.metric;
+            const label = key === 'visitors' ? '방문자' : '페이지뷰';
+            $('vsChartTitle').textContent = `날짜별 ${label}`;
+
+            const W = Math.max(300, Math.round(box.clientWidth - 8));
+            const H = 236;
+            const m = { t: 24, r: 10, b: 28, l: 40 };
+            const iw = W - m.l - m.r, ih = H - m.t - m.b;
+            const max = Math.max(0, ...d.map(x => x[key]));
+            const { top, step } = niceScale(max);
+            const band = iw / d.length;
+            const bw = Math.max(2, Math.min(24, band - 2, band * 0.72));   // 이웃 막대와 2px 이상 띄운다
+            const y = v => m.t + ih - (v / top) * ih;
+            const xOf = i => m.l + band * i + (band - bw) / 2;
+
+            let g = '';
+            for (let v = 0; v <= top + 1e-9; v += step) {
+                const yy = Math.round(y(v)) + 0.5;
+                g += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="var(--viz-grid)" stroke-width="1"/>`;
+                g += `<text x="${m.l - 8}" y="${yy + 4}" text-anchor="end" font-size="11" fill="#94a3b8" style="font-variant-numeric:tabular-nums">${nf(v)}</text>`;
+            }
+
+            // 날짜 글씨: 6개 남짓만, 마지막(오늘)은 늘 보인다
+            const every = Math.max(1, Math.ceil(d.length / 6));
+            let xl = '';
+            d.forEach((p, i) => {
+                const last = i === d.length - 1;
+                if (!last && (i % every !== 0 || d.length - 1 - i < every * 0.6)) return;
+                xl += `<text x="${(xOf(i) + bw / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="#94a3b8">${last ? '오늘' : dayLabel(p.day)}</text>`;
+            });
+
+            let bars = '';
+            d.forEach((p, i) => {
+                const v = p[key];
+                bars += `<path d="${barPath(xOf(i), y(v), bw, y(0) - y(v))}" fill="var(--viz-series)"/>`;
+            });
+
+            // 값은 골라서만 단다 — 가장 큰 날과 오늘
+            const iMax = d.reduce((b, p, i) => (p[key] > d[b][key] ? i : b), 0);
+            const tag = new Set([d.length - 1]);
+            if (d[iMax][key] > 0) tag.add(iMax);
+            let vl = '';
+            tag.forEach(i => {
+                const v = d[i][key];
+                vl += `<text x="${(xOf(i) + bw / 2).toFixed(1)}" y="${(y(v) - 6).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="#e2e8f0">${nf(v)}</text>`;
+            });
+
+            // 칸 전체를 잡는 투명 영역 — 막대보다 넓게 잡아 가는 막대도 쉽게 고른다
+            let hits = '';
+            d.forEach((p, i) => {
+                hits += `<rect class="vs-hit" data-i="${i}" x="${(m.l + band * i).toFixed(1)}" y="${m.t}" width="${band.toFixed(1)}" height="${ih}" fill="transparent"/>`;
+            });
+
+            box.innerHTML = `
+                <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 ${d.length}일 날짜별 ${label}. 최대 ${nf(d[iMax][key])}, 오늘 ${nf(d[d.length - 1][key])}.">
+                    ${g}
+                    <rect id="vsHover" x="0" y="${m.t}" width="${band.toFixed(1)}" height="${ih}" fill="rgba(255,255,255,0.05)" visibility="hidden"/>
+                    ${bars}${vl}${xl}${hits}
+                </svg>
+                <div class="vs-tip" id="vsTip" hidden></div>`;
+
+            const svg = box.querySelector('svg');
+            const geom = { W, band, m, y, xOf, bw };
+            svg.addEventListener('pointermove', e => {
+                const r = e.target.closest && e.target.closest('.vs-hit');
+                if (r) showTip(+r.dataset.i, geom);
+            });
+            svg.addEventListener('pointerleave', hideTip);
+            if (state.active >= 0 && state.active < d.length) showTip(state.active, geom);
+            box._geom = geom;
+        }
+
+        function showTip(i, geom) {
+            const d = state.data.daily;
+            if (i < 0 || i >= d.length) return;
+            state.active = i;
+            const box = $('vsChart');
+            const svg = box.querySelector('svg');
+            const tip = $('vsTip');
+            const hover = $('vsHover');
+            const scale = svg.clientWidth / geom.W;
+            const p = d[i];
+            hover.setAttribute('x', (geom.m.l + geom.band * i).toFixed(1));
+            hover.setAttribute('visibility', 'visible');
+            tip.innerHTML = `<div>${dayLabel(p.day, true)}${i === d.length - 1 ? ' · 오늘' : ''}</div>
+                <div><span class="k">방문자</span><b>${nf(p.visitors)}</b>명</div>
+                <div><span class="k">페이지뷰</span><b>${nf(p.views)}</b>회</div>`;
+            tip.hidden = false;
+            // <svg> 에는 offsetLeft 가 없다(HTML 요소에만 있다) — 화면 좌표의 차이로 잰다
+            const sr = svg.getBoundingClientRect(), bxr = box.getBoundingClientRect();
+            const cx = (geom.xOf(i) + geom.bw / 2) * scale + (sr.left - bxr.left);
+            const v = p[state.metric];
+            const cy = Math.min(geom.y(v), geom.y(0) - 4) * scale + (sr.top - bxr.top);
+            // 상자가 그림 밖으로 나가지 않게 가로 위치를 붙잡아 둔다
+            const half = tip.offsetWidth / 2 + 4;
+            tip.style.left = Math.max(half, Math.min(box.clientWidth - half, cx)) + 'px';
+            tip.style.top = Math.max(tip.offsetHeight + 14, cy) + 'px';
+        }
+        function hideTip() {
+            const tip = $('vsTip'), hover = $('vsHover');
+            if (tip) tip.hidden = true;
+            if (hover) hover.setAttribute('visibility', 'hidden');
+            state.active = -1;
+        }
+
+        // 글쇠판: 왼쪽·오른쪽으로 날짜를 옮기고, Esc 로 닫는다
+        $('vsChart').addEventListener('keydown', e => {
+            if (!state.data || !$('vsChart')._geom) return;
+            const n = state.data.daily.length;
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                const cur = state.active < 0 ? n - 1 : state.active + (e.key === 'ArrowRight' ? 1 : -1);
+                showTip(Math.max(0, Math.min(n - 1, cur)), $('vsChart')._geom);
+            } else if (e.key === 'Escape') hideTip();
+        });
+        $('vsChart').addEventListener('focus', () => {
+            if (state.data && state.active < 0 && $('vsChart')._geom) showTip(state.data.daily.length - 1, $('vsChart')._geom);
+        });
+        $('vsChart').addEventListener('blur', hideTip);
+
+        function renderTable() {
+            const rows = state.data.daily.slice().reverse();
+            $('vsTable').innerHTML = `
+                <thead><tr><th scope="col">날짜</th><th scope="col">방문자</th><th scope="col">페이지뷰</th></tr></thead>
+                <tbody>${rows.map(p => `<tr><td>${dayLabel(p.day, true)}</td><td>${nf(p.visitors)}</td><td>${nf(p.views)}</td></tr>`).join('')}</tbody>`;
+        }
+
+        /* ---------- 순위 목록 ---------- */
+        function rankList(el, items, total, unit, nameOf) {
+            if (!items.length) { el.innerHTML = '<li class="vs-empty">아직 기록이 없습니다.</li>'; return; }
+            const top = items[0].n || 1;
+            el.innerHTML = items.map(it => `
+                <li>
+                    <span class="vs-rank-name">${nameOf(it)}</span>
+                    <span class="vs-rank-val">${nf(it.n)}${unit} · ${pct(it.n, total)}%</span>
+                    <span class="vs-rank-bar" aria-hidden="true"><span style="width:${Math.max(1, (it.n / top) * 100).toFixed(1)}%"></span></span>
+                </li>`).join('');
+        }
+
+        function renderRanks() {
+            const { pages, referrers, totals } = state.data;
+            rankList($('vsPages'), pages.map(p => ({ key: p.path, n: p.views })), totals.views, '회',
+                it => `${esc(PAGE_NAMES[it.key] || it.key)}<small>${esc(it.key)}</small>`);
+            rankList($('vsRefs'), referrers.map(r => ({ key: r.host, n: r.visits })), totals.visits, '회',
+                it => it.key && refName(it.key) !== it.key
+                    ? `${esc(refName(it.key))}<small>${esc(it.key)}</small>`
+                    : esc(refName(it.key)));
+        }
+
+        /* ---------- 기기 ---------- */
+        function renderDevices() {
+            const rows = state.data.devices || [];
+            const by = Object.fromEntries(rows.map(r => [r.device, r.visitors]));
+            const total = DEVICES.reduce((s, [k]) => s + (by[k] || 0), 0);
+            if (!total) { $('vsDevices').innerHTML = '<p class="vs-empty">아직 기록이 없습니다.</p>'; return; }
+            const seg = DEVICES.filter(([k]) => by[k] > 0)
+                .map(([k, name, color]) => `<span style="flex:${by[k]} 1 0;background:${color}" title="${name} ${pct(by[k], total)}%"></span>`).join('');
+            const legend = DEVICES.map(([k, name, color]) =>
+                `<span><i style="background:${color}"></i>${name}<b>${pct(by[k] || 0, total)}%</b> · ${nf(by[k] || 0)}명</span>`).join('');
+            $('vsDevices').innerHTML = `
+                <div class="vs-devbar" role="img" aria-label="${DEVICES.map(([k, n]) => `${n} ${pct(by[k] || 0, total)}%`).join(', ')}">${seg}</div>
+                <div class="vs-legend">${legend}</div>`;
+        }
+
+        /* ---------- 단추 ---------- */
+        function press(group, btn) {
+            group.forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        }
+        const dayBtns = Array.from(document.querySelectorAll('#panel-stats [data-days]'));
+        dayBtns.forEach(b => b.addEventListener('click', () => {
+            press(dayBtns, b);
+            state.days = Number(b.dataset.days);
+            state.active = -1;
+            loadStats();
+        }));
+        const metricBtns = Array.from(document.querySelectorAll('#panel-stats [data-metric]'));
+        metricBtns.forEach(b => b.addEventListener('click', () => {
+            press(metricBtns, b);
+            state.metric = b.dataset.metric;
+            if (state.data) renderChart();
+        }));
+        $('vsReload').addEventListener('click', () => loadStats());
+
+        // 탭을 처음 열 때 불러온다 (관리자 화면을 여는 것만으로는 부르지 않는다)
+        const tab = document.querySelector('.admin-tab[data-panel="stats"]');
+        if (tab) tab.addEventListener('click', () => { if (!state.data) loadStats(); else renderChart(); });
+
+        // 창 폭이 바뀌면 그래프를 다시 맞춘다
+        let rz = 0;
+        new ResizeObserver(() => {
+            if (!state.data || !$('panel-stats').classList.contains('active')) return;
+            cancelAnimationFrame(rz);
+            rz = requestAnimationFrame(renderChart);
+        }).observe($('vsChart'));
     </script>
 </body>
 </html>

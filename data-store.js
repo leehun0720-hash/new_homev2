@@ -1018,6 +1018,41 @@ async function reorderCategories(scope, orderedIds) {
     await listCategories({ reload: true });
 }
 
+/* ---------- 접속 통계 (supabase-visits.sql) ---------- */
+
+/* 방문 한 건을 남긴다. 어떤 이유로 실패해도 조용히 끝낸다 —
+   통계 때문에 방문자 화면이 멈추거나 오류를 띄우는 일은 없어야 한다. */
+async function trackView(view) {
+    if (mode !== 'supabase') return false;
+    try {
+        const { error } = await sb.rpc('track_view', {
+            p_path: view.path,
+            p_ref: view.ref || null,
+            p_device: view.device,
+            p_entry: !!view.entry,
+            p_new: !!view.isNew
+        });
+        return !error;
+    } catch (e) {
+        return false;
+    }
+}
+
+/* 관리자 콘솔이 보는 합계.
+   SQL 을 아직 돌리지 않았으면 { missing: true }, 관리자가 아니면 { forbidden: true }
+   를 돌려줘서 화면이 '무엇을 하면 되는지'를 말할 수 있게 한다. */
+async function getVisitStats(days) {
+    if (mode !== 'supabase') return { local: true };
+    const { data, error } = await sb.rpc('admin_visit_stats', { p_days: days });
+    if (error) {
+        const msg = String(error.message || '');
+        if (error.code === 'PGRST202' || /could not find the function/i.test(msg)) return { missing: true };
+        if (error.code === '42501' || /admin only/i.test(msg)) return { forbidden: true };
+        throw error;
+    }
+    return data;
+}
+
 /* ---------- 공개 API (index.html / admin.html 인라인 스크립트에서 사용) ---------- */
 window.TenStore = {
     mode,
@@ -1037,6 +1072,8 @@ window.TenStore = {
     signInAdmin, signOutAdmin, getAdminSession,
     signUpMember, signInMember, signOutMember, signInWithGoogle, signInWithGoogleIdToken,
     getMemberProfile, isAdminUser,
+    /* 접속 통계 */
+    trackView, getVisitStats,
     /* 구글이 브라우저에 직접 ID 토큰을 줄 수 있는 자리인지.
        Supabase 모드이고, 클라이언트 ID 가 있고, 지금 주소가 구글 콘솔에
        등록된 주소일 때만 참이다. 셋 중 하나라도 어긋나면 예전 방식으로 간다. */
