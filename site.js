@@ -1187,6 +1187,10 @@ async function applySettings() {
     // 링크류
     document.querySelectorAll('[data-mail]').forEach(a => { a.href = 'mailto:' + s.contactEmail; });
     document.querySelectorAll('[data-mail]:not(.btn-primary)').forEach(a => { a.textContent = s.contactEmail; });
+    // 제목이 붙는 문의 링크 — 주소는 관리자 설정을 따르고, 제목과 글자는 그대로 둔다
+    document.querySelectorAll('[data-mail-subject]').forEach(a => {
+        a.href = 'mailto:' + s.contactEmail + '?subject=' + encodeURIComponent(a.dataset.mailSubject);
+    });
     document.querySelectorAll('[data-yt]').forEach(a => { a.href = s.youtubeUrl; });
 }
 

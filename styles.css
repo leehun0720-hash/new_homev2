@@ -4058,3 +4058,146 @@ nav[data-mode="gate"] .nav-right { margin-left: auto; }
     font-size: 0.82rem; font-weight: 800;
     letter-spacing: 0.02em; color: var(--brand-accent);
 }
+
+/* =====================================================================
+   개발 중인 AI 제품 (/biz #lab)
+   ---------------------------------------------------------------------
+   사업영역(크림)과 최신 소식(크림) 사이에 라임 띠를 하나 둬, 사이트의
+   색면 리듬(라임 → 크림 → 라임 → 크림)을 그대로 잇는다.
+   카드는 히어로의 떠 있는 카드(.hb-float)와 같은 말투 —
+   크림 바탕 · 잉크 테두리 · 모서리 없는 6px 그림자.
+
+   제품이 늘면 .lab-item 을 복사해 붙이면 된다. 목록은 한 줄에 하나씩
+   쌓이므로, 몇 개가 되든 3칸 격자처럼 빈칸이 생기지 않는다.
+   ===================================================================== */
+.lab { background: var(--brand-lime); color: var(--brand-ink); }
+
+.lab-list {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.lab-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    background: var(--brand-cream);
+    border: 2px solid var(--brand-ink);
+    box-shadow: 6px 6px 0 var(--brand-ink);
+}
+
+.lab-text {
+    padding: clamp(1.5rem, 4vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.lab-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 0.8rem;
+    margin: 0;
+}
+
+/* 알약 대신 네모 깃발 — 사이트 전체가 모서리 없는 면으로 말한다 */
+.lab-flag {
+    display: inline-block;
+    padding: 0.3rem 0.65rem;
+    background: var(--brand-orange);
+    color: var(--brand-ink);
+    border: 2px solid var(--brand-ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.lab-kicker {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ax-muted, #41456b);
+}
+
+.lab-name {
+    font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.045em;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.lab-desc {
+    font-size: 1.02rem;
+    line-height: 1.8;
+    max-width: 34em;
+    margin: 0;
+}
+
+.lab-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    margin-top: 0.4rem;
+    padding: 0.8rem 1.3rem;
+    background: var(--brand-ink);
+    color: #fff;
+    border: 2px solid var(--brand-ink);
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.18s ease, background-color 0.2s ease;
+}
+.lab-cta:hover { background: #383e90; }
+.lab-cta:hover svg { transform: translateX(3px); }
+.lab-cta svg { transition: transform 0.2s ease; }
+.lab-cta:active { transform: translateY(1px) scale(0.985); }
+
+/* 그림 칸 — 현관의 AX 조합기와 같은 모눈 바탕 */
+.lab-visual {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-left: 2px solid var(--brand-ink);
+    background-color: #fff;
+    background-image:
+        linear-gradient(rgba(32, 36, 94, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(32, 36, 94, 0.07) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: var(--brand-ink);
+}
+.lab-visual svg { width: 100%; max-width: 340px; height: auto; overflow: visible; }
+.lab-visual figcaption {
+    font-size: 0.78rem;
+    color: var(--ax-muted, #41456b);
+    text-align: center;
+}
+
+/* 방의 면 — 사이트 팔레트 안에서만 칠한다 */
+.lab-floor       { fill: var(--brand-lime); }
+.lab-wall        { fill: var(--ax-lav, #d7ccff); }
+.lab-wall-r      { fill: #fff; }
+.lab-window      { fill: var(--brand-cream); }
+.lab-sofa-back,
+.lab-sofa-top    { fill: var(--brand-orange); }
+.lab-sofa-front,
+.lab-sofa-side   { fill: #d9603f; }
+.lab-table-top   { fill: #fff; }
+
+/* 카드에 손이 닿으면 가구가 살짝 떠오른다 — 도면이 입체가 되는 순간을 빗댄 것 */
+.lab-furniture { transition: transform 0.35s ease; }
+.lab-item:hover .lab-furniture { transform: translateY(-4px); }
+
+@media (max-width: 860px) {
+    .lab-item { grid-template-columns: 1fr; }
+    .lab-visual { border-left: 0; border-top: 2px solid var(--brand-ink); }
+}
