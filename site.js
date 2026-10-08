@@ -1061,14 +1061,17 @@ if (menuBtn && mobileMenu) {
    motion-fx.js 가 부팅되면(fx-ready) 등장 연출을 그쪽이 전담한다.
    아래 코드는 모션 레이어가 없을 때를 위한 기본 폴백. */
 if (!document.documentElement.classList.contains('fx-ready')) {
+    // 문턱을 0 과 0.12 둘 다 둔다. 짧은 덩어리는 12% 가 보일 때 드러나고(전과 같음),
+    // 화면보다 긴 덩어리는 12% 에 영영 닿지 못하므로 들어오는 순간 드러낸다.
     const revealObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
+            const tall = entry.boundingClientRect.height > window.innerHeight * 0.8;
+            if (entry.isIntersecting && (tall || entry.intersectionRatio >= 0.12)) {
                 entry.target.classList.add('visible');
                 revealObserver.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+    }, { threshold: [0, 0.12], rootMargin: '0px 0px -50px 0px' });
     document.querySelectorAll('.animate-on-scroll').forEach(el => revealObserver.observe(el));
 
     // 스태거(순차) 등장

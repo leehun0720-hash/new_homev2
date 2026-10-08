@@ -337,11 +337,19 @@ function revealSystem() {
         /* 스태거 대상은 미리 숨겨 둔다 — 부모가 드러나는 순간의 깜빡임 방지 */
         if (!isHeader && el.dataset.fxStagger) utils.set($(el.dataset.fxStagger, el), { opacity: 0 });
 
+        /* 화면보다 긴 덩어리는 '15%가 한꺼번에 보일 때'를 기다리면 영영 드러나지
+           않는다. 784px 화면에 6,000px 짜리 덩어리는 최대 13%만 보인다.
+           실제로 개인정보 처리방침·이용약관 본문 전체가 작은 폰(375×667)에서
+           끝까지 내려도 투명한 채로 남아 있었다. 그런 덩어리는 조금이라도
+           들어오면(some) 드러내고, 짧은 덩어리만 전처럼 15%를 기다린다.
+           높이는 연출을 준비하는 이 시점에 잰다 — 등장 덩어리 중 나중에 내용이
+           차서 길어지는 것은 없다(9개 쪽을 끝까지 내려 확인). */
+        const tall = el.getBoundingClientRect().height > window.innerHeight * 0.8;
         inView(el, () => {
             el.classList.add('visible');
             if (isHeader) revealHeader(el, splits);
             else revealBlock(el);
-        }, { amount: 0.15, margin: '0px 0px -60px 0px' });
+        }, { amount: tall ? 'some' : 0.15, margin: '0px 0px -60px 0px' });
     });
 }
 
