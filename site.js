@@ -1767,3 +1767,70 @@ initGoogleButton().catch(e => console.warn('구글 버튼 준비 실패', e));
 
 // 외부 리더보드는 독립적으로 조회한다 — 지연되거나 실패해도 본문 로딩과 무관
 renderTenosRank().catch(e => console.warn('K-AI 리더보드 순위 조회 실패', e));
+
+/* ---------------------------------------------------------------------
+   접속 통계 — 익명 방문 기록 (supabase-visits.sql)
+   ---------------------------------------------------------------------
+   보내는 것   : 본 쪽 주소 · 들어온 사이트 이름 · 기기 종류 ·
+                 '오늘 처음 왔는가' · '이 탭에서 처음 연 쪽인가' (예/아니오)
+   안 보내는 것: 방문자를 구별하는 번호 · IP · 검색어 · 들어온 주소의 나머지
+
+   브라우저에는 '마지막으로 온 날짜' 하나만 남기고, 그 날짜 자체는 서버로
+   보내지 않는다. 서버로 가는 것은 그 날짜로 계산한 예/아니오뿐이다.
+
+   VISIT_STATS_FROM 은 개인정보 처리방침의 '마. 방문 통계' 시행일과
+   반드시 같아야 한다. 방침 9조(시행 7일 전 공지)를 지키려고,
+   그날 전에는 아무것도 보내지 않는다.
+   --------------------------------------------------------------------- */
+const VISIT_STATS_FROM = '2026-10-16';
+
+function trackVisit() {
+    try {
+        const host = location.hostname;
+        if (host !== 'tenai.kr' && host !== 'www.tenai.kr') return;      // 미리보기·로컬은 세지 않는다
+        if (navigator.webdriver) return;                                  // 검사 도구·크롤러
+        if (navigator.doNotTrack === '1' || window.doNotTrack === '1' ||
+            navigator.globalPrivacyControl === true) return;              // 추적 안 함을 켠 분
+
+        // 한국 시간 기준 오늘 (YYYY-MM-DD)
+        const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+        if (today < VISIT_STATS_FROM) return;
+
+        // 주소: 소문자 · .html 과 끝 / 떼기 · 쿼리와 해시는 버린다 → /biz
+        let path = location.pathname.toLowerCase().replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+        if (path === '/index') path = '/';
+        if (path === '/admin' || !/^\/[a-z0-9/_-]{0,80}$/.test(path)) return;
+
+        // 이 탭에서 처음 연 쪽인가 — 방문 수 · 유입 경로는 여기서만 센다
+        let entry = true;
+        try {
+            entry = !sessionStorage.getItem('tenai_tab');
+            sessionStorage.setItem('tenai_tab', '1');
+        } catch (e) { }
+
+        // 이 브라우저가 오늘 처음 왔는가 — 날짜는 브라우저에만 두고 예/아니오만 보낸다
+        let isNew = entry;
+        try {
+            isNew = localStorage.getItem('tenai_day') !== today;
+            localStorage.setItem('tenai_day', today);
+        } catch (e) { }
+
+        // 들어온 사이트 — 이름만. 우리 사이트 안에서 옮긴 것은 남기지 않는다
+        let ref = null;
+        if (entry && document.referrer) {
+            try {
+                const h = new URL(document.referrer).hostname.toLowerCase().replace(/^www\./, '');
+                if (h && !/(^|\.)tenai\.kr$/.test(h) && /^[a-z0-9.-]{1,120}$/.test(h)) ref = h;
+            } catch (e) { }
+        }
+
+        const w = window.innerWidth || document.documentElement.clientWidth || 0;
+        const device = w < 768 ? 'mobile' : (w < 1024 ? 'tablet' : 'desktop');
+
+        TenStore.trackView({ path, ref, device, entry, isNew });
+    } catch (e) { /* 통계는 사이트의 어떤 동작도 막지 않는다 */ }
+}
+
+// 본문이 다 뜬 뒤에 보낸다 — 첫 화면을 그리는 요청과 다투지 않게
+if (document.readyState === 'complete') setTimeout(trackVisit, 0);
+else window.addEventListener('load', () => setTimeout(trackVisit, 0), { once: true });
