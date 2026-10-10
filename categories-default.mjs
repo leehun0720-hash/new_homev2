@@ -30,7 +30,7 @@ export const CATEGORY_SCOPES = [
 
 export const SCOPE_IDS = CATEGORY_SCOPES.map(s => s.id);
 
-/* 배지 색조 — styles.css 의 .tag-* 와 일대일 대응 */
+/* 배지 색조 — tenai.css 의 .tag-* (색 점) 와 일대일 대응 */
 export const CATEGORY_TONES = [
     { id: 'tag-vibe',  name: '오렌지' },
     { id: 'tag-genai', name: '라임'   },

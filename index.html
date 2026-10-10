@@ -9,7 +9,7 @@
     <link rel="canonical" href="https://tenai.kr/">
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="format-detection" content="telephone=no">
-    <meta name="theme-color" content="#c9f379">
+    <meta name="theme-color" content="#0f1011">
     <meta name="color-scheme" content="light">
 
     <meta property="og:type" content="website">
@@ -262,144 +262,462 @@
   ]
 }
     </script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://i.ytimg.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/ax-lab.css">
-    <link rel="stylesheet" href="/polish.css">
+    <link rel="stylesheet" href="/fonts/pretendard/pretendard-variable.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&text=%E5%8C%97%E6%9D%B1%E5%8D%97%E8%A5%BF%E4%B8%AD%E5%8D%81%E9%9D%91%E4%B8%B9%E9%BB%83%E7%99%BD%E9%BB%91%E7%B6%A0&display=swap">
+    <link rel="stylesheet" href="/tenai.css">
     <script>
-        /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
-           motion-fx.js 가 제때 부팅하지 못하면 안전망(fx-fallback)으로 콘텐츠를 드러낸다. */
-        document.documentElement.classList.add('js-anim');
-        window.addEventListener('load', () => setTimeout(() => {
-            if (!document.documentElement.classList.contains('fx-ready')) {
-                document.documentElement.classList.add('fx-fallback');
+        /* 영어를 골라 둔 사람에게는 한국어가 잠깐 비치지 않도록, 번역이 끝날 때까지 본문을 가린다.
+           i18n.js 가 끝나면 걷어내고, 그마저 늦으면 tenai.css 가 1.5초 뒤 저절로 드러낸다. */
+        try {
+            if (localStorage.getItem('tenai_lang') === 'en' || /[?&]lang=en\b/.test(location.search)) {
+                document.documentElement.classList.add('i18n-pending');
+                document.documentElement.lang = 'en';
             }
-        }, 1500));
+        } catch (e) {}
     </script>
+    <link rel="preconnect" href="https://i.ytimg.com">
 </head>
 <body>
     <a class="skip-link" href="#main">본문 바로가기</a>
 
-    <!-- ============ Navigation (현관) ============ -->
     <nav id="nav" aria-label="주 메뉴" data-mode="gate">
-        <a href="/" class="logo" aria-label="TEN AI">
-            <span class="brand-logo-frame">
-                <img class="brand-logo-image" src="/brand/TenAI_ink.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
-            </span>
-        </a>
-        <div class="nav-right">
-            <a class="mode-switch" href="mailto:leesh@tenai.kr"><span class="mode-switch-label">leesh@tenai.kr</span></a>
+        <div class="nav-inner">
+            <a href="/" class="logo" aria-label="TEN AI 홈"><span class="logo-mark" role="img" aria-label="TEN AI"></span></a>
+            <ul class="nav-links">
+                <li><a href="/business">사업영역</a></li>
+                <li><a href="/education">교육</a></li>
+                <li><a class="nav-new" href="/apps">AI 앱<span class="nav-new-dot" aria-hidden="true"></span><span class="visually-hidden">(새 앱 있음)</span></a></li>
+                <li><a href="/news">소식</a></li>
+                <li><a href="/about">회사소개</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="lang-switch" role="group" aria-label="언어 선택" translate="no">
+                    <button type="button" data-set-lang="ko" aria-pressed="true" class="is-on">KO</button>
+                    <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+                </div>
+                <button class="nav-login" type="button" data-login>로그인</button>
+                <a class="btn btn-light btn-sm nav-cta" href="#contact">상담 신청</a>
+                <button class="mobile-menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileMenu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
     </nav>
 
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="/">홈</a>
+        <a href="/business">사업영역</a>
+        <a href="/education">교육</a>
+        <a href="/apps">AI 앱</a>
+        <a href="/news">소식</a>
+        <a href="/about">회사소개</a>
+        <div class="mobile-menu-foot">
+            <div class="lang-switch" role="group" aria-label="언어 선택" translate="no">
+                <button type="button" data-set-lang="ko" aria-pressed="true" class="is-on">KO</button>
+                <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+            </div>
+            <button class="nav-login" type="button" data-login>로그인 / 회원가입</button>
+            <a class="btn btn-light" href="#contact">상담 신청</a>
+        </div>
+    </div>
+
+
     <main id="main">
 
-    <!-- ============ AI·AX HUB ============ -->
-    <header class="hero" id="home">
-        <div class="hero-inner">
-            <div class="hero-badge"><span class="hero-badge-dot"></span>AI × PEOPLE × REAL WORK</div>
-            <div class="hero-visual" aria-hidden="true">✳</div>
-            <h1><span>MAKE</span><br><span class="hero-indent">AX</span><br><span class="highlight">HAPPEN.</span></h1>
-            <div class="hero-bottom">
-                <p class="hero-subtitle">AI를 설명하는 곳은 많습니다.<br>TEN AI는 <strong>당신의 일에서 작동하게</strong> 만듭니다.</p>
-                <div class="hero-cta-group">
-                    <a class="btn-primary" href="#ax-lab">나의 AX 조합하기 <span aria-hidden="true">↘</span></a>
-                    <a class="btn-secondary" href="/learn">학습 홈 보기 <span aria-hidden="true">↗</span></a>
+    <!-- ============ 첫 화면: 연화 머리초 도면 ============ -->
+    <header class="home-hero night" id="home">
+        <svg class="hero-art" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <path id="petal" pathLength="1" d="M0 -78 C 58 -118 60 -212 0 -262 C -60 -212 -58 -118 0 -78 Z"/>
+              <path id="petal-s" pathLength="1" d="M0 -40 C 23 -60 25 -106 0 -128 C -25 -106 -23 -60 0 -40 Z"/>
+            </defs>
+
+            <!-- 기준선 -->
+            <line class="g-guide g-dashdot" x1="720" y1="0" x2="720" y2="900"/>
+            <text class="ann-dim" x="734" y="22" style="text-anchor:start">℄</text>
+
+            <!-- 연화 머리초: 큰 꽃잎 여덟 장, 안쪽으로 장단·황·삼청 세 단 -->
+            <g class="rosette-pos" transform="translate(720 520) scale(.72)">
+              <line class="g-guide g-dashdot" x1="-640" y1="0" x2="640" y2="0"/>
+              <circle class="g-guide g-dash" r="292"/>
+              <circle class="g-guide" r="318"/>
+              <g class="spin">
+                <g class="draw">
+                  <g transform="rotate(0)"><use href="#petal" class="pt pt-w" style="--i:0;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:1;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:2;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:3;stroke-width:3.38"/></g>
+                  <g transform="rotate(22.5)"><use href="#petal-s" class="pt pt-soft" style="--i:2;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:3;stroke-width:1.9"/></g>
+                  <g transform="rotate(45)"><use href="#petal" class="pt pt-w" style="--i:1;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:2;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:3;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:4;stroke-width:3.38"/></g>
+                  <g transform="rotate(67.5)"><use href="#petal-s" class="pt pt-soft" style="--i:3;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:4;stroke-width:1.9"/></g>
+                  <g transform="rotate(90)"><use href="#petal" class="pt pt-w" style="--i:2;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:3;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:4;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:5;stroke-width:3.38"/></g>
+                  <g transform="rotate(112.5)"><use href="#petal-s" class="pt pt-soft" style="--i:4;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:5;stroke-width:1.9"/></g>
+                  <g transform="rotate(135)"><use href="#petal" class="pt pt-w" style="--i:3;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:4;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:5;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:6;stroke-width:3.38"/></g>
+                  <g transform="rotate(157.5)"><use href="#petal-s" class="pt pt-soft" style="--i:5;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:6;stroke-width:1.9"/></g>
+                  <g transform="rotate(180)"><use href="#petal" class="pt pt-w" style="--i:4;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:5;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:6;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:7;stroke-width:3.38"/></g>
+                  <g transform="rotate(202.5)"><use href="#petal-s" class="pt pt-soft" style="--i:6;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:7;stroke-width:1.9"/></g>
+                  <g transform="rotate(225)"><use href="#petal" class="pt pt-w" style="--i:5;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:6;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:7;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:8;stroke-width:3.38"/></g>
+                  <g transform="rotate(247.5)"><use href="#petal-s" class="pt pt-soft" style="--i:7;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:8;stroke-width:1.9"/></g>
+                  <g transform="rotate(270)"><use href="#petal" class="pt pt-w" style="--i:6;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:7;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:8;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:9;stroke-width:3.38"/></g>
+                  <g transform="rotate(292.5)"><use href="#petal-s" class="pt pt-soft" style="--i:8;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:9;stroke-width:1.9"/></g>
+                  <g transform="rotate(315)"><use href="#petal" class="pt pt-w" style="--i:7;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:8;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:9;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:10;stroke-width:3.38"/></g>
+                  <g transform="rotate(337.5)"><use href="#petal-s" class="pt pt-soft" style="--i:9;stroke-width:1"/><use href="#petal-s" class="pt pt-n" transform="translate(0 -84) scale(.6) translate(0 84)" style="--i:10;stroke-width:1.9"/></g>
+                </g>
+              </g>
+              <g class="draw">
+                <circle class="core-ring" r="42" pathLength="1" style="--i:10"/>
+              </g>
+              <circle class="core" r="13"/>
+              <circle class="stamen" cx="0.0" cy="-58.0" r="2.4"/><circle class="stamen" cx="29.0" cy="-50.2" r="2.4"/><circle class="stamen" cx="50.2" cy="-29.0" r="2.4"/><circle class="stamen" cx="58.0" cy="-0.0" r="2.4"/><circle class="stamen" cx="50.2" cy="29.0" r="2.4"/><circle class="stamen" cx="29.0" cy="50.2" r="2.4"/><circle class="stamen" cx="0.0" cy="58.0" r="2.4"/><circle class="stamen" cx="-29.0" cy="50.2" r="2.4"/><circle class="stamen" cx="-50.2" cy="29.0" r="2.4"/><circle class="stamen" cx="-58.0" cy="0.0" r="2.4"/><circle class="stamen" cx="-50.2" cy="-29.0" r="2.4"/><circle class="stamen" cx="-29.0" cy="-50.2" r="2.4"/>
+            </g>
+
+            <!-- 주석 -->
+            <g class="callouts">
+              <polyline class="ldr" points="96,300 300,300 634,434"/>
+              <circle class="lead-dot" cx="634" cy="434" r="3"/>
+              <text class="ann ann-b" x="96" y="288">연화 머리초</text>
+              <text class="ann ann-s" x="96" y="322">ROSETTE · Ø 1,200 · 8 PETALS</text>
+
+              <polyline class="ldr" points="1344,300 1140,300 732,514"/>
+              <circle class="lead-dot" cx="732" cy="514" r="3"/>
+              <text class="ann ann-b" x="1140" y="288">TENOS-KO 28B</text>
+              <text class="ann ann-s" x="1140" y="322">CORE · ON-PREMISE</text>
+
+              <polyline class="ldr" points="1320,690 1110,690 806,606"/>
+              <circle class="lead-dot" cx="806" cy="606" r="3"/>
+              <text class="ann ann-b" x="1110" y="678">오방색 다섯</text>
+              <g transform="translate(1110 700)">
+                <rect class="chip-j" width="12" height="12" rx="6"/>
+                <rect class="chip-h" x="20" width="12" height="12" rx="6"/>
+                <rect class="chip-c" x="40" width="12" height="12" rx="6"/>
+                <rect class="chip-n" x="60" width="12" height="12" rx="6"/>
+                <rect class="chip-w" x="80" width="12" height="12" rx="6"/>
+                <text class="ann ann-s" x="104" y="11">丹 黃 靑 綠 白</text>
+              </g>
+
+              <!-- 세로 치수선 -->
+              <line class="ldr" x1="980" y1="291" x2="980" y2="749"/>
+              <line class="ldr" x1="974" y1="297" x2="986" y2="285"/>
+              <line class="ldr" x1="974" y1="755" x2="986" y2="743"/>
+              <text class="ann-dim" transform="translate(1000 520) rotate(90)">Ø 1,200</text>
+            </g>
+          </svg>
+
+        <div class="hero-mark">
+            <p class="label">The 10th Intelligence · For Human Progress</p>
+            <p class="wordmark" aria-hidden="true" translate="no">TEN AI</p>
+        </div>
+
+        <div class="hero-spacer"></div>
+
+        <div class="wrap hero-foot">
+            <div>
+                <h1 class="display"><span>한국의 결로</span><br><span>AI를 짓습니다</span></h1>
+                <p class="hero-sub">교육부터 현장 구축까지, 중소기업과 공공기관이 매일 쓰는 AI를 자체 한국어 모델 위에 세웁니다.</p>
+                <div class="hero-cta">
+                    <a class="btn btn-light" href="#contact">상담 신청 <span class="arr" aria-hidden="true">→</span></a>
+                    <a class="btn btn-ghost-night" href="/education">교육 과정 보기</a>
                 </div>
             </div>
-            <div class="hero-stats" aria-label="TEN AI 핵심 분야"><span>AI EDUCATION</span><span>AX CONSULTING</span><span>TenOS · PLATFORM</span></div>
+            <div class="title-block" aria-hidden="true">
+                <div><b>TEN AI</b>D-01 · 단청 회로</div>
+                <div><b>Scale 1:10</b>Seoul · 2026</div>
+                <div class="seal hz">十</div>
+            </div>
         </div>
     </header>
 
-    <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack">
-        <span class="marquee-item"><em>AI EDUCATION</em> · 중소기업 AI교육</span>
-        <span class="marquee-item"><em>VIBE CODING</em> · 바이브코딩</span>
-        <span class="marquee-item"><em>AX CONSULTING</em> · 조직 전환</span>
-        <span class="marquee-item"><em>TenOS-Ko-28B</em> · 한국어 LLM</span>
-        <span class="marquee-item"><em>AI EDUCATION</em> · 중소기업 AI교육</span>
-        <span class="marquee-item"><em>VIBE CODING</em> · 바이브코딩</span>
-        <span class="marquee-item"><em>AX CONSULTING</em> · 조직 전환</span>
-        <span class="marquee-item"><em>TenOS-Ko-28B</em> · 한국어 LLM</span>
-    </div></div>
+    <!-- ============ 숫자 ============ -->
+    <section class="stats-band night" aria-label="TEN AI 숫자">
+        <div class="wrap">
+            <ul class="hero-stats">
+                <li><span class="label">/ 01 · Model</span><b class="num">28<small>B</small></b><span>자체 한국어 모델 TenOS-Ko</span></li>
+                <li><span class="label">/ 02 · Handbook</span><b class="num" data-stat="handbooks">13+</b><span>레벨별 교육 핸드북</span></li>
+                <li><span class="label">/ 03 · Apps</span><b class="num">19</b><span>직접 만든 AI 앱</span></li>
+                <li><span class="label">/ 04 · Practice</span><b class="num">4</b><span>핵심 사업영역</span></li>
+            </ul>
+        </div>
+    </section>
 
-    <section class="ax-lab" id="ax-lab" aria-labelledby="axLabTitle"><div class="ax-lab-inner">
-        <div class="ax-lab-heading"><div><span class="ax-lab-kicker">/ THE INTERACTIVE AX LAB</span><h2 id="axLabTitle">당신의 조직에<br>필요한 첫 조각은?</h2></div><p>지금 가장 필요한 변화를 선택해 보세요. 교육, 컨설팅, 구축 중 어디서 출발하느냐에 따라 AX 허브의 조합이 달라집니다.</p></div>
-        <div class="ax-console"><div class="ax-controls"><span class="ax-lab-kicker">SELECT YOUR STARTING POINT</span><h3>지금 필요한<br>변화는 무엇인가요?</h3>
-            <div class="ax-choices" role="group" aria-label="AX 시작점 선택"><button class="ax-choice active" type="button" data-ax-choice="learn" aria-pressed="true">01. 팀이 AI를 배워야 해요 <span aria-hidden="true">↗</span></button><button class="ax-choice" type="button" data-ax-choice="plan" aria-pressed="false">02. AX 방향을 찾고 싶어요 <span aria-hidden="true">↗</span></button><button class="ax-choice" type="button" data-ax-choice="build" aria-pressed="false">03. AI 시스템이 필요해요 <span aria-hidden="true">↗</span></button></div>
-            <p class="ax-hint">선택하면 오른쪽의 조합이 바뀝니다.</p></div>
-        <div class="ax-output" id="axOutput"><div class="ax-output-top"><span>TEN AI / AX COMBINATOR</span><span id="axStatus">PATH 01 ACTIVE</span></div><div class="ax-pieces" aria-hidden="true"><span class="ax-piece" id="axPiece1">AI 교육</span><b>+</b><span class="ax-piece" id="axPiece2">바이브코딩</span><b>+</b><span class="ax-piece" id="axPiece3">핸드북</span></div><div class="ax-result" aria-live="polite"><span id="axResultTag">YOUR NEXT MOVE / 01</span><h3 id="axResultTitle">팀의 AI 근육부터 만듭니다.</h3><p id="axResultDescription">직무에 맞춘 실무 교육과 바이브코딩으로, 배운 내용을 바로 업무에 적용하는 첫 경험을 설계합니다.</p><a id="axResultLink" href="/education">AI 교육 살펴보기 ↗</a></div></div></div>
-    </div></section>
+    <!-- ============ 오방: 다섯 가지 일 ============ -->
+    <section class="sec obang" id="obang" aria-labelledby="obangTitle">
+        <div class="wrap">
+            <div class="sec-head">
+                <p class="label sec-no">01 · 오방</p>
+                <h2 class="title-l" id="obangTitle">다섯 방위에 놓은 다섯 가지 일</h2>
+                <p class="lead">오방색은 동서남북과 중앙을 뜻합니다. 가운데에 자체 모델을 두고, 네 갈래 일이 그 위에 섭니다.</p>
+            </div>
 
-    <section class="hub-path" aria-labelledby="hubPathTitle"><div class="hub-shell"><span class="hub-kicker">/ MORE THAN A SINGLE SERVICE</span><h2 id="hubPathTitle">따로 놀던 AI를,<br>하나의 일로 엮습니다.</h2><div class="hub-path-grid">
-        <article><span class="hub-no">01 / LEARN</span><span class="hub-symbol" aria-hidden="true">↗</span><h3>사람의 역량</h3><p>중소기업 AI교육, 바이브코딩, 강사 양성. 조직 안에 활용 능력을 남깁니다.</p><a href="/education">교육 아카데미 ↗</a></article>
-        <article><span class="hub-no">02 / THINK</span><span class="hub-symbol" aria-hidden="true">✳</span><h3>조직의 전략</h3><p>AX 컨설팅, 업무 진단, AIDC 자문. 투자보다 먼저 문제를 정의합니다.</p><a href="/business">사업 영역 보기 ↗</a></article>
-        <article><span class="hub-no">03 / DO</span><span class="hub-symbol" aria-hidden="true">⌘</span><h3>현장의 시스템</h3><p>TenOS-Ko-28B, RAG, AX 플랫폼과 AI 앱. 업무에서 돌아가는 도구를 만듭니다.</p><a href="/apps">AI 앱 쇼케이스 ↗</a></article>
-    </div></div></section>
+            <div class="obang-body">
+                <div class="compass-wrap">
+                    <svg class="compass" id="compass" data-active="c" viewBox="-60 -60 600 600" role="img" aria-label="오방 배치도. 가운데 TenOS-Ko, 동쪽 AI 교육, 남쪽 AX 컨설팅, 서쪽 AI 시스템 구축, 북쪽 AIDC 컨설팅">
+                                <circle class="cp-line" cx="240" cy="240" r="200"/>
+                                <circle class="cp-line cp-dash" cx="240" cy="240" r="128"/>
+                                <circle class="cp-line" cx="240" cy="240" r="240" stroke-opacity=".08"/>
+                                <line class="cp-line" x1="240" y1="-30" x2="240" y2="510"/>
+                                <line class="cp-line" x1="-30" y1="240" x2="510" y2="240"/>
+                                <line class="cp-tick" x1="274.7" y1="43.0" x2="276.1" y2="35.2"/><line class="cp-tick" x1="308.4" y1="52.1" x2="311.1" y2="44.5"/><line class="cp-tick" x1="340.0" y1="66.8" x2="347.0" y2="54.7"/><line class="cp-tick" x1="368.6" y1="86.8" x2="373.7" y2="80.7"/><line class="cp-tick" x1="393.2" y1="111.4" x2="399.3" y2="106.3"/><line class="cp-tick" x1="413.2" y1="140.0" x2="425.3" y2="133.0"/><line class="cp-tick" x1="427.9" y1="171.6" x2="435.5" y2="168.9"/><line class="cp-tick" x1="437.0" y1="205.3" x2="444.8" y2="203.9"/><line class="cp-tick" x1="437.0" y1="274.7" x2="444.8" y2="276.1"/><line class="cp-tick" x1="427.9" y1="308.4" x2="435.5" y2="311.1"/><line class="cp-tick" x1="413.2" y1="340.0" x2="425.3" y2="347.0"/><line class="cp-tick" x1="393.2" y1="368.6" x2="399.3" y2="373.7"/><line class="cp-tick" x1="368.6" y1="393.2" x2="373.7" y2="399.3"/><line class="cp-tick" x1="340.0" y1="413.2" x2="347.0" y2="425.3"/><line class="cp-tick" x1="308.4" y1="427.9" x2="311.1" y2="435.5"/><line class="cp-tick" x1="274.7" y1="437.0" x2="276.1" y2="444.8"/><line class="cp-tick" x1="205.3" y1="437.0" x2="203.9" y2="444.8"/><line class="cp-tick" x1="171.6" y1="427.9" x2="168.9" y2="435.5"/><line class="cp-tick" x1="140.0" y1="413.2" x2="133.0" y2="425.3"/><line class="cp-tick" x1="111.4" y1="393.2" x2="106.3" y2="399.3"/><line class="cp-tick" x1="86.8" y1="368.6" x2="80.7" y2="373.7"/><line class="cp-tick" x1="66.8" y1="340.0" x2="54.7" y2="347.0"/><line class="cp-tick" x1="52.1" y1="308.4" x2="44.5" y2="311.1"/><line class="cp-tick" x1="43.0" y1="274.7" x2="35.2" y2="276.1"/><line class="cp-tick" x1="43.0" y1="205.3" x2="35.2" y2="203.9"/><line class="cp-tick" x1="52.1" y1="171.6" x2="44.5" y2="168.9"/><line class="cp-tick" x1="66.8" y1="140.0" x2="54.7" y2="133.0"/><line class="cp-tick" x1="86.8" y1="111.4" x2="80.7" y2="106.3"/><line class="cp-tick" x1="111.4" y1="86.8" x2="106.3" y2="80.7"/><line class="cp-tick" x1="140.0" y1="66.8" x2="133.0" y2="54.7"/><line class="cp-tick" x1="171.6" y1="52.1" x2="168.9" y2="44.5"/><line class="cp-tick" x1="205.3" y1="43.0" x2="203.9" y2="35.2"/>
+                                <line class="ray r-n" x1="240" y1="240" x2="240" y2="40" stroke="#16181a"/>
+                                <line class="ray r-e" x1="240" y1="240" x2="440" y2="240" stroke="#3a8aec"/>
+                                <line class="ray r-s" x1="240" y1="240" x2="240" y2="440" stroke="#e0482b"/>
+                                <line class="ray r-w" x1="240" y1="240" x2="40" y2="240" stroke="#868c91"/>
 
-    <section class="hub-next" aria-labelledby="hubNextTitle"><div class="hub-shell"><span class="hub-kicker">/ EXPLORE YOUR WAY</span><h2 id="hubNextTitle">어디서 시작할지<br>정하셨나요?</h2><div class="hub-next-links"><a href="/biz"><small>FOR ORGANIZATIONS</small><strong>기업 · 공공기관</strong><span>AX 프로젝트 살펴보기 ↗</span></a><a href="/learn"><small>FOR LEARNERS</small><strong>수강생 · 개인</strong><span>학습 홈 살펴보기 ↗</span></a></div></div></section>
+                                <g class="node n-n"><circle class="node-halo" cx="240" cy="40" r="17" stroke="#16181a"/><circle cx="240" cy="40" r="9" fill="#16181a"/></g>
+                                <g class="node n-e"><circle class="node-halo" cx="440" cy="240" r="17" stroke="#3a8aec"/><circle cx="440" cy="240" r="9" fill="#3a8aec"/></g>
+                                <g class="node n-s"><circle class="node-halo" cx="240" cy="440" r="17" stroke="#e0482b"/><circle cx="240" cy="440" r="9" fill="#e0482b"/></g>
+                                <g class="node n-w"><circle class="node-halo" cx="40" cy="240" r="17" stroke="#868c91"/><circle cx="40" cy="240" r="9" fill="#ffffff" stroke="#16181a" stroke-width="1.5"/></g>
+                                <g class="node n-c"><circle class="node-halo" cx="240" cy="240" r="40" stroke="#f2b200"/><circle cx="240" cy="240" r="26" fill="none" stroke="#f2b200" stroke-width="1.5"/><circle cx="240" cy="240" r="12" fill="#f2b200"/></g>
 
-    <section class="cta" id="contact"><div class="cta-content"><h2>당신의 AX,<br>함께 실험해볼까요?</h2><p>AI 교육, AX·AIDC 컨설팅, TenOS 기반 시스템 구축까지. 지금 필요한 변화부터 함께 설계합니다.</p><div class="hero-cta-group"><a class="btn-primary" href="mailto:leesh@tenai.kr">TEN AI에 이야기하기 ↗</a><a class="btn-secondary" href="/about#profile">회사소개서 보기 ↗</a></div></div></section>
+                                <text class="hz" x="240" y="-6">北</text><text class="hz-s" x="240" y="-30">AIDC</text>
+                                <text class="hz" x="496" y="248">東</text><text class="hz-s" x="496" y="276">EDU</text>
+                                <text class="hz" x="240" y="504">南</text><text class="hz-s" x="240" y="530">AX</text>
+                                <text class="hz" x="-16" y="248">西</text><text class="hz-s" x="-16" y="276">BUILD</text>
+                                <text class="hz-s" x="240" y="300" style="fill:#16181a">TENOS-KO</text>
+                              </svg>
+                </div>
+
+                <ol class="ob-list" id="obList">
+                    <li class="ob-row" data-dir="c" tabindex="0">
+                        <p class="ob-dir label"><i class="dot dot-hwang"></i><span class="hz">中</span>· 黃</p>
+                        <div><h3 class="title-m">TenOS-Ko-28B</h3><p>모든 방위의 한가운데. 네 갈래 일이 모두 이 자체 한국어 모델 위에 섭니다.</p></div>
+                        <div class="ob-foot"><ul class="tags"><li class="pill">28B 파라미터</li><li class="pill">온프레미스 배포</li><li class="pill">망분리 운영</li></ul><a class="text-link" href="/about#tenos">모델 소개 <span class="arr" aria-hidden="true">→</span></a></div>
+                    </li>
+                    <li class="ob-row" data-dir="e" tabindex="0">
+                        <p class="ob-dir label"><i class="dot dot-cheong"></i><span class="hz">東</span>· 靑</p>
+                        <div><h3 class="title-m">AI 교육</h3><p>해가 뜨는 쪽. 처음 써 보는 사람부터 경영진까지, 배움이 여기서 시작됩니다.</p></div>
+                        <div class="ob-foot"><ul class="tags"><li class="pill">AI 리터러시</li><li class="pill">생성형 AI 실무</li><li class="pill">비개발자 바이브코딩</li><li class="pill">경영진 AI 전략</li></ul><a class="text-link" href="/education">교육 아카데미 <span class="arr" aria-hidden="true">→</span></a></div>
+                    </li>
+                    <li class="ob-row" data-dir="s" tabindex="0">
+                        <p class="ob-dir label"><i class="dot dot-jeok"></i><span class="hz">南</span>· 丹</p>
+                        <div><h3 class="title-m">AX 컨설팅</h3><p>볕이 가장 센 쪽. 진단에서 그치지 않고 현장에서 실행합니다.</p></div>
+                        <div class="ob-foot"><ul class="tags"><li class="pill">정부·지자체 AI 자문</li><li class="pill">RAG 기반 LLM 솔루션</li><li class="pill">산업 전환 전략</li></ul><a class="text-link" href="/business">사업영역 <span class="arr" aria-hidden="true">→</span></a></div>
+                    </li>
+                    <li class="ob-row" data-dir="w" tabindex="0">
+                        <p class="ob-dir label"><i class="dot dot-baek"></i><span class="hz">西</span>· 白</p>
+                        <div><h3 class="title-m">AI 시스템 구축</h3><p>거두는 쪽. 전략을 실제로 돌아가는 시스템으로 거둡니다.</p></div>
+                        <div class="ob-foot"><ul class="tags"><li class="pill">RAG 지식 검색</li><li class="pill">문서 작성·검토 자동화</li><li class="pill">AI 콜센터</li><li class="pill">QR 무인 주차</li></ul><a class="text-link" href="/apps">AI 앱 쇼케이스 <span class="arr" aria-hidden="true">→</span></a></div>
+                    </li>
+                    <li class="ob-row" data-dir="n" tabindex="0">
+                        <p class="ob-dir label"><i class="dot dot-heuk"></i><span class="hz">北</span>· 黑</p>
+                        <div><h3 class="title-m">AIDC 컨설팅</h3><p>깊고 고요한 쪽. 데이터센터는 짓기 전에 설계합니다.</p></div>
+                        <div class="ob-foot"><ul class="tags"><li class="pill">GPU 수요·용량 산정</li><li class="pill">전력·냉각 설계 자문</li><li class="pill">보안·망분리 대응</li><li class="pill">RE100 연계</li></ul><a class="text-link" href="/business">사업영역 <span class="arr" aria-hidden="true">→</span></a></div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 처마: 사진에 주석 ============ -->
+    <section class="eaves night" aria-labelledby="eavesTitle">
+        <div class="eaves-frame">
+            <img src="/img/dancheong-eaves.webp" width="1344" height="752" loading="lazy" decoding="async"
+                 alt="궁궐 처마의 단청. 파란 하늘 아래 연꽃무늬를 그린 서까래가 줄지어 있습니다.">
+            <svg class="eaves-notes" viewBox="0 0 1344 752" aria-hidden="true">
+                    <g>
+                      <circle class="en-ring" cx="522" cy="318" r="14"/><circle class="en-dot" cx="522" cy="318" r="3"/>
+                      <g class="en-label">
+                        <polyline class="en-lead" points="532,308 604,258"/>
+                        <rect class="en-box" x="604" y="214" width="142" height="44" rx="6"/>
+                        <text class="en-t" x="616" y="234">연화문</text>
+                        <text class="en-s" x="616" y="250">서까래 마구리</text>
+                      </g>
+                    </g>
+                    <g>
+                      <circle class="en-ring" cx="885" cy="290" r="14"/><circle class="en-dot" cx="885" cy="290" r="3"/>
+                      <g class="en-label">
+                        <polyline class="en-lead" points="894,279 964,156"/>
+                        <rect class="en-box" x="964" y="112" width="134" height="44" rx="6"/>
+                        <text class="en-t" x="976" y="132">수막새</text>
+                        <text class="en-s" x="976" y="148">기와 끝 · 막음</text>
+                      </g>
+                    </g>
+                    <g>
+                      <circle class="en-ring" cx="742" cy="496" r="14"/><circle class="en-dot" cx="742" cy="496" r="3"/>
+                      <g class="en-label">
+                        <polyline class="en-lead" points="752,506 834,566"/>
+                        <rect class="en-box" x="834" y="566" width="200" height="44" rx="6"/>
+                        <text class="en-t" x="846" y="586">뇌록 바탕칠</text>
+                        <text class="en-s" x="846" y="602">나무를 덮는 첫 칠 · 방부</text>
+                      </g>
+                    </g>
+                  </svg>
+            <p class="ai-tag label">AI 생성 이미지</p>
+        </div>
+        <div class="eaves-copy">
+            <div class="wrap">
+                <div class="inner">
+                    <p class="label sec-no">02 · 단청</p>
+                    <h2 class="title-l" id="eavesTitle">나무를 지키려고 칠했습니다</h2>
+                    <p class="lead">단청은 꾸밈이기 전에 비바람과 벌레로부터 나무를 지키는 칠이었습니다. TEN AI는 자체 모델을 기관 안에 설치해, 데이터가 밖으로 나가지 않게 지킵니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 교육 ============ -->
+    <section class="sec" id="learn-intro" aria-labelledby="learnTitle">
+        <div class="wrap">
+            <div class="sec-head">
+                <p class="label sec-no">03 · 교육</p>
+                <h2 class="title-l" id="learnTitle">AI를 배우는 시대에서, AI로 배우는 시대로</h2>
+                <p class="lead">단청은 한 색을 여러 단으로 밝기를 달리해 칠하며 깊이를 냅니다. 배움도 그렇게 한 단씩 쌓습니다.</p>
+            </div>
+
+            <ol class="levels" aria-label="교육 단계">
+                <li style="--a:.28"><span class="label">L1</span><strong>처음 써 보기</strong><span>묻고, 고치고, 다시 묻는 법</span></li>
+                <li style="--a:.52"><span class="label">L2</span><strong>업무에 붙이기</strong><span>문서와 보고, 자료 조사에 바로</span></li>
+                <li style="--a:.76"><span class="label">L3</span><strong>직접 만들기</strong><span>바이브코딩으로 내 업무 도구를</span></li>
+                <li style="--a:1"><span class="label">L4</span><strong>조직에 퍼뜨리기</strong><span>팀의 일하는 방식으로</span></li>
+            </ol>
+
+            <div class="courses">
+                <div class="course"><span class="label num">01</span><h3>바이브코딩</h3><p>개발자가 아니어도 AI에게 말로 시켜 업무 도구를 직접 만듭니다.</p><span class="pill">실무자</span></div>
+                <div class="course"><span class="label num">02</span><h3>생성형 AI 실무</h3><p>문서 작성, 보도자료, 자료 조사처럼 매일 하는 일에 바로 씁니다.</p><span class="pill">전 직원</span></div>
+                <div class="course"><span class="label num">03</span><h3>AI 경영 전략</h3><p>경영진이 AI 도입의 범위와 순서를 판단할 수 있게 돕습니다.</p><span class="pill">경영진</span></div>
+            </div>
+
+            <div class="learn-foot">
+                <p>레벨별 교육 핸드북과 정원훈 박사의 대표 강의가 준비되어 있습니다.</p>
+                <a class="btn btn-ghost" href="/education">교육 아카데미 <span class="arr" aria-hidden="true">→</span></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 두 갈래 입구 ============ -->
+    <section class="sec doors-sec" aria-labelledby="doorsTitle">
+        <div class="wrap">
+            <div class="sec-head">
+                <p class="label sec-no">04 · 입구</p>
+                <h2 class="title-l" id="doorsTitle">어디서 시작할지 고르세요</h2>
+            </div>
+            <div class="doors">
+                <a class="door" href="/biz" data-gate="biz">
+                    <span class="label">For Organizations</span>
+                    <strong>기업 · 공공기관</strong>
+                    <span class="door-desc">AX 진단부터 교육, 구축, 정착까지. 도입을 검토하는 담당자를 위한 회사 홈입니다.</span>
+                    <span class="door-go">회사 홈으로 <span class="arr" aria-hidden="true">→</span></span>
+                </a>
+                <a class="door" href="/learn" data-gate="learn">
+                    <span class="label">For Learners</span>
+                    <strong>수강생 · 개인</strong>
+                    <span class="door-desc">핸드북, 강의, AI 앱까지. 직접 배우고 써 보는 분을 위한 학습 홈입니다.</span>
+                    <span class="door-go">학습 홈으로 <span class="arr" aria-hidden="true">→</span></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ 소식 ============ -->
+    <section class="sec news-sec" id="home-news" aria-labelledby="newsTitle">
+        <div class="wrap">
+            <div class="sec-head sec-head-row">
+                <div>
+                    <p class="label sec-no">05 · 소식</p>
+                    <h2 class="title-l" id="newsTitle">TEN AI의 요즘</h2>
+                </div>
+                <a class="text-link" href="/news">소식 전체 보기 <span class="arr" aria-hidden="true">→</span></a>
+            </div>
+            <div class="news-grid" id="newsGrid" data-limit="3"></div>
+        </div>
+    </section>
+
+    <!-- ============ 개발 중: RUNIQ STUDIO ============ -->
+    <section class="sec lab-sec night" id="lab" aria-labelledby="labTitle">
+        <div class="wrap">
+            <div class="sec-head">
+                <p class="label sec-no">06 · 개발 중인 제품</p>
+            </div>
+            <div class="lab-panel">
+                <figure>
+                    <img src="/img/runiq-concept.webp" width="1168" height="880" loading="lazy" decoding="async"
+                         alt="한옥풍 거실. 왼쪽은 완성된 모습이고, 오른쪽은 같은 방을 파란 선으로 그린 3D 도면입니다.">
+                    <figcaption>개념 이미지입니다. 실제 화면은 출시 때 공개합니다.</figcaption>
+                </figure>
+                <div class="lab-copy">
+                    <p class="flag label"><i></i>개발 중</p>
+                    <div>
+                        <h2 class="lab-name" id="labTitle" translate="no">RUNIQ STUDIO</h2>
+                        <p class="label lab-by">인테리어 상담 스튜디오 · by TEN AI</p>
+                    </div>
+                    <p class="lab-lead">도면이 공간이 되는 곳</p>
+                    <p>상담 자리에서 시안을 보여 주고, 다음 날 제안서를 보냅니다. 상담부터 현장, 매출, 3D까지 한 번 로그인으로 이어집니다.</p>
+                    <ul class="mods label"><li>상담</li><li>현장</li><li>매출</li><li>3D</li></ul>
+                    <a class="btn btn-ghost" href="mailto:leesh@tenai.kr" data-mail-subject="RUNIQ STUDIO 문의">먼저 써 보기 문의 <span class="arr" aria-hidden="true">→</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta" id="contact" aria-labelledby="contactTitle">
+        <div class="wrap cta-grid">
+            <div class="cta-main">
+                <div class="threads" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+                <h2 class="cta-title" id="contactTitle">보고서로 끝나지 않게,<br>현장에서 끝냅니다</h2>
+                <p class="lead">AI 교육, AX·AIDC 컨설팅, TenOS 기반 시스템 구축까지. 지금 필요한 변화부터 함께 설계합니다.</p>
+                <div class="cta-actions">
+                    <a class="btn btn-ink" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 상담 신청 <span class="arr" aria-hidden="true">→</span></a>
+                    <button class="btn btn-ghost" type="button" data-copy-mail>주소 복사</button>
+                </div>
+                <p class="cta-mail"><span class="label">상담 메일</span><a data-mail href="mailto:leesh@tenai.kr" translate="no">leesh@tenai.kr</a></p>
+            </div>
+            <ol class="steps" aria-label="상담 진행 순서">
+                <li><span class="label num">01</span><span>메일로 지금 상황을 알려 주세요</span></li>
+                <li><span class="label num">02</span><span>진단 미팅에서 할 일과 순서를 정합니다</span></li>
+                <li><span class="label num">03</span><span>범위와 일정을 담은 제안서를 드립니다</span></li>
+            </ol>
+        </div>
+    </section>
+
 
     </main>
 
-
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <a href="/" class="logo" aria-label="TenAI 홈">
-                    <span class="brand-logo-frame">
-                        <img class="brand-logo-image" src="/brand/TenAI_lime.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" loading="lazy" decoding="async">
-                    </span>
-                </a>
-                <p>인간의 지혜와 실천이 만나는 10번째 인공지능. 활용 중심의 AI, 실천형 인공지능 생태계를 구축합니다.</p>
+    <footer class="site-foot">
+        <div class="wrap">
+            <div class="foot-threads" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="foot-grid">
+                <div class="foot-brand">
+                    <a href="/" class="logo" aria-label="TEN AI 홈"><span class="logo-mark" role="img" aria-label="TEN AI"></span></a>
+                    <p>인간의 지혜와 실천이 만나는 10번째 인공지능. AI 교육, AX 컨설팅, AIDC 컨설팅, AI 시스템 구축을 한 팀이 이어서 합니다.</p>
+                </div>
+                <div>
+                    <h4 class="foot-title label">배우기</h4>
+                    <ul class="foot-links">
+                        <li><a href="/learn">학습 홈</a></li>
+                        <li><a href="/education">교육 아카데미</a></li>
+                        <li><a href="/education#lectures">정원훈 박사 강의</a></li>
+                        <li><a href="/apps">AI 앱 · 신규앱</a></li>
+                        <li><a href="/membership">멤버십</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="foot-title label">회사</h4>
+                    <ul class="foot-links">
+                        <li><a href="/biz">회사 홈</a></li>
+                        <li><a href="/about">소개 &amp; 철학</a></li>
+                        <li><a href="/business">사업영역</a></li>
+                        <li><a href="/news">뉴스 &amp; 홍보</a></li>
+                        <li><a href="/about#profile">회사소개서</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="foot-title label">연락처</h4>
+                    <ul class="foot-links">
+                        <li><a href="mailto:leesh@tenai.kr" data-mail>leesh@tenai.kr</a></li>
+                        <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
+                        <li><a href="/#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
+                        <li><a href="/admin.html">관리자 콘솔</a></li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h4 class="footer-title">플랫폼</h4>
-                <ul class="footer-links">
-                    <li><a href="/education">교육 아카데미</a></li>
-                    <li><a href="/education#lectures">정원훈 박사 강의</a></li>
-                    <li><a href="/apps">AI 앱 · 신규앱</a></li>
-                    <li><a href="/news">뉴스 &amp; 홍보</a></li>
-                    <li><a href="/membership">멤버십</a></li>
-                </ul>
+            <div class="foot-bottom label">
+                <span>© 2026 TEN AI <span class="foot-legal"><a href="/privacy">개인정보처리방침</a><a href="/terms">이용약관</a></span></span>
+                <span data-set="footerSlogan">AI를 배우다, AI로 실천하다</span>
             </div>
-            <div>
-                <h4 class="footer-title">회사</h4>
-                <ul class="footer-links">
-                    <li><a href="/about">소개 &amp; 철학</a></li>
-                    <li><a href="/about#tenos">TenOS-Ko-28B</a></li>
-                    <li><a href="/business">사업영역</a></li>
-                    <li><a href="/about#profile">회사소개서</a></li>
-                    <li><a href="/biz#contact">파트너십 문의</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="footer-title">연락처</h4>
-                <ul class="footer-links">
-                    <li><a href="mailto:leesh@tenai.kr" data-mail>leesh@tenai.kr</a></li>
-                    <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
-                    <li><a href="/biz#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
-                    <li><a href="/admin.html" style="opacity:0.85;">관리자 콘솔</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p class="footer-copyright">
-                © 2026 TEN AI. All rights reserved.
-                <span class="footer-legal">
-                    <a href="/privacy">개인정보처리방침</a>
-                    <a href="/terms">이용약관</a>
-                </span>
-            </p>
-            <p class="footer-slogan" data-set="footerSlogan">AI를 배우다, AI로 실천하다</p>
         </div>
     </footer>
 
-    <!-- ============ Post Modal ============ -->
+
+    <!-- ============ 게시물 보기 ============ -->
     <div class="video-modal" id="postModal" role="dialog" aria-modal="true" aria-label="게시물 보기">
         <div class="video-modal-box">
             <div class="post-modal-body">
@@ -407,19 +725,18 @@
                 <h3 id="postModalTitle"></h3>
                 <div class="content" id="postModalContent"></div>
             </div>
-            <div class="video-modal-meta" style="border-top:1px solid rgba(255,255,255,0.08);">
+            <div class="video-modal-meta">
                 <div></div>
-                <button class="modal-close" id="postModalClose" aria-label="닫기">✕</button>
+                <button class="modal-close" id="postModalClose" type="button" aria-label="닫기">✕</button>
             </div>
         </div>
     </div>
 
     <div class="toast" id="toast" role="status"></div>
 
-    <!-- 모션 레이어(anime.js + Motion) — 반드시 다른 모듈보다 먼저 실행 -->
-    <script type="module" src="/motion-fx.js"></script>
+    <script type="module" src="/i18n.js"></script>
     <script type="module" src="/data-store.js"></script>
     <script type="module" src="/site.js"></script>
-    <script type="module" src="/ax-lab.js"></script>
+
 </body>
 </html>

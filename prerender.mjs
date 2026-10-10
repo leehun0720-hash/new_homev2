@@ -137,7 +137,7 @@ function handbookHtml(rows, limit) {
                     <div class="hb-body">
                         <div class="hb-meta">
                             <span class="hb-course-tag ${c.tagClass}">${esc(c.name)}</span>
-                            <span class="hb-access ${a.cls}">${a.icon} ${a.label}</span>
+                            <span class="hb-access ${a.cls}">${a.label}</span>
                         </div>
                         <h3 class="hb-title">${esc(h.title)}</h3>
                         <p class="hb-desc">${esc(h.description)}</p>
@@ -209,7 +209,7 @@ function newAppsHtml(rows, limit) {
                 <p class="board-item-desc">${esc(a.oneliner)}</p>
                 <p class="board-item-date">${Number(a.released_at) ? '공개일 · ' + fmtDate(a.released_at) : '공개 준비 중'}</p>
                 <div class="board-item-actions">
-                    <a class="app-btn launch" href="${appLinkUrl(a.launch_url)}" ${a.launch_url ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>⚡ 바로 실행</a>
+                    <a class="app-btn launch" href="${appLinkUrl(a.launch_url)}" ${a.launch_url ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>바로 실행</a>
                     <a class="app-btn gh" href="${appLinkUrl(a.github_url)}" ${a.github_url ? 'target="_blank" rel="noopener"' : 'data-nolink="github"'}>GitHub 보러가기</a>
                 </div>
             </article>`).join('');
@@ -235,7 +235,7 @@ function appHtml(rows, limit) {
                     <p class="app-oneliner">${esc(a.oneliner)}</p>
                     <div class="app-actions">
                         <a class="app-btn launch" href="${safeUrl(a.launch_url)}" ${a.launch_url ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>
-                            ⚡ App Launch
+                            App Launch
                         </a>
                         <a class="app-btn gh" href="${safeUrl(a.github_url)}" ${a.github_url ? 'target="_blank" rel="noopener"' : 'data-nolink="github"'}>GitHub 보러가기</a>
                     </div>
@@ -248,7 +248,7 @@ function newsHtml(rows, limit) {
                 <button class="news-card" data-post="${esc(p.id)}">
                     <div class="news-meta">
                         ${catName('post', p.category) ? `<span class="news-cat ${catTone('post', p.category)}">${esc(catName('post', p.category))}</span>` : ''}
-                        ${p.pinned ? '<span class="news-pin">📌 고정</span>' : ''}
+                        ${p.pinned ? '<span class="news-pin">고정</span>' : ''}
                         <span class="news-date">${fmtDate(p.created_at)}</span>
                     </div>
                     <div class="news-title">${esc(p.title)}</div>
