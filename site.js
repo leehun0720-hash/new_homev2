@@ -78,7 +78,7 @@ function handbookCardHtml(h, i) {
             <div class="hb-body">
                 <div class="hb-meta">
                     <span class="hb-course-tag ${c.tagClass}">${escHtml(c.name)}</span>
-                    <span class="hb-access ${a.cls}">${a.icon} ${a.label}</span>
+                    <span class="hb-access ${a.cls}">${a.label}</span>
                 </div>
                 <h3 class="hb-title">${escHtml(h.title)}</h3>
                 <p class="hb-desc">${escHtml(h.desc)}</p>
@@ -334,13 +334,13 @@ function renderNewApps() {
         <span class="board-flag">${NEW_FLAG_HTML}</span>
         <div class="board-item-head">
             <h4 class="board-item-name">${escHtml(a.name)}</h4>
-            ${catName(a.category) ? `<span class="app-badge ${catTone(a.category)}">${escHtml(catName(a.category))}</span>` : ''}
+            ${catName('app', a.category) ? `<span class="app-badge ${catTone('app', a.category)}">${escHtml(catName('app', a.category))}</span>` : ''}
         </div>
         <p class="board-item-desc">${escHtml(a.oneliner)}</p>
         <p class="board-item-date">${a.releasedAt ? '공개일 · ' + fmtDate(a.releasedAt) : '공개 준비 중'}</p>
         <div class="board-item-actions">
             <a class="app-btn launch" href="${safeUrl(a.launch, '/apps')}" ${a.launch ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>
-                ⚡ 바로 실행
+                바로 실행
             </a>
             <a class="app-btn gh" href="${safeUrl(a.github, '/apps')}" ${a.github ? 'target="_blank" rel="noopener"' : 'data-nolink="github"'}>
                 GitHub 보러가기
@@ -643,7 +643,7 @@ function appCardHtml(a) {
             <p class="app-oneliner">${escHtml(a.oneliner)}</p>
             <div class="app-actions">
                 <a class="app-btn launch" href="${safeUrl(a.launch)}" ${a.launch ? 'target="_blank" rel="noopener"' : 'data-nolink="launch"'}>
-                    ⚡ App Launch
+                    App Launch
                 </a>
                 <a class="app-btn gh" href="${safeUrl(a.github)}" ${a.github ? 'target="_blank" rel="noopener"' : 'data-nolink="github"'}>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.4.6.1.83-.26.83-.58v-2.03c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.76-1.34-1.76-1.08-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.5 1 .1-.78.42-1.31.76-1.6-2.66-.31-5.47-1.34-5.47-5.93 0-1.32.47-2.39 1.24-3.23-.13-.3-.54-1.53.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.65.24 2.88.12 3.18.77.84 1.23 1.9 1.23 3.23 0 4.6-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.23v3.3c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -765,7 +765,7 @@ function loadGsiScript() {
 const GSI_BTN_OPTS = {
     type: 'standard', theme: 'outline', size: 'large',
     text: 'signin_with', shape: 'rectangular',
-    logo_alignment: 'center', locale: 'ko'
+    logo_alignment: 'center', locale: (window.TenI18n && window.TenI18n.lang === 'en') ? 'en' : 'ko'
 };
 
 async function initGoogleButton() {
@@ -1205,7 +1205,7 @@ function newsCardHtml(p) {
         <button class="news-card" data-post="${p.id}">
             <div class="news-meta">
                 ${label ? `<span class="news-cat ${tone}">${escHtml(label)}</span>` : ''}
-                ${p.pinned ? '<span class="news-pin">📌 고정</span>' : ''}
+                ${p.pinned ? '<span class="news-pin">고정</span>' : ''}
                 <span class="news-date">${fmtDate(p.createdAt)}</span>
             </div>
             <div class="news-title">${escHtml(p.title)}</div>
@@ -1405,7 +1405,7 @@ async function refreshMemberUI() {
             '<div class="profile-row"><span class="k">' + k + '</span><span class="v' +
             (k === '등급' && profile.role === 'admin' ? ' role-admin' : '') + '">' + escHtml(v) + '</span></div>'
         ).join('');
-        navLoginBtns.forEach(b => { b.innerHTML = '👤 내 정보'; });
+        navLoginBtns.forEach(b => { b.innerHTML = '내 정보'; });
     } else {
         if (authView) authView.hidden = false;
         if (profileView) profileView.hidden = true;
@@ -1717,6 +1717,40 @@ async function initPromoBanner() {
         door.addEventListener('click', () => save(door.dataset.gate));
     });
 })();
+
+/* ============ 홈: 오방 배치도 ============
+   목록에 손을 대면(마우스·키보드) 배치도의 같은 방위가 켜진다. */
+(function linkCompass() {
+    const compass = document.getElementById('compass');
+    const list = document.getElementById('obList');
+    if (!compass || !list) return;
+    list.querySelectorAll('.ob-row').forEach(row => {
+        const on = () => { compass.dataset.active = row.dataset.dir; };
+        row.addEventListener('mouseenter', on);
+        row.addEventListener('focusin', on);
+    });
+    list.addEventListener('mouseleave', () => { compass.dataset.active = 'c'; });
+})();
+
+/* ============ 상담 메일 주소 복사 ============
+   메일 앱이 없는 PC에서도 주소를 바로 가져갈 수 있게. 복사가 막힌 브라우저는
+   주소를 선택해 둔다. 주소는 관리자 설정(contactEmail)을 따른다. */
+document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-copy-mail]');
+    if (!btn) return;
+    const addr = (window.SITE_SETTINGS && window.SITE_SETTINGS.contactEmail) || 'leesh@tenai.kr';
+    const t = s => (window.TenI18n ? window.TenI18n.t(s) : s);
+    const selectAddr = () => {
+        const el = btn.closest('section')?.querySelector('[data-mail]');
+        if (!el) return;
+        const r = document.createRange(); r.selectNodeContents(el);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    };
+    const done = () => showToast(t('메일 주소를 복사했습니다.'));
+    const fail = () => { selectAddr(); showToast(t('주소를 선택해 두었습니다. 복사해서 써 주세요.')); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).then(done, fail);
+    else fail();
+});
 
 /* ----- 초기 로드 ----- */
 (async function initDynamic() {

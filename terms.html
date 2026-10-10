@@ -36,62 +36,69 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://i.ytimg.com">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/ax-theme.css">
-    <link rel="stylesheet" href="/polish.css">
+    <link rel="stylesheet" href="/fonts/pretendard/pretendard-variable.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&text=%E5%8C%97%E6%9D%B1%E5%8D%97%E8%A5%BF%E4%B8%AD%E5%8D%81%E9%9D%91%E4%B8%B9%E9%BB%83%E7%99%BD%E9%BB%91%E7%B6%A0&display=swap">
+    <link rel="stylesheet" href="/tenai.css">
     <script>
-        /* JS가 살아있음을 즉시 표시 — 진입 애니메이션의 초기 상태를 CSS가 잡아준다.
-           motion-fx.js 가 제때 부팅하지 못하면 안전망(fx-fallback)으로 콘텐츠를 드러낸다. */
-        document.documentElement.classList.add('js-anim');
-        window.addEventListener('load', () => setTimeout(() => {
-            if (!document.documentElement.classList.contains('fx-ready')) {
-                document.documentElement.classList.add('fx-fallback');
+        /* 영어를 골라 둔 사람에게는 한국어가 잠깐 비치지 않도록, 번역이 끝날 때까지 본문을 가린다.
+           i18n.js 가 끝나면 걷어내고, 그마저 늦으면 tenai.css 가 1.5초 뒤 저절로 드러낸다. */
+        try {
+            if (localStorage.getItem('tenai_lang') === 'en' || /[?&]lang=en\b/.test(location.search)) {
+                document.documentElement.classList.add('i18n-pending');
+                document.documentElement.lang = 'en';
             }
-        }, 1500));
+        } catch (e) {}
     </script>
+    <link rel="preconnect" href="https://i.ytimg.com">
 </head>
 <body>
     <a class="skip-link" href="#main">본문 바로가기</a>
 
     <!-- ============ Navigation ============ -->
     <nav id="nav" aria-label="주 메뉴" data-mode="biz">
-        <a href="/biz" class="logo" aria-label="TEN AI 회사 홈">
-            <span class="brand-logo-frame">
-                <img class="brand-logo-image" src="/brand/TenAI_ink.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" decoding="async">
-            </span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="/business">사업영역</a></li>
-            <li><a href="/about">회사소개</a></li>
-            <li><a href="/news">소식</a></li>
-            <li><a href="/biz#contact">문의</a></li>
-        </ul>
-        <div class="nav-right">
-            <a class="mode-switch" href="/learn" title="AI 학습 쪽으로 이동"><span class="mode-switch-label">AI 학습</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-            <a class="nav-login nav-contact" href="/biz#contact">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/></svg>
-                문의하기
-            </a>
-            <button class="mobile-menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false">
-                <span></span><span></span><span></span>
-            </button>
+        <div class="nav-inner">
+            <a href="/" class="logo" aria-label="TEN AI 홈"><span class="logo-mark" role="img" aria-label="TEN AI"></span></a>
+            <ul class="nav-links">
+                <li><a href="/business">사업영역</a></li>
+                <li><a href="/education">교육</a></li>
+                <li><a class="nav-new" href="/apps">AI 앱<span class="nav-new-dot" aria-hidden="true"></span><span class="visually-hidden">(새 앱 있음)</span></a></li>
+                <li><a href="/news">소식</a></li>
+                <li><a href="/about">회사소개</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="lang-switch" role="group" aria-label="언어 선택" translate="no">
+                    <button type="button" data-set-lang="ko" aria-pressed="true" class="is-on">KO</button>
+                    <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+                </div>
+                <button class="nav-login" type="button" data-login>로그인</button>
+                <a class="btn btn-light btn-sm nav-cta" href="#contact">상담 신청</a>
+                <button class="mobile-menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileMenu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
     </nav>
 
-    <!-- Mobile menu overlay -->
     <div class="mobile-menu" id="mobileMenu">
+        <a href="/">홈</a>
         <a href="/business">사업영역</a>
-        <a href="/about">회사소개</a>
+        <a href="/education">교육</a>
+        <a href="/apps">AI 앱</a>
         <a href="/news">소식</a>
-        <a href="/biz#contact">문의</a>
-        <a class="mode-switch mode-switch-mobile" href="/learn">AI 학습로 이동</a>
-        <a class="nav-login nav-contact" href="/biz#contact">문의하기</a>
+        <a href="/about">회사소개</a>
+        <div class="mobile-menu-foot">
+            <div class="lang-switch" role="group" aria-label="언어 선택" translate="no">
+                <button type="button" data-set-lang="ko" aria-pressed="true" class="is-on">KO</button>
+                <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+            </div>
+            <button class="nav-login" type="button" data-login>로그인 / 회원가입</button>
+            <a class="btn btn-light" href="#contact">상담 신청</a>
+        </div>
     </div>
+
 
     <main id="main">
 
@@ -106,6 +113,7 @@
 
     <section class="legal">
         <div class="legal-inner animate-on-scroll">
+            <p class="legal-note en-only" lang="en">This English version is a convenience translation. If it differs from the Korean original, the Korean version prevails.</p>
 
             <p class="legal-updated">시행일 2026년 9월 18일</p>
 
@@ -195,89 +203,86 @@
             <a href="mailto:leesh@tenai.kr">leesh@tenai.kr</a> 로 문의 주시면 성실히 협의하겠습니다.</p>
 
             <h2>문의</h2>
-            <table class="legal-table">
+            <div class="legal-scroll"><table class="legal-table">
                 <tbody>
                     <tr><th>상호</th><td>TEN AI</td></tr>
                     <tr><th>주소</th><td>서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</td></tr>
                     <tr><th>이메일</th><td><a href="mailto:leesh@tenai.kr">leesh@tenai.kr</a></td></tr>
                 </tbody>
-            </table>
+            </table></div>
         </div>
     </section>
 
 
     <!-- ============ 문의 CTA ============ -->
-    <section class="cta" id="contact">
-        <div class="cta-bg" aria-hidden="true"></div>
-        <div class="cta-content animate-on-scroll">
-            <h2>AI가 삶에 닿을 때,<br>혁신은 현실이 됩니다</h2>
-            <p>TEN AI와 함께 실천적 지능의 시대를 열어가세요.<br>교육, 컨설팅, 플랫폼 구축까지 맞춤형 솔루션을 제공합니다.</p>
-            <div class="hero-cta-group">
-                <a href="mailto:leesh@tenai.kr" class="btn-primary" data-mail>
-                    상담 신청하기
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-                <a href="/education" class="btn-secondary">교육 과정 둘러보기</a>
+    <section class="cta" id="contact" aria-labelledby="contactTitle">
+        <div class="wrap cta-grid">
+            <div class="cta-main">
+                <div class="threads" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+                <h2 class="cta-title" id="contactTitle">AI가 삶에 닿을 때,<br>혁신은 현실이 됩니다</h2>
+                <p class="lead">TEN AI와 함께 실천적 지능의 시대를 열어가세요. 교육, 컨설팅, 플랫폼 구축까지 맞춤형 솔루션을 제공합니다.</p>
+                <div class="cta-actions">
+                    <a class="btn btn-ink" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 상담 신청 <span class="arr" aria-hidden="true">→</span></a>
+                    <button class="btn btn-ghost" type="button" data-copy-mail>주소 복사</button>
+                </div>
+                <p class="cta-mail"><span class="label">상담 메일</span><a data-mail href="mailto:leesh@tenai.kr" translate="no">leesh@tenai.kr</a></p>
             </div>
+            <ol class="steps" aria-label="상담 진행 순서">
+                <li><span class="label num">01</span><span>메일로 지금 상황을 알려 주세요</span></li>
+                <li><span class="label num">02</span><span>진단 미팅에서 할 일과 순서를 정합니다</span></li>
+                <li><span class="label num">03</span><span>범위와 일정을 담은 제안서를 드립니다</span></li>
+            </ol>
         </div>
     </section>
 
 </main>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <a href="/" class="logo" aria-label="TenAI 홈">
-                    <span class="brand-logo-frame">
-                        <img class="brand-logo-image" src="/brand/TenAI_lime.png" alt="TenAI AX HUB PLATFORM" width="1040" height="440" loading="lazy" decoding="async">
-                    </span>
-                </a>
-                <p>인간의 지혜와 실천이 만나는 10번째 인공지능. 활용 중심의 AI, 실천형 인공지능 생태계를 구축합니다.</p>
+    <footer class="site-foot">
+        <div class="wrap">
+            <div class="foot-threads" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="foot-grid">
+                <div class="foot-brand">
+                    <a href="/" class="logo" aria-label="TEN AI 홈"><span class="logo-mark" role="img" aria-label="TEN AI"></span></a>
+                    <p>인간의 지혜와 실천이 만나는 10번째 인공지능. AI 교육, AX 컨설팅, AIDC 컨설팅, AI 시스템 구축을 한 팀이 이어서 합니다.</p>
+                </div>
+                <div>
+                    <h4 class="foot-title label">배우기</h4>
+                    <ul class="foot-links">
+                        <li><a href="/learn">학습 홈</a></li>
+                        <li><a href="/education">교육 아카데미</a></li>
+                        <li><a href="/education#lectures">정원훈 박사 강의</a></li>
+                        <li><a href="/apps">AI 앱 · 신규앱</a></li>
+                        <li><a href="/membership">멤버십</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="foot-title label">회사</h4>
+                    <ul class="foot-links">
+                        <li><a href="/biz">회사 홈</a></li>
+                        <li><a href="/about">소개 &amp; 철학</a></li>
+                        <li><a href="/business">사업영역</a></li>
+                        <li><a href="/news">뉴스 &amp; 홍보</a></li>
+                        <li><a href="/about#profile">회사소개서</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="foot-title label">연락처</h4>
+                    <ul class="foot-links">
+                        <li><a href="mailto:leesh@tenai.kr" data-mail>leesh@tenai.kr</a></li>
+                        <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
+                        <li><a href="/#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
+                        <li><a href="/admin.html">관리자 콘솔</a></li>
+                    </ul>
+                </div>
             </div>
-            <div>
-                <h4 class="footer-title">플랫폼</h4>
-                <ul class="footer-links">
-                    <li><a href="/education">교육 아카데미</a></li>
-                    <li><a href="/education#lectures">정원훈 박사 강의</a></li>
-                    <li><a href="/apps">AI 앱 · 신규앱</a></li>
-                    <li><a href="/news">뉴스 &amp; 홍보</a></li>
-                    <li><a href="/membership">멤버십</a></li>
-                </ul>
+            <div class="foot-bottom label">
+                <span>© 2026 TEN AI <span class="foot-legal"><a href="/privacy">개인정보처리방침</a><a href="/terms">이용약관</a></span></span>
+                <span data-set="footerSlogan">AI를 배우다, AI로 실천하다</span>
             </div>
-            <div>
-                <h4 class="footer-title">회사</h4>
-                <ul class="footer-links">
-                    <li><a href="/about">소개 &amp; 철학</a></li>
-                    <li><a href="/about#tenos">TenOS-Ko-28B</a></li>
-                    <li><a href="/business">사업영역</a></li>
-                    <li><a href="/about#profile">회사소개서</a></li>
-                    <li><a href="#contact">파트너십 문의</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="footer-title">연락처</h4>
-                <ul class="footer-links">
-                    <li><a href="mailto:leesh@tenai.kr" data-mail>leesh@tenai.kr</a></li>
-                    <li><a href="https://www.youtube.com/@smauelchung" target="_blank" rel="noopener" data-yt>YouTube 채널</a></li>
-                    <li><a href="#contact" data-set="address">서울시 서초구 서초동 1604-19 (대호프레조빌 202호)</a></li>
-                    <li><a href="/admin.html" style="opacity:0.85;">관리자 콘솔</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p class="footer-copyright">
-                © 2026 TEN AI. All rights reserved.
-                <span class="footer-legal">
-                    <a href="/?home">현관</a>
-                    <a href="/privacy">개인정보처리방침</a>
-                    <a href="/terms">이용약관</a>
-                </span>
-            </p>
-            <p class="footer-slogan" data-set="footerSlogan">AI를 배우다, AI로 실천하다</p>
         </div>
     </footer>
 
-    <!-- ============ Post Modal ============ -->
+    <!-- ============ 게시물 보기 ============ -->
     <div class="video-modal" id="postModal" role="dialog" aria-modal="true" aria-label="게시물 보기">
         <div class="video-modal-box">
             <div class="post-modal-body">
@@ -285,17 +290,16 @@
                 <h3 id="postModalTitle"></h3>
                 <div class="content" id="postModalContent"></div>
             </div>
-            <div class="video-modal-meta" style="border-top:1px solid rgba(255,255,255,0.08);">
+            <div class="video-modal-meta">
                 <div></div>
-                <button class="modal-close" id="postModalClose" aria-label="닫기">✕</button>
+                <button class="modal-close" id="postModalClose" type="button" aria-label="닫기">✕</button>
             </div>
         </div>
     </div>
 
     <div class="toast" id="toast" role="status"></div>
 
-    <!-- 모션 레이어(anime.js + Motion) — 반드시 다른 모듈보다 먼저 실행 -->
-    <script type="module" src="/motion-fx.js"></script>
+    <script type="module" src="/i18n.js"></script>
     <script type="module" src="/data-store.js"></script>
     <script type="module" src="/site.js"></script>
 </body>
