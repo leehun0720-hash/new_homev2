@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS = {
     heroBadge: 'The 10th Intelligence for Human Progress',
     heroTitle1: 'AI를 배우는 시대에서,',
     heroTitle2: 'AI로 배우는 시대로',
-    heroSubtitle: '인간의 지혜와 실천이 만나는 10번째 인공지능, TEN AI.\n과정별·레벨별 교육 핸드북부터 대표 강의, 실전 AI 앱까지 —\n실천형 인공지능 생태계를 한곳에서 만나보세요.',
+    heroSubtitle: '인간의 지혜와 실천이 만나는 10번째 인공지능, TEN AI. 과정별·레벨별 교육 핸드북부터 대표 강의, 실전 AI 앱까지 한곳에서 만나보세요.',
     contactEmail: 'leesh@tenai.kr',
     address: '서울시 서초구 서초동 1604-19 (대호프레조빌 202호)',
     youtubeUrl: 'https://www.youtube.com/@smauelchung',
@@ -343,6 +343,34 @@ async function getSettings() {
         }
     }
     return Object.assign({}, DEFAULT_SETTINGS, LS.read('tenai_settings', {}));
+}
+
+/* 공개 페이지가 쓰는 설정만 골라 받는다.
+   설정 행에는 관리자 콘솔이 쓰는 큰 값(logoImage: base64 PNG, 약 12만 자)도 함께 들어 있어
+   통째로 받으면 쪽마다 약 118KB를 더 받게 된다. 쓰는 키만 JSON 경로로 꺼낸다.
+   (관리자 콘솔은 그대로 getSettings 로 전체를 읽고 쓴다 — 저장할 때 다른 키를 지우지 않도록) */
+const PUBLIC_SETTING_KEYS = ['heroBadge', 'heroTitle1', 'heroTitle2', 'heroSubtitle', 'contactEmail', 'address', 'youtubeUrl', 'footerSlogan'];
+async function getPublicSettings() {
+    const out = Object.assign({}, DEFAULT_SETTINGS);
+    delete out.adminPass;
+    const take = src => {
+        for (const k of PUBLIC_SETTING_KEYS) {
+            if (src && src[k] != null && src[k] !== '') out[k] = src[k];
+        }
+    };
+    if (mode === 'supabase') {
+        try {
+            const select = PUBLIC_SETTING_KEYS.map(k => `${k}:data->>${k}`).join(',');
+            const { data, error } = await sb.from('site').select(select).eq('id', 'settings').maybeSingle();
+            if (error) throw error;
+            take(data);
+        } catch (e) {
+            console.warn('[TenStore] 공개 설정 로드 실패 — 기본값으로 표시합니다', e);
+        }
+        return out;
+    }
+    take(LS.read('tenai_settings', {}));
+    return out;
 }
 
 async function saveSettings(patch) {
@@ -1066,7 +1094,7 @@ window.TenStore = {
     /* 홍보 배너 */
     listBanners, pickLiveBanner, saveBanner, deleteBanner,
     uploadBannerImage, deleteBannerImage,
-    getSettings, saveSettings,
+    getSettings, getPublicSettings, saveSettings,
     listPosts, savePost, deletePost,
     listQna, submitQuestion, updateQna, deleteQna,
     signInAdmin, signOutAdmin, getAdminSession,

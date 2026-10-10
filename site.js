@@ -1163,36 +1163,50 @@ const ytThumbUrl = watchUrl => {
 const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 window.SITE_SETTINGS = null;
 
-/* ----- 설정 반영 (문구, 연락처) ----- */
+/* ----- 설정 반영 (문구, 연락처) -----
+   관리자 콘솔 '사이트 설정'에서 저장한 값을 화면에 옮긴다.
+   공개 페이지에 필요한 키만 받는다 (TenStore.getPublicSettings).
+
+   문구(data-set)
+     · 내용이 같으면 손대지 않는다. 비교할 때 빈칸·줄바꿈 차이는 무시한다.
+       그래야 HTML 쪽 굵은 글씨(<strong>) 같은 꾸밈이 매번 지워지지 않는다.
+     · 영어로 보는 중에는 문구를 건드리지 않는다. 영어 문구는 번역 사전이 맡는다.
+       한국어로 돌아오면(tenai:lang) 다시 반영한다.
+   링크(data-mail · data-mail-subject · data-yt)는 언어와 상관없이 늘 반영한다. */
+let SETTINGS_LOAD = null;
+const sameText = (a, b) => String(a == null ? '' : a).replace(/\s+/g, ' ').trim() === String(b == null ? '' : b).replace(/\s+/g, ' ').trim();
+
 async function applySettings() {
-    const s = await TenStore.getSettings();
+    if (!SETTINGS_LOAD) SETTINGS_LOAD = TenStore.getPublicSettings();
+    const s = await SETTINGS_LOAD;
     window.SITE_SETTINGS = s;
 
-    // 문구류 (data-set 훅)
-    document.querySelectorAll('[data-set]').forEach(el => {
-        const key = el.dataset.set;
-        if (!(key in s) || s[key] == null || s[key] === '') return;
-        // 값이 그대로면 손대지 않는다 — 모션 레이어(motion-fx.js)가 분할해 둔 글자 구조를 지키기 위함.
-        // 분할된 요소는 textContent 가 중복되므로 원본 텍스트를 data-fx-text 에서 읽는다.
-        const current = el.dataset.fxText != null ? el.dataset.fxText : el.textContent;
-        if (key !== 'heroSubtitle' && current === String(s[key])) return;
-        delete el.dataset.fxText;
-        if (key === 'heroSubtitle') {
-            el.innerHTML = escHtml(s[key]).replace(/\n/g, '<br>');
-        } else {
-            el.textContent = s[key];
-        }
-    });
+    if (document.documentElement.dataset.lang !== 'en') {
+        document.querySelectorAll('[data-set]').forEach(el => {
+            const key = el.dataset.set;
+            const value = s[key];
+            if (value == null || value === '') return;
+            if (sameText(el.textContent, value)) return;
+            if (key === 'heroSubtitle') el.innerHTML = escHtml(value).replace(/\n/g, '<br>');
+            else el.textContent = value;
+        });
+    }
 
-    // 링크류
-    document.querySelectorAll('[data-mail]').forEach(a => { a.href = 'mailto:' + s.contactEmail; });
-    document.querySelectorAll('[data-mail]:not(.btn-primary)').forEach(a => { a.textContent = s.contactEmail; });
-    // 제목이 붙는 문의 링크 — 주소는 관리자 설정을 따르고, 제목과 글자는 그대로 둔다
-    document.querySelectorAll('[data-mail-subject]').forEach(a => {
-        a.href = 'mailto:' + s.contactEmail + '?subject=' + encodeURIComponent(a.dataset.mailSubject);
-    });
-    document.querySelectorAll('[data-yt]').forEach(a => { a.href = s.youtubeUrl; });
+    if (s.contactEmail) {
+        document.querySelectorAll('[data-mail]').forEach(a => { a.href = 'mailto:' + s.contactEmail; });
+        document.querySelectorAll('[data-mail]:not(.btn-primary)').forEach(a => { a.textContent = s.contactEmail; });
+        // 제목이 붙는 문의 링크 — 주소는 관리자 설정을 따르고, 제목과 글자는 그대로 둔다
+        document.querySelectorAll('[data-mail-subject]').forEach(a => {
+            a.href = 'mailto:' + s.contactEmail + '?subject=' + encodeURIComponent(a.dataset.mailSubject);
+        });
+    }
+    if (s.youtubeUrl && /^https?:\/\//i.test(s.youtubeUrl)) {
+        document.querySelectorAll('[data-yt]').forEach(a => { a.href = s.youtubeUrl; });
+    }
 }
+document.addEventListener('tenai:lang', e => {
+    if (e.detail && e.detail.lang === 'ko') applySettings().catch(err => console.warn('설정 반영 실패', err));
+});
 
 /* ----- 소식 (게시물) ----- */
 let NEWS_CACHE = [];
@@ -1798,6 +1812,9 @@ document.addEventListener('click', e => {
    사용자가 버튼을 누르려는 순간에 버튼이 바뀐다 — 가장 나쁜 때다.
    따로 떼어 처음부터 나란히 달리게 한다. */
 initGoogleButton().catch(e => console.warn('구글 버튼 준비 실패', e));
+
+/* 관리자 설정도 데이터 조회 줄과 따로 달린다 — 문구와 연락처만 바꾸므로 기다릴 이유가 없다 */
+applySettings().catch(e => console.warn('설정 반영 실패', e));
 
 // 외부 리더보드는 독립적으로 조회한다 — 지연되거나 실패해도 본문 로딩과 무관
 renderTenosRank().catch(e => console.warn('K-AI 리더보드 순위 조회 실패', e));
