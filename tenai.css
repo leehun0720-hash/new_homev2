@@ -893,12 +893,8 @@ main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.home-hero) 
   padding: clamp(24px, 2.6vw, 34px); border: 1px solid var(--hair); border-radius: var(--radius); background: var(--white);
 }
 .biz-card[style] { background: var(--white) !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; }
-.biz-icon { font-size: 0; line-height: 0; }
-.biz-icon::before { content: counter(biz, decimal-leading-zero); font: 500 12px/1.4 var(--mono); letter-spacing: .14em; color: var(--ink-3); }
-.biz-card::after { content: ""; position: absolute; top: clamp(24px, 2.6vw, 34px); right: clamp(24px, 2.6vw, 34px); width: 9px; height: 9px; border-radius: 50%; background: var(--cheong); }
-.biz-card:nth-child(4n+2)::after { background: var(--jeok); }
-.biz-card:nth-child(4n+3)::after { background: var(--ink); }
-.biz-card:nth-child(4n+4)::after { background: var(--nok); }
+.biz-icon { display: block; width: 64px; height: 64px; margin: -6px 0 2px -8px; font-size: 0; line-height: 0; }
+.biz-card::after { content: counter(biz, decimal-leading-zero); position: absolute; top: clamp(24px, 2.6vw, 34px); right: clamp(24px, 2.6vw, 34px); font: 500 12px/1.4 var(--mono); letter-spacing: .14em; color: var(--ink-3); }
 .biz-title { font-size: clamp(21px, 1.9vw, 25px); letter-spacing: -0.03em; }
 .biz-subtitle { color: var(--ink); font-weight: 600; }
 .biz-desc { color: var(--ink-2); font-size: 15px; }
@@ -1192,3 +1188,33 @@ main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.home-hero) 
 .en-only { display: none; }
 html[data-lang="en"] .en-only { display: block; }
 html[data-lang="en"] .tenos-rank-badge em::before { content: "#"; }
+
+/* ---------------------------------------------------------------------
+   Lottie 애니메이션 자리 (lottie-fx.js · public/lottie/*.json)
+   자리는 미리 잡아 두어 그림이 늦게 와도 글이 밀리지 않는다.
+   --------------------------------------------------------------------- */
+[data-lottie] svg { display: block; }
+
+/* 오방 다섯 갈래: 방위 표시 아래에 그 갈래의 그림 */
+.ob-icon { display: block; grid-column: 1; grid-row: 1 / span 2; align-self: start; width: 64px; height: 64px; margin: 40px 0 0 -10px; pointer-events: none; }
+@media (max-width: 899px) {
+  .ob-row { grid-template-columns: 52px minmax(0, 1fr); column-gap: 14px; }
+  .ob-row .ob-icon { grid-column: 1; grid-row: 1; width: 52px; height: 52px; margin: -8px 0 0 -6px; }
+  .ob-row .ob-dir { grid-column: 2; grid-row: 1; align-self: center; padding-top: 0; }
+  .ob-row > div { grid-column: 1 / -1; }
+}
+
+/* 두 갈래 입구 */
+.door-icon { display: block; width: 72px; height: 72px; margin: -10px 0 -4px -12px; pointer-events: none; }
+
+/* RUNIQ STUDIO: 방 한 칸이 도면에서 완성되기까지 */
+.lab-anim { width: 160px; max-width: 100%; aspect-ratio: 4 / 3; margin: -8px 0 -6px -26px; pointer-events: none; }
+
+/* 쪽 머리의 겹 원: 그림이 준비되면 CSS 고리 대신 그려지는 고리 */
+.ph-rings { position: absolute; z-index: -1; right: -220px; top: -260px; width: 720px; height: 720px; pointer-events: none; }
+.has-lottie .page-head:has(> .ph-rings:not(.lottie-failed))::before { display: none; }
+@media (max-width: 720px) { .ph-rings { right: -360px; top: -340px; } }
+
+/* 상담 구역의 다섯 실 */
+.threads.is-lottie { display: block; width: 56px; height: 22px; }
+.threads.is-lottie i { display: none; }
