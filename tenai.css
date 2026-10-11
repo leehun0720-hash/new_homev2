@@ -1373,3 +1373,24 @@ html[data-lang="en"] .tenos-rank-badge em::before { content: "#"; }
   .inq-panel { width: 100%; max-height: 94dvh; padding: 22px 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: var(--radius) var(--radius) 0 0; transform: translateY(24px); }
   .inq-row { grid-template-columns: 1fr; }
 }
+
+/* ---------------------------------------------------------------------
+   움직임 켜기 · 멈춤 (motion.js · 첫 화면 오른쪽 위)
+   --------------------------------------------------------------------- */
+.motion-toggle {
+  position: absolute; z-index: 2; top: 16px;
+  right: max(var(--gutter), calc((100% - var(--wrap)) / 2 + var(--gutter)));
+  display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 14px 0 12px;
+  border: 1px solid var(--hair-night); border-radius: 999px; background: rgba(15, 16, 17, .55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: var(--on-night-2); font: 500 11.5px/1 var(--mono); letter-spacing: .08em; cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.motion-toggle:hover, .motion-toggle:focus-visible { border-color: var(--on-night); color: var(--on-night); }
+.motion-ico { width: 12px; height: 12px; fill: currentColor; }
+.motion-toggle .ico-play { display: none; }
+.motion-toggle[data-state="off"] .ico-play { display: inline; }
+.motion-toggle[data-state="off"] .ico-pause { display: none; }
+/* 멈춘 상태에서는 켜기 단추를 조금 더 눈에 띄게 */
+.motion-toggle[data-state="off"] { color: var(--on-night); border-color: var(--hair-night-2); }
+@media (max-width: 600px) { .motion-toggle { top: 10px; right: 12px; min-height: 30px; padding: 0 11px 0 10px; font-size: 10.5px; } }

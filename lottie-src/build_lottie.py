@@ -45,6 +45,19 @@ def A(keys, ease=OUT_EASE):
         kf.append(k)
     return {'a': 1, 'k': kf}
 
+def AS(keys):
+    """keys: [(프레임, 값, 다음 키까지의 가속), ...] — 구간마다 가속이 다를 때"""
+    kf = []
+    for i, (t, v, ease) in enumerate(keys):
+        vv = v if isinstance(v, list) else [v]
+        k = {'t': t, 's': vv}
+        if i < len(keys) - 1:
+            n = len(vv)
+            k['o'] = {'x': [ease[0]] * n, 'y': [ease[1]] * n}
+            k['i'] = {'x': [ease[2]] * n, 'y': [ease[3]] * n}
+        kf.append(k)
+    return {'a': 1, 'k': kf}
+
 # ---------------------------------------------------------------- 도형
 def path(pts, closed=False):
     n = len(pts)
@@ -278,7 +291,8 @@ def threads():
 # 도면(1440 × 900)의 (720, 520) 에 0.72 배로 놓인다 (tenai.css .hero-rosette).
 #   0 ~ 170f   꽃잎이 안쪽부터 차례로 그려진다
 #   170f ~     20초 되풀이 (1200f)
-#              · 바깥 큰 꽃잎은 시계 방향 90°, 안쪽 작은 꽃잎은 반대로 90°, 꽃술은 반대로 60°
+#   0 ~ 140f   그와 함께 꽃 전체가 작게 돌며 피어난다 (바깥 -60° → 0, 안쪽 +60° → 0, 70% → 100%)
+#              · 바깥 큰 꽃잎은 시계 방향 180°, 안쪽 작은 꽃잎은 반대로 180°, 꽃술은 반대로 120°
 #                (여덟 겹 · 열두 겹 대칭이라 되풀이의 이음매가 보이지 않는다)
 #              · 큰 꽃잎의 네 겹 색이 바깥에서 안으로 한 칸씩 스민다 — 白 丹 黃 靑 綠 차례.
 #                꽃잎마다 25f 씩 늦게 바뀌어 색 물결이 꽃을 따라 돈다
@@ -289,7 +303,8 @@ def threads():
 # 여기를 바꾸면 그쪽 상수도 같이 바꾼다.
 ROS_C = 360
 ROS_LOOP0, ROS_LOOP_LEN = 170, 1200
-ROS_SPIN_OUT, ROS_SPIN_IN, ROS_SPIN_STAMEN = 90, -90, -60
+ROS_SPIN_OUT, ROS_SPIN_IN, ROS_SPIN_STAMEN = 180, -180, -120
+ROS_BLOOM = 140                                          # 피어나기가 끝나는 프레임 (hero-callouts.js BLOOM)
 ROS_SEQ = [NIGHT_FG, JEOK, HWANG, CHEONG, NOK]          # 큰 꽃잎 색 차례 (겹 L 의 처음 색 = ROS_SEQ[L])
 ROS_STEP, ROS_HOLD, ROS_PHASE = 240, 180, 25             # 한 칸 240f 중 180f 머물고 60f 동안 바뀐다
 ROS_SEQ_S = [NOK, CHEONG, HWANG]                          # 작은 꽃잎 안쪽
@@ -331,6 +346,9 @@ def rosette():
     END = L0 + LN
     t_draw = lambda i: (12 + 5.4 * i, 12 + 5.4 * i + 96)          # CSS: i×90ms + 200ms, 1.6s
     spin = lambda deg: A([(0, 0), (L0, 0), (END, deg)], LINEAR)
+    # 돌며 피어나기 → 잠깐 멈춤 → 되풀이 회전
+    bloom_spin = lambda start, deg: AS([(0, start, OUT_EASE), (ROS_BLOOM, 0, LINEAR), (L0, 0, LINEAR), (END, deg, LINEAR)])
+    bloom_scale = AS([(0, [70, 70, 100], BACK), (ROS_BLOOM, [100, 100, 100], LINEAR), (END, [100, 100, 100], LINEAR)])
     big_scale = [1.0, 0.78, 0.56, 0.34]                            # 겹 L: 바깥 → 안
 
     outer, inner = [], []
@@ -359,20 +377,20 @@ def rosette():
             ok += [(st, 0), (st + 6, 100), (st + 46, 100), (st + 60, 0)]
             off += [(st, 0), (st + 60, 360)]
         ok = sorted(set(ok)); off = sorted(set(off))
-        glow = [(t, v * 0.22) for t, v in ok]
-        sig_trim = {'ty': 'tm', 's': S(0), 'e': S(15), 'o': A(off, LINEAR), 'm': 1}
+        glow = [(t, v * 0.3) for t, v in ok]
+        sig_trim = {'ty': 'tm', 's': S(0), 'e': S(16), 'o': A(off, LINEAR), 'm': 1}
         signals.append(group([_petal(True, 1.0, (0, -170), 45 * m), sig_trim,
-                              stroke(HWANG, 2.8, A(ok, LINEAR)),            # 신호
-                              stroke(HWANG, 9, A(glow, LINEAR))], nm=f'sig{m}'))   # 번짐
+                              stroke(HWANG, 3.2, A(ok, LINEAR)),            # 신호
+                              stroke(HWANG, 11, A(glow, LINEAR))], nm=f'sig{m}'))   # 번짐
 
     # 코어 파동 (5초마다)
     rip_d, rip_o = [(0, [84, 84])], [(0, 0)]
     for n in range(0, 5):
         st = L0 + 300 * n
-        rip_d += [(st, [84, 84]), (st + 150, [600, 600])]
-        rip_o += [(st, 0), (st + 1, 55), (st + 150, 0)]
+        rip_d += [(st, [84, 84]), (st + 150, [640, 640])]
+        rip_o += [(st, 0), (st + 1, 75), (st + 150, 0)]
     ripple = group([{'ty': 'el', 'p': S([ROS_C, ROS_C]), 's': A(rip_d, OUT_EASE), 'd': 1},
-                    stroke(HWANG, 1.5, A(rip_o, OUT_EASE))], nm='ripple')
+                    stroke(HWANG, 2, A(rip_o, OUT_EASE))], nm='ripple')
 
     # 꽃술 열두 개 — 한 층으로 묶어 함께 돈다
     stamens = []
@@ -385,9 +403,9 @@ def rosette():
     L = [layer('core', [group([ell(26), fill(HWANG)], tr(s=pop(70, 88)))], p=(ROS_C, ROS_C)),
          layer('stamens', stamens, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=spin(ROS_SPIN_STAMEN)),
          layer('core-ring', [group([ell(84, ROS_C, ROS_C), draw(a, b), stroke(HWANG, 1.2)])]),
-         layer('signals', signals, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=spin(ROS_SPIN_OUT)),
-         layer('flower-in', inner, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=spin(ROS_SPIN_IN)),
-         layer('flower-out', outer, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=spin(ROS_SPIN_OUT)),
+         layer('signals', signals, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=bloom_spin(-60, ROS_SPIN_OUT), s=bloom_scale),
+         layer('flower-in', inner, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=bloom_spin(60, ROS_SPIN_IN), s=bloom_scale),
+         layer('flower-out', outer, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=bloom_spin(-60, ROS_SPIN_OUT), s=bloom_scale),
          layer('ripple', [ripple])]
     return comp('rosette', 720, 720, END, L)
 

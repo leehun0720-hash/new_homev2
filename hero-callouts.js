@@ -13,20 +13,27 @@
 
    연꽃의 움직임은 lottie-src/build_lottie.py 의 rosette() 시간표(ROS_*)를 그대로
    따라 계산한다 — 그쪽을 바꾸면 아래 ROS 도 같이 바꾼다.
-   '움직임 줄이기'를 켠 분, 좁은 화면(설명선을 감추는 600px 이하)에서는 아무것도 하지 않는다.
+   움직임을 멈춘 상태(motion.js — 기기의 '움직임 줄이기' 또는 사이트의 멈춤 단추)와
+   좁은 화면(설명선을 감추는 600px 이하)에서는 아무것도 하지 않는다.
    ===================================================================== */
 
-const svg = document.querySelector('.home-hero .hero-art');
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-const narrow = window.matchMedia('(max-width: 600px)');
+import { motion } from './motion.js';
 
-if (svg && !reduce.matches) init();
+const svg = document.querySelector('.home-hero .hero-art');
+const narrow = window.matchMedia('(max-width: 600px)');
+let inited = false;
+
+if (svg) {
+    if (!motion.reduced) init();
+    else motion.onChange(reduced => { if (!reduced && !inited) init(); });   // '움직임 켜기'를 누르면 그때 시작
+}
 
 function init() {
+    inited = true;
     const NS = 'http://www.w3.org/2000/svg';
     const ROS = {
-        L0: 170, LN: 1200,
-        SPIN_OUT: 90, SPIN_IN: -90, SPIN_STAMEN: -60,
+        L0: 170, LN: 1200, BLOOM: 140,             // 0~140f 돌며 피어나기 (그동안은 설명선을 띄우지 않는다)
+        SPIN_OUT: 180, SPIN_IN: -180, SPIN_STAMEN: -120,
         STEP: 240, HOLD: 180, PHASE: 25,           // 큰 꽃잎 색: 白 丹 黃 靑 綠 (0~4)
         STEP_S: 400, HOLD_S: 320,                  // 작은 꽃잎 안쪽: 綠 靑 黃
         SEQ_S: [4, 3, 2]
@@ -250,8 +257,8 @@ function init() {
         if (!running) return;
         const f = frame();
         if (!began) {
-            // 연꽃이 꽃잎을 거의 다 그린 뒤 시작 (Lottie 가 없으면 1.6초 뒤)
-            const ready = f != null ? f >= 64 : now - t0 > 1600;
+            // 연꽃이 돌며 피어나기를 마친 뒤 시작 (Lottie 가 없으면 1.6초 뒤)
+            const ready = f != null ? f >= ROS.BLOOM : now - t0 > 1600;
             if (ready) { began = now; list.forEach(c => go(c, 'dot', now + START_MS[c.id])); }
         }
         if (!narrow.matches) {
@@ -265,7 +272,7 @@ function init() {
     }
     const t0 = performance.now();
     function run() {
-        const want = visible && !document.hidden && !reduce.matches;
+        const want = visible && !document.hidden && !motion.reduced;
         if (want && !running) { running = true; raf = requestAnimationFrame(tick); }
         if (!want && running) { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; }
     }
@@ -273,14 +280,22 @@ function init() {
         .observe(document.querySelector('.home-hero'));
     document.addEventListener('visibilitychange', run);
 
-    // 보는 중에 '움직임 줄이기'를 켜면: 멈추고 지금 설명을 다 보여 준다
-    reduce.addEventListener && reduce.addEventListener('change', () => {
-        if (!reduce.matches) { run(); return; }
-        run();
+    // 움직임을 멈추면: 첫 설명을 다 보인 정지 장면. 다시 켜면: 처음 등장부터
+    motion.onChange(reduced => {
+        if (reduced) {
+            run();
+            list.forEach(c => {
+                c.idx = 0; c.phase = 'wait'; c.armP = 1; c.shelfP = 1; c.dotS = 1; c.subO = 1; c.typed = 1; c.ringT = -1;
+                c.cur = c.states[0].at(null); setTexts(c, true); paint(c, performance.now());
+            });
+            return;
+        }
+        began = 0;
         list.forEach(c => {
-            c.phase = 'wait'; c.armP = 1; c.shelfP = 1; c.dotS = 1; c.subO = 1; c.typed = 1; c.ringT = -1;
-            c.cur = c.states[c.idx].at(null); setTexts(c, true); paint(c, performance.now());
+            c.idx = 0; c.phase = 'wait'; c.armP = 0; c.shelfP = 0; c.dotS = 0; c.subO = 0; c.typed = 0; c.ringT = -1; c.cur = null;
+            setTexts(c, false); paint(c, performance.now());
         });
+        run();
     });
     // 언어를 바꾸면 지금 설명을 그 말로 다시 쓴다
     document.addEventListener('tenai:lang', () => list.forEach(c => { if (c.phase !== 'wait') setTexts(c, c.phase === 'hold'); }));
