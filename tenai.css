@@ -402,6 +402,15 @@ footer.site-foot { background: var(--night); color: var(--on-night); padding-blo
 .ann-dim { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; fill: var(--on-night); text-anchor: middle; }
 .chip-j { fill: var(--jeok); } .chip-h { fill: var(--hwang); } .chip-c { fill: var(--cheong); } .chip-n { fill: var(--nok); } .chip-w { fill: var(--on-night); }
 
+/* 설명선: hero-callouts.js 가 그릴 때는 CSS 의 단순 나타나기를 끈다 */
+.hero-art.js-co .co :is(.ldr, .ann, .lead-dot) { animation: none; }
+.co-ring { fill: none; stroke: var(--on-night); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: 0; }
+.co-arm { transition: stroke .4s; }
+.co-dot { transition: fill .4s; }
+.co-chips rect { transform-box: fill-box; transform-origin: center; transition: transform .35s var(--ease); }
+.co-chips rect.on { transform: scale(1.6); }
+.co-chips tspan { transition: fill .3s; }
+.co-chips tspan.on { fill: var(--on-night); font-weight: 700; }
 @media (prefers-reduced-motion: no-preference) {
   .draw use, .draw circle.core-ring { stroke-dasharray: 1; stroke-dashoffset: 1; animation: tn-draw 1.6s cubic-bezier(.6, 0, .2, 1) forwards; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
   .spin { transform-box: fill-box; transform-origin: center; animation: tn-spin 160s linear infinite; }

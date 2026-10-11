@@ -376,26 +376,40 @@
 
             <!-- 주석 -->
             <g class="callouts">
-              <polyline class="ldr" points="96,300 300,300 634,434"/>
-              <circle class="lead-dot" cx="634" cy="434" r="3"/>
-              <text class="ann ann-b" x="96" y="288">연화 머리초</text>
-              <text class="ann ann-s" x="96" y="322">ROSETTE · Ø 1,200 · 8 PETALS</text>
+              <!-- 설명선 셋 — hero-callouts.js 가 그리고, 움직이는 꽃잎을 따라가며, 몇 초마다 설명을 바꾼다.
+                   아래 값은 스크립트가 없거나 '움직임 줄이기'일 때 보이는 정지 장면이다. -->
+              <g class="co" id="coA" data-elbow="300,300" data-far="96,300">
+                <polyline class="ldr co-shelf" points="96,300 300,300"/>
+                <polyline class="ldr co-arm" points="300,300 634,434"/>
+                <circle class="co-ring" cx="634" cy="434" r="3"/>
+                <circle class="lead-dot co-dot" cx="634" cy="434" r="3"/>
+                <text class="ann ann-b co-title" x="96" y="288">연화 머리초</text>
+                <text class="ann ann-s co-sub" x="96" y="322">ROSETTE · Ø 1,200 · 8 PETALS</text>
+              </g>
 
-              <polyline class="ldr" points="1344,300 1140,300 732,514"/>
-              <circle class="lead-dot" cx="732" cy="514" r="3"/>
-              <text class="ann ann-b" x="1140" y="288">TENOS-KO 28B</text>
-              <text class="ann ann-s" x="1140" y="322">CORE · ON-PREMISE</text>
+              <g class="co" id="coB" data-elbow="1140,300" data-far="1344,300">
+                <polyline class="ldr co-shelf" points="1344,300 1140,300"/>
+                <polyline class="ldr co-arm" points="1140,300 732,514"/>
+                <circle class="co-ring" cx="732" cy="514" r="3"/>
+                <circle class="lead-dot co-dot" cx="732" cy="514" r="3"/>
+                <text class="ann ann-b co-title" x="1140" y="288">TENOS-KO 28B</text>
+                <text class="ann ann-s co-sub" x="1140" y="322">CORE · ON-PREMISE</text>
+              </g>
 
-              <polyline class="ldr" points="1320,690 1110,690 806,606"/>
-              <circle class="lead-dot" cx="806" cy="606" r="3"/>
-              <text class="ann ann-b" x="1110" y="678">오방색 다섯</text>
-              <g transform="translate(1110 700)">
-                <rect class="chip-j" width="12" height="12" rx="6"/>
-                <rect class="chip-h" x="20" width="12" height="12" rx="6"/>
-                <rect class="chip-c" x="40" width="12" height="12" rx="6"/>
-                <rect class="chip-n" x="60" width="12" height="12" rx="6"/>
-                <rect class="chip-w" x="80" width="12" height="12" rx="6"/>
-                <text class="ann ann-s" x="104" y="11">丹 黃 靑 綠 白</text>
+              <g class="co" id="coC" data-elbow="1110,690" data-far="1320,690">
+                <polyline class="ldr co-shelf" points="1320,690 1110,690"/>
+                <polyline class="ldr co-arm" points="1110,690 806,606"/>
+                <circle class="co-ring" cx="806" cy="606" r="3"/>
+                <circle class="lead-dot co-dot" cx="806" cy="606" r="3"/>
+                <text class="ann ann-b co-title" x="1110" y="678">오방색 다섯</text>
+                <g class="co-chips" transform="translate(1110 700)">
+                  <rect class="chip-j" data-c="1" width="12" height="12" rx="6"/>
+                  <rect class="chip-h" data-c="2" x="20" width="12" height="12" rx="6"/>
+                  <rect class="chip-c" data-c="3" x="40" width="12" height="12" rx="6"/>
+                  <rect class="chip-n" data-c="4" x="60" width="12" height="12" rx="6"/>
+                  <rect class="chip-w" data-c="0" x="80" width="12" height="12" rx="6"/>
+                  <text class="ann ann-s" x="104" y="11"><tspan data-c="1">丹</tspan> <tspan data-c="2">黃</tspan> <tspan data-c="3">靑</tspan> <tspan data-c="4">綠</tspan> <tspan data-c="0">白</tspan></text>
+                </g>
               </g>
 
               <!-- 세로 치수선 -->
@@ -764,6 +778,7 @@
     <script type="module" src="/data-store.js"></script>
     <script type="module" src="/site.js"></script>
     <script type="module" src="/lottie-fx.js"></script>
+    <script type="module" src="/hero-callouts.js"></script>
 
 </body>
 </html>
