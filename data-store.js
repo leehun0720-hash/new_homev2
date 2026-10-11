@@ -1081,6 +1081,84 @@ async function getVisitStats(days) {
     return data;
 }
 
+/* ---------- 상담 신청 (supabase-inquiries.sql) ---------- */
+const INQUIRY_KINDS = [
+    ['edu', 'AI 교육'], ['ax', 'AX 컨설팅'], ['aidc', 'AIDC 컨설팅'],
+    ['si', 'AI 시스템 구축'], ['runiq', 'RUNIQ STUDIO'], ['etc', '기타']
+];
+const INQUIRY_STATUSES = [['new', '새 신청'], ['doing', '진행 중'], ['done', '끝남']];
+const inquiryFromRow = r => ({
+    id: r.id, createdAt: r.created_at ? Date.parse(r.created_at) : Date.now(),
+    kind: r.kind, name: r.name, org: r.org || '', email: r.email, phone: r.phone || '',
+    message: r.message, page: r.page || '', status: r.status,
+    handledAt: r.handled_at ? Date.parse(r.handled_at) : null
+});
+const rpcMissing = error => error && (error.code === 'PGRST202' || /could not find the function/i.test(String(error.message || '')));
+const rpcForbidden = error => error && (error.code === '42501' || /admin only/i.test(String(error.message || '')));
+
+/* 신청 한 건을 보낸다.
+   돌려주는 값: 'ok' · 'invalid'(형식) · 'busy'(몰림) · 'missing'(SQL 을 아직 안 돌림) · 'error'
+   오류를 던지지 않는다 — 화면이 값에 따라 다음 길(고쳐 쓰기 · 메일로 보내기)을 안내한다. */
+async function submitInquiry(f) {
+    const v = {
+        kind: f.kind || 'etc', name: (f.name || '').trim(), org: (f.org || '').trim(),
+        email: (f.email || '').trim(), phone: (f.phone || '').trim(),
+        message: (f.message || '').trim(), page: f.page || null
+    };
+    if (mode === 'supabase') {
+        try {
+            const { data, error } = await sb.rpc('submit_inquiry', {
+                p_kind: v.kind, p_name: v.name, p_org: v.org || null, p_email: v.email,
+                p_phone: v.phone || null, p_message: v.message, p_page: v.page
+            });
+            if (error) return rpcMissing(error) ? 'missing' : 'error';
+            return ['ok', 'invalid', 'busy'].includes(data) ? data : 'error';
+        } catch (e) { return 'error'; }
+    }
+    // 로컬 모드: 이 브라우저에만 쌓는다 (관리자 콘솔의 같은 탭에서 보인다)
+    try {
+        const items = LS.read('tenai_inquiries', []);
+        items.unshift({ id: genId(), createdAt: Date.now(), status: 'new', handledAt: null,
+            kind: v.kind, name: v.name, org: v.org, email: v.email.toLowerCase(), phone: v.phone,
+            message: v.message, page: v.page || '' });
+        LS.write('tenai_inquiries', items.slice(0, 300));
+        return 'ok';
+    } catch (e) { return 'error'; }
+}
+
+/* 관리자 콘솔: 목록. SQL 을 아직 안 돌렸으면 { missing: true }, 관리자가 아니면 { forbidden: true } */
+async function listInquiries() {
+    if (mode !== 'supabase') return { items: LS.read('tenai_inquiries', []), local: true };
+    const { data, error } = await sb.rpc('admin_list_inquiries', { p_limit: 300 });
+    if (error) {
+        if (rpcMissing(error)) return { missing: true };
+        if (rpcForbidden(error)) return { forbidden: true };
+        throw error;
+    }
+    return { items: (data || []).map(inquiryFromRow) };
+}
+
+async function setInquiryStatus(id, status) {
+    if (mode !== 'supabase') {
+        const items = LS.read('tenai_inquiries', []);
+        const it = items.find(x => String(x.id) === String(id));
+        if (it) { it.status = status; it.handledAt = status === 'done' ? Date.now() : null; }
+        LS.write('tenai_inquiries', items);
+        return;
+    }
+    const { error } = await sb.rpc('admin_set_inquiry_status', { p_id: Number(id), p_status: status });
+    if (error) throw error;
+}
+
+async function deleteInquiry(id) {
+    if (mode !== 'supabase') {
+        LS.write('tenai_inquiries', LS.read('tenai_inquiries', []).filter(x => String(x.id) !== String(id)));
+        return;
+    }
+    const { error } = await sb.rpc('admin_delete_inquiry', { p_id: Number(id) });
+    if (error) throw error;
+}
+
 /* ---------- 공개 API (index.html / admin.html 인라인 스크립트에서 사용) ---------- */
 window.TenStore = {
     mode,
@@ -1102,6 +1180,8 @@ window.TenStore = {
     getMemberProfile, isAdminUser,
     /* 접속 통계 */
     trackView, getVisitStats,
+    /* 상담 신청 */
+    INQUIRY_KINDS, INQUIRY_STATUSES, submitInquiry, listInquiries, setInquiryStatus, deleteInquiry,
     /* 구글이 브라우저에 직접 ID 토큰을 줄 수 있는 자리인지.
        Supabase 모드이고, 클라이언트 ID 가 있고, 지금 주소가 구글 콘솔에
        등록된 주소일 때만 참이다. 셋 중 하나라도 어긋나면 예전 방식으로 간다. */
