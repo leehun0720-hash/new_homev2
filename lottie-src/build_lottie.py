@@ -273,10 +273,98 @@ def threads():
         L.append(layer(f'line{i}', [group([path([[2, y], [110, y]]), draw(4 * i, 30 + 4 * i), stroke(c, 4 if i < 4 else 3.5, 100 if i < 4 else 85)])]))
     return comp('threads', 112, 44, 44 + 14 * 4 + 64, L)
 
+# ================================================================= 첫 화면: 연화 머리초 (720 × 720)
+# index.html 의 SVG 연꽃과 같은 좌표(꽃 중심 0,0 · 큰 꽃잎 끝 262)를 쓰고, 화면에서는
+# 도면(1440 × 900)의 (720, 520) 에 0.72 배로 놓인다 (tenai.css .hero-rosette).
+#   0 ~ 170f   꽃잎이 안쪽부터 차례로 그려진다 (원래 CSS 그리기와 같은 순서·속도)
+#   170f ~     20초 되풀이: 꽃이 45° 돈다(여덟 겹 대칭이라 이음매가 없다)
+#              · 회로 신호가 큰 꽃잎을 차례로 한 바퀴씩 돈다 (5초에 한 바퀴, 네 번)
+#              · 5초마다 가운데 TenOS 코어에서 파동이 퍼진다
+ROS_C = 360
+ROS_LOOP0, ROS_LOOP_LEN = 170, 1200
+
+def _petal_pts(big=True):
+    """SVG 의 #petal / #petal-s 를 Lottie 꼭짓점·접선으로 (시작점: 꽃잎 밑동)"""
+    if big:
+        return [[0, -78], [0, -262]], [[-58, -40], [60, 50]], [[58, -40], [-60, 50]]
+    return [[0, -40], [0, -128]], [[-23, -20], [25, 22]], [[23, -20], [-25, 22]]
+
+def _xf(v, i, o, k=1.0, pivot=(0, 0), deg=0.0):
+    """pivot 기준 k 배 → 원점 기준 deg 회전. 접선은 크기·회전만 받는다"""
+    c, s_ = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+    rot = lambda x, y: [round(x * c - y * s_, 3), round(x * s_ + y * c, 3)]
+    vv = [rot(pivot[0] + (x - pivot[0]) * k, pivot[1] + (y - pivot[1]) * k) for x, y in v]
+    ii = [rot(x * k, y * k) for x, y in i]
+    oo = [rot(x * k, y * k) for x, y in o]
+    return vv, ii, oo
+
+def _petal(big, k, pivot, deg):
+    v, i, o = _xf(*_petal_pts(big), k=k, pivot=pivot, deg=deg)
+    return bez([[x + ROS_C, y + ROS_C] for x, y in v], i, o, True)
+
+def rosette():
+    L0, LN = ROS_LOOP0, ROS_LOOP_LEN
+    END = L0 + LN
+    t_draw = lambda i: (12 + 5.4 * i, 12 + 5.4 * i + 96)          # CSS: i×90ms + 200ms, 1.6s
+    spin = A([(0, 0), (L0, 0), (END, 45)], LINEAR)
+    big_layers = [(1.0, NIGHT_FG, 80, 0), (0.78, JEOK, 100, 1), (0.56, HWANG, 100, 2), (0.34, CHEONG, 100, 3)]
+    small_layers = [(1.0, NIGHT_FG, 38, 2), (0.6, NOK, 100, 3)]
+
+    petals = []
+    for m in range(8):
+        for k, col, op, di in big_layers:
+            a, b = t_draw(m + di)
+            petals.append(group([_petal(True, k, (0, -170), 45 * m), draw(a, b), stroke(col, 1.15, op)], nm=f'p{m}-{di}'))
+        for k, col, op, di in small_layers:
+            a, b = t_draw(m + di)
+            petals.append(group([_petal(False, k, (0, -84), 45 * m + 22.5), draw(a, b), stroke(col, 1.15, op)], nm=f's{m}-{di}'))
+
+    # 회로 신호: 큰 꽃잎 바깥 선을 따라 밑동 → 끝 → 밑동. 30f 간격으로 다음 꽃잎.
+    # 여덟 장을 돌고(270f) 30f 쉰 뒤 다시 — 쉬는 틈이 되풀이의 이음매에 걸리게 해서
+    # 이음매에서도, 멈춘 장면(움직임 줄이기)에서도 신호가 걸쳐 있지 않다.
+    signals = []
+    for m in range(8):
+        wins = [L0 + 300 * n + 30 * m for n in range(4)]
+        ok, off = [(0, 0)], [(0, 0)]
+        for st in wins:
+            ok += [(st, 0), (st + 6, 100), (st + 46, 100), (st + 60, 0)]
+            off += [(st, 0), (st + 60, 360)]
+        ok = sorted(set(ok)); off = sorted(set(off))
+        glow = [(t, v * 0.22) for t, v in ok]
+        sig_trim = {'ty': 'tm', 's': S(0), 'e': S(15), 'o': A(off, LINEAR), 'm': 1}
+        signals.append(group([_petal(True, 1.0, (0, -170), 45 * m), sig_trim,
+                              stroke(HWANG, 2.8, A(ok, LINEAR)),            # 신호
+                              stroke(HWANG, 9, A(glow, LINEAR))], nm=f'sig{m}'))   # 번짐
+
+    # 코어 파동 (5초마다)
+    rip_d, rip_o = [(0, [84, 84])], [(0, 0)]
+    for n in range(0, 5):
+        st = L0 + 300 * n
+        rip_d += [(st, [84, 84]), (st + 150, [600, 600])]
+        rip_o += [(st, 0), (st + 1, 55), (st + 150, 0)]
+    ripple = group([{'ty': 'el', 'p': S([ROS_C, ROS_C]), 's': A(rip_d, OUT_EASE), 'd': 1},
+                    stroke(HWANG, 1.5, A(rip_o, OUT_EASE))], nm='ripple')
+
+    stamens = []
+    for j in range(12):
+        ang = math.radians(30 * j - 90)
+        x, y = ROS_C + 58 * math.cos(ang), ROS_C + 58 * math.sin(ang)
+        stamens.append(layer(f'stamen{j}', [group([ell(4.8), fill(HWANG)], tr(s=pop(96 + 4 * j, 110 + 4 * j)))], p=(x, y)))
+
+    a, b = t_draw(10)
+    L = [layer('core', [group([ell(26), fill(HWANG)], tr(s=pop(70, 88)))], p=(ROS_C, ROS_C))] + stamens + [
+        layer('core-ring', [group([ell(84, ROS_C, ROS_C), draw(a, b), stroke(HWANG, 1.2)])]),
+        layer('signals', signals, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=spin),
+        layer('flower', petals, p=(ROS_C, ROS_C), a=(ROS_C, ROS_C), r=spin),
+        layer('ripple', [ripple]),
+    ]
+    return comp('rosette', 720, 720, END, L)
+
 ALL = {
     'ob-center': ob_center, 'ob-east': ob_east, 'ob-south': ob_south, 'ob-west': ob_west, 'ob-north': ob_north,
     'biz-platform': biz_platform, 'biz-trainer': biz_trainer, 'biz-research': biz_research, 'biz-partner': biz_partner,
     'door-org': door_org, 'door-learn': door_learn, 'runiq-room': runiq_room, 'rings': rings, 'threads': threads,
+    'rosette': rosette,
 }
 
 if __name__ == '__main__':

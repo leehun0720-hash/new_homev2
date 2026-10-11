@@ -1766,6 +1766,96 @@ document.addEventListener('click', e => {
     else fail();
 });
 
+/* ============ 메일 링크: 보낼 방법 고르기 ============
+   mailto: 는 PC에 메일 프로그램이 없으면 눌러도 아무 일이 없다.
+   (웹메일만 쓰는 대부분의 방문자에게는 '끊긴 링크'로 보인다)
+   그래서 메일 링크를 누르면 작은 창을 띄워 고르게 한다.
+     Gmail       받는 사람·제목을 채운 쓰기 화면을 새 탭으로
+     네이버 메일  받는 사람을 미리 채우는 공식 주소가 없어, 주소를 복사해 두고 연다
+     메일 앱      원래의 mailto: (Outlook 등이 깔린 PC)
+     주소 복사
+   Ctrl·⌘ 를 누른 채 누르면 예전처럼 곧장 mailto: 로 간다. */
+let mailSheet = null;
+function buildMailSheet() {
+    const el = document.createElement('div');
+    el.className = 'mail-sheet';
+    el.id = 'mailSheet';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'mailSheetTitle');
+    el.innerHTML = `
+        <div class="mail-sheet-panel">
+            <div class="mail-sheet-head">
+                <p class="label" id="mailSheetTitle">메일로 문의하기</p>
+                <button type="button" class="mail-sheet-x" data-mail-close aria-label="닫기">×</button>
+            </div>
+            <div class="mail-sheet-addr">
+                <span class="mail-sheet-to" translate="no"></span>
+                <button type="button" class="pill mail-sheet-copy" data-mail-copy>주소 복사</button>
+            </div>
+            <p class="mail-sheet-subj"><span class="label">제목</span> <span class="mail-sheet-subj-text" translate="no"></span></p>
+            <div class="mail-sheet-ways">
+                <a class="mail-way" data-way="gmail" target="_blank" rel="noopener"><span class="mail-way-name">Gmail로 쓰기</span><span class="arr" aria-hidden="true">↗</span></a>
+                <a class="mail-way" data-way="naver" href="https://mail.naver.com/" target="_blank" rel="noopener"><span class="mail-way-name">네이버 메일로 쓰기</span><span class="mail-way-note">주소를 복사해 두고 엽니다</span><span class="arr" aria-hidden="true">↗</span></a>
+                <a class="mail-way" data-way="app"><span class="mail-way-name">메일 앱 열기</span><span class="mail-way-note">Outlook 등</span><span class="arr" aria-hidden="true">→</span></a>
+            </div>
+        </div>`;
+    el.addEventListener('click', ev => {
+        if (ev.target === el || ev.target.closest('[data-mail-close]')) { closeMailSheet(); return; }
+        if (ev.target.closest('[data-mail-copy]')) { copyMailAddr(el.dataset.to, '메일 주소를 복사했습니다.'); return; }
+        const way = ev.target.closest('.mail-way');
+        if (!way) return;
+        if (way.dataset.way === 'naver') copyMailAddr(el.dataset.to, '주소를 복사했습니다. 받는 사람 칸에 붙여 넣어 주세요.');
+        setTimeout(closeMailSheet, 150);
+    });
+    el.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeMailSheet(); });
+    document.body.appendChild(el);
+    return el;
+}
+function copyMailAddr(addr, okMsg) {
+    const t = s => (window.TenI18n ? window.TenI18n.t(s) : s);
+    const fail = () => {
+        const to = mailSheet && mailSheet.querySelector('.mail-sheet-to');
+        if (to) { const r = document.createRange(); r.selectNodeContents(to); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+        showToast(t('주소를 선택해 두었습니다. 복사해서 써 주세요.'));
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).then(() => showToast(t(okMsg)), fail);
+    else fail();
+}
+function openMailSheet(a) {
+    const href = a.href;
+    const url = new URL(href);
+    const to = decodeURIComponent(url.pathname);
+    // 제목은 주소에 붙어 있거나(관리자 설정을 읽은 뒤) data-mail-subject 에 있다
+    const subject = url.searchParams.get('subject') || a.dataset.mailSubject || '';
+    mailSheet = mailSheet || buildMailSheet();
+    mailSheet.dataset.to = to;
+    mailSheet.querySelector('.mail-sheet-to').textContent = to;
+    const subj = mailSheet.querySelector('.mail-sheet-subj');
+    subj.hidden = !subject;
+    mailSheet.querySelector('.mail-sheet-subj-text').textContent = subject;
+    mailSheet.querySelector('[data-way="gmail"]').href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' +
+        encodeURIComponent(to) + (subject ? '&su=' + encodeURIComponent(subject) : '');
+    mailSheet.querySelector('[data-way="app"]').href = subject && !url.searchParams.get('subject')
+        ? href + (href.includes('?') ? '&' : '?') + 'subject=' + encodeURIComponent(subject) : href;
+    mailSheet.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    openOverlay(mailSheet);
+}
+function closeMailSheet() {
+    if (!mailSheet || !mailSheet.classList.contains('open')) return;
+    mailSheet.classList.remove('open');
+    document.body.style.overflow = '';
+    closeOverlay(mailSheet);
+}
+document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="mailto:"]');
+    if (!a || a.closest('#mailSheet')) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    openMailSheet(a);
+});
+
 /* ----- 초기 로드 ----- */
 (async function initDynamic() {
     // 분류를 가장 먼저 읽는다 — 배지 이름과 필터 칩이 여기서 나온다.

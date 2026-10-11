@@ -329,7 +329,8 @@
 
     <!-- ============ 첫 화면: 연화 머리초 도면 ============ -->
     <header class="home-hero night" id="home">
-        <svg class="hero-art" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <div class="hero-stage" aria-hidden="true">
+        <svg class="hero-art" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet">
             <defs>
               <path id="petal" pathLength="1" d="M0 -78 C 58 -118 60 -212 0 -262 C -60 -212 -58 -118 0 -78 Z"/>
               <path id="petal-s" pathLength="1" d="M0 -40 C 23 -60 25 -106 0 -128 C -25 -106 -23 -60 0 -40 Z"/>
@@ -344,6 +345,7 @@
               <line class="g-guide g-dashdot" x1="-640" y1="0" x2="640" y2="0"/>
               <circle class="g-guide g-dash" r="292"/>
               <circle class="g-guide" r="318"/>
+              <g class="rosette-flower">
               <g class="spin">
                 <g class="draw">
                   <g transform="rotate(0)"><use href="#petal" class="pt pt-w" style="--i:0;stroke-width:1.15"/><use href="#petal" class="pt pt-j" transform="translate(0 -170) scale(0.78) translate(0 170)" style="--i:1;stroke-width:1.47"/><use href="#petal" class="pt pt-h" transform="translate(0 -170) scale(0.56) translate(0 170)" style="--i:2;stroke-width:2.05"/><use href="#petal" class="pt pt-c" transform="translate(0 -170) scale(0.34) translate(0 170)" style="--i:3;stroke-width:3.38"/></g>
@@ -369,6 +371,7 @@
               </g>
               <circle class="core" r="13"/>
               <circle class="stamen" cx="0.0" cy="-58.0" r="2.4"/><circle class="stamen" cx="29.0" cy="-50.2" r="2.4"/><circle class="stamen" cx="50.2" cy="-29.0" r="2.4"/><circle class="stamen" cx="58.0" cy="-0.0" r="2.4"/><circle class="stamen" cx="50.2" cy="29.0" r="2.4"/><circle class="stamen" cx="29.0" cy="50.2" r="2.4"/><circle class="stamen" cx="0.0" cy="58.0" r="2.4"/><circle class="stamen" cx="-29.0" cy="50.2" r="2.4"/><circle class="stamen" cx="-50.2" cy="29.0" r="2.4"/><circle class="stamen" cx="-58.0" cy="0.0" r="2.4"/><circle class="stamen" cx="-50.2" cy="-29.0" r="2.4"/><circle class="stamen" cx="-29.0" cy="-50.2" r="2.4"/>
+              </g>
             </g>
 
             <!-- 주석 -->
@@ -402,6 +405,9 @@
               <text class="ann-dim" transform="translate(1000 520) rotate(90)">Ø 1,200</text>
             </g>
           </svg>
+          <!-- 연화 머리초 Lottie (lottie-src/build_lottie.py · rosette). 준비되면 위 SVG 꽃 대신 그려진다 -->
+          <div class="hero-rosette" data-lottie="rosette" data-lottie-mode="intro-loop" data-lottie-loop-from="170" data-lottie-rest="169"></div>
+        </div>
 
         <div class="hero-mark">
             <p class="label">The 10th Intelligence · For Human Progress</p>
@@ -414,9 +420,21 @@
             <div>
                 <h1 class="display"><span>한국의 결로</span><br><span>AI를 짓습니다</span></h1>
                 <p class="hero-sub">교육부터 현장 구축까지, 중소기업과 공공기관이 매일 쓰는 AI를 자체 한국어 모델 위에 세웁니다.</p>
-                <div class="hero-cta">
-                    <a class="btn btn-light" href="#contact">상담 신청 <span class="arr" aria-hidden="true">→</span></a>
-                    <a class="btn btn-ghost-night" href="/education">교육 과정 보기</a>
+                <!-- 대문: 들어온 분이 먼저 자기 쪽을 고른다 (회사 홈 · 학습 홈) -->
+                <div class="hero-gate" role="group" aria-labelledby="gateQ">
+                    <p class="label hero-gate-q" id="gateQ">어느 쪽을 보러 오셨나요?</p>
+                    <div class="hero-gate-doors">
+                        <a class="gate-btn" href="/biz" data-gate="biz">
+                            <i class="dot dot-jeok" aria-hidden="true"></i>
+                            <span class="gate-btn-txt"><small>기업 · 공공기관</small><b>AI 도입을 맡기고 싶습니다</b></span>
+                            <span class="arr" aria-hidden="true">→</span>
+                        </a>
+                        <a class="gate-btn" href="/learn" data-gate="learn">
+                            <i class="dot dot-cheong" aria-hidden="true"></i>
+                            <span class="gate-btn-txt"><small>수강생 · 개인</small><b>AI를 배우러 왔습니다</b></span>
+                            <span class="arr" aria-hidden="true">→</span>
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="title-block" aria-hidden="true">
