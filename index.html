@@ -299,7 +299,7 @@
                     <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
                 </div>
                 <button class="nav-login" type="button" data-login>로그인</button>
-                <a class="btn btn-light btn-sm nav-cta" href="#contact">상담 신청</a>
+                <a class="btn btn-light btn-sm nav-cta" href="#contact" data-inquiry>상담 신청</a>
                 <button class="mobile-menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileMenu">
                     <span></span><span></span><span></span>
                 </button>
@@ -320,7 +320,7 @@
                 <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
             </div>
             <button class="nav-login" type="button" data-login>로그인 / 회원가입</button>
-            <a class="btn btn-light" href="#contact">상담 신청</a>
+            <a class="btn btn-light" href="#contact" data-inquiry>상담 신청</a>
         </div>
     </div>
 
@@ -376,26 +376,40 @@
 
             <!-- 주석 -->
             <g class="callouts">
-              <polyline class="ldr" points="96,300 300,300 634,434"/>
-              <circle class="lead-dot" cx="634" cy="434" r="3"/>
-              <text class="ann ann-b" x="96" y="288">연화 머리초</text>
-              <text class="ann ann-s" x="96" y="322">ROSETTE · Ø 1,200 · 8 PETALS</text>
+              <!-- 설명선 셋 — hero-callouts.js 가 그리고, 움직이는 꽃잎을 따라가며, 몇 초마다 설명을 바꾼다.
+                   아래 값은 스크립트가 없거나 '움직임 줄이기'일 때 보이는 정지 장면이다. -->
+              <g class="co" id="coA" data-elbow="300,300" data-far="96,300">
+                <polyline class="ldr co-shelf" points="96,300 300,300"/>
+                <polyline class="ldr co-arm" points="300,300 634,434"/>
+                <circle class="co-ring" cx="634" cy="434" r="3"/>
+                <circle class="lead-dot co-dot" cx="634" cy="434" r="3"/>
+                <text class="ann ann-b co-title" x="96" y="288">연화 머리초</text>
+                <text class="ann ann-s co-sub" x="96" y="322">ROSETTE · Ø 1,200 · 8 PETALS</text>
+              </g>
 
-              <polyline class="ldr" points="1344,300 1140,300 732,514"/>
-              <circle class="lead-dot" cx="732" cy="514" r="3"/>
-              <text class="ann ann-b" x="1140" y="288">TENOS-KO 28B</text>
-              <text class="ann ann-s" x="1140" y="322">CORE · ON-PREMISE</text>
+              <g class="co" id="coB" data-elbow="1140,300" data-far="1344,300">
+                <polyline class="ldr co-shelf" points="1344,300 1140,300"/>
+                <polyline class="ldr co-arm" points="1140,300 732,514"/>
+                <circle class="co-ring" cx="732" cy="514" r="3"/>
+                <circle class="lead-dot co-dot" cx="732" cy="514" r="3"/>
+                <text class="ann ann-b co-title" x="1140" y="288">TENOS-KO 28B</text>
+                <text class="ann ann-s co-sub" x="1140" y="322">CORE · ON-PREMISE</text>
+              </g>
 
-              <polyline class="ldr" points="1320,690 1110,690 806,606"/>
-              <circle class="lead-dot" cx="806" cy="606" r="3"/>
-              <text class="ann ann-b" x="1110" y="678">오방색 다섯</text>
-              <g transform="translate(1110 700)">
-                <rect class="chip-j" width="12" height="12" rx="6"/>
-                <rect class="chip-h" x="20" width="12" height="12" rx="6"/>
-                <rect class="chip-c" x="40" width="12" height="12" rx="6"/>
-                <rect class="chip-n" x="60" width="12" height="12" rx="6"/>
-                <rect class="chip-w" x="80" width="12" height="12" rx="6"/>
-                <text class="ann ann-s" x="104" y="11">丹 黃 靑 綠 白</text>
+              <g class="co" id="coC" data-elbow="1110,690" data-far="1320,690">
+                <polyline class="ldr co-shelf" points="1320,690 1110,690"/>
+                <polyline class="ldr co-arm" points="1110,690 806,606"/>
+                <circle class="co-ring" cx="806" cy="606" r="3"/>
+                <circle class="lead-dot co-dot" cx="806" cy="606" r="3"/>
+                <text class="ann ann-b co-title" x="1110" y="678">오방색 다섯</text>
+                <g class="co-chips" transform="translate(1110 700)">
+                  <rect class="chip-j" data-c="1" width="12" height="12" rx="6"/>
+                  <rect class="chip-h" data-c="2" x="20" width="12" height="12" rx="6"/>
+                  <rect class="chip-c" data-c="3" x="40" width="12" height="12" rx="6"/>
+                  <rect class="chip-n" data-c="4" x="60" width="12" height="12" rx="6"/>
+                  <rect class="chip-w" data-c="0" x="80" width="12" height="12" rx="6"/>
+                  <text class="ann ann-s" x="104" y="11"><tspan data-c="1">丹</tspan> <tspan data-c="2">黃</tspan> <tspan data-c="3">靑</tspan> <tspan data-c="4">綠</tspan> <tspan data-c="0">白</tspan></text>
+                </g>
               </g>
 
               <!-- 세로 치수선 -->
@@ -668,7 +682,7 @@
                     <p class="lab-lead">도면이 공간이 되는 곳</p>
                     <p>상담 자리에서 시안을 보여 주고, 다음 날 제안서를 보냅니다. 상담부터 현장, 매출, 3D까지 한 번 로그인으로 이어집니다.</p>
                     <ul class="mods label"><li>상담</li><li>현장</li><li>매출</li><li>3D</li></ul>
-                    <a class="btn btn-ghost" href="mailto:leesh@tenai.kr" data-mail-subject="RUNIQ STUDIO 문의">먼저 써 보기 문의 <span class="arr" aria-hidden="true">→</span></a>
+                    <a class="btn btn-ghost" href="mailto:leesh@tenai.kr" data-mail-subject="RUNIQ STUDIO 문의" data-inquiry="runiq">먼저 써 보기 문의 <span class="arr" aria-hidden="true">→</span></a>
                 </div>
             </div>
         </div>
@@ -681,13 +695,13 @@
                 <h2 class="cta-title" id="contactTitle">보고서로 끝나지 않게,<br>현장에서 끝냅니다</h2>
                 <p class="lead">AI 교육, AX·AIDC 컨설팅, TenOS 기반 시스템 구축까지. 지금 필요한 변화부터 함께 설계합니다.</p>
                 <div class="cta-actions">
-                    <a class="btn btn-ink" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 상담 신청 <span class="arr" aria-hidden="true">→</span></a>
-                    <button class="btn btn-ghost" type="button" data-copy-mail>주소 복사</button>
+                    <a class="btn btn-ink" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의" data-inquiry>상담 신청서 쓰기 <span class="arr" aria-hidden="true">→</span></a>
+                    <a class="btn btn-ghost" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 문의</a>
                 </div>
                 <p class="cta-mail"><span class="label">상담 메일</span><a data-mail href="mailto:leesh@tenai.kr" translate="no">leesh@tenai.kr</a></p>
             </div>
             <ol class="steps" aria-label="상담 진행 순서">
-                <li><span class="label num">01</span><span>메일로 지금 상황을 알려 주세요</span></li>
+                <li><span class="label num">01</span><span>신청서나 메일로 지금 상황을 알려 주세요</span></li>
                 <li><span class="label num">02</span><span>진단 미팅에서 할 일과 순서를 정합니다</span></li>
                 <li><span class="label num">03</span><span>범위와 일정을 담은 제안서를 드립니다</span></li>
             </ol>
@@ -764,6 +778,7 @@
     <script type="module" src="/data-store.js"></script>
     <script type="module" src="/site.js"></script>
     <script type="module" src="/lottie-fx.js"></script>
+    <script type="module" src="/hero-callouts.js"></script>
 
 </body>
 </html>

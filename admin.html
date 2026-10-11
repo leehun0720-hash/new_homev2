@@ -367,6 +367,12 @@
         .vs-seg[aria-pressed="true"] { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.45); color: var(--cyan-glow); }
         .vs-seg:focus-visible, .vs-chart:focus-visible { outline: 2px solid var(--cyan-glow); outline-offset: 3px; }
 
+        .tab-count { display: inline-grid; place-items: center; min-width: 1.35rem; height: 1.35rem; margin-left: 0.3rem; padding: 0 0.35rem; border-radius: 999px; background: var(--red); color: var(--white); font-size: 0.72rem; font-weight: 800; line-height: 1; }
+        .inq-msg { margin-top: 0.7rem; white-space: pre-wrap; color: var(--gray-200); font-size: 0.92rem; line-height: 1.75; }
+        .inq-contact { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin-top: 0.55rem; font-size: 0.86rem; }
+        .inq-contact a { color: var(--cyan-soft); text-decoration: none; }
+        .inq-contact a:hover { text-decoration: underline; }
+        .chip-doing { background: rgba(255,182,61,0.13); color: var(--amber); }
         .vs-notice {
             margin-bottom: 1.2rem; padding: 0.85rem 1rem;
             border-left: 3px solid var(--cyan-glow); border-radius: 0 10px 10px 0;
@@ -477,6 +483,7 @@
     <div class="admin-layout">
         <nav class="admin-tabs" aria-label="관리 메뉴">
             <button class="admin-tab active" data-panel="settings">⚙️ 사이트 설정</button>
+            <button class="admin-tab" data-panel="inquiries">✉️ 상담 신청 <span class="tab-count" id="inqCount" hidden></span></button>
             <button class="admin-tab" data-panel="stats">📊 접속 통계</button>
             <button class="admin-tab" data-panel="posts">📋 게시물 관리</button>
             <button class="admin-tab" data-panel="qna">💬 Q&amp;A 관리</button>
@@ -901,6 +908,24 @@
                     <h2>배너 목록</h2>
                     <p class="sub" id="banCount"></p>
                     <div class="item-list" id="banList"></div>
+                </div>
+            </section>
+
+            <!-- ============ 상담 신청 (supabase-inquiries.sql) ============
+                 사이트의 상담 신청서로 들어온 문의. 관리자가 아니면 DB 가 거절한다. -->
+            <section class="panel" id="panel-inquiries" aria-labelledby="inqAdmTitle">
+                <div class="card">
+                    <h2 id="inqAdmTitle">상담 신청</h2>
+                    <p class="sub">사이트의 상담 신청서로 들어온 문의입니다. 접수일로부터 1년이 지나면 저절로 지워집니다(개인정보 처리방침 '상담 신청').</p>
+                    <div class="filter-row" role="group" aria-label="상태">
+                        <button type="button" class="filter-btn active" data-if="all">전체</button>
+                        <button type="button" class="filter-btn" data-if="new">새 신청</button>
+                        <button type="button" class="filter-btn" data-if="doing">진행 중</button>
+                        <button type="button" class="filter-btn" data-if="done">끝남</button>
+                        <button type="button" class="btn btn-ghost btn-sm" id="inqReload">새로고침</button>
+                    </div>
+                    <div class="vs-notice" id="inqNotice" role="status" hidden></div>
+                    <div class="item-list" id="inqList"></div>
                 </div>
             </section>
 
@@ -2411,6 +2436,132 @@
             cancelAnimationFrame(rz);
             rz = requestAnimationFrame(renderChart);
         }).observe($('vsChart'));
+    </script>
+    <!-- ============ 상담 신청 탭 (supabase-inquiries.sql · data-store.js listInquiries) ============
+         관리자 화면에 들어오면 한 번 조용히 불러와 새 신청 개수를 탭에 띄운다. -->
+    <script type="module">
+        'use strict';
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s == null ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        const toast = msg => {
+            const t = $('toast'); if (!t) return;
+            t.textContent = msg; t.classList.add('show');
+            clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3000);
+        };
+        const KIND = Object.fromEntries(TenStore.INQUIRY_KINDS);
+        const STATUS = Object.fromEntries(TenStore.INQUIRY_STATUSES);
+        const STATUS_CHIP = { new: 'chip-pending', doing: 'chip-doing', done: 'chip-answered' };
+        const when = ts => new Date(ts).toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const sqlLink = () => {
+            const m = ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '').match(/^https:\/\/([a-z0-9]+)\.supabase\.co/);
+            return m ? `https://supabase.com/dashboard/project/${m[1]}/sql/new` : 'https://supabase.com/dashboard';
+        };
+        const state = { items: null, filter: 'all', loading: false };
+
+        function notice(html, isErr) {
+            const n = $('inqNotice');
+            n.hidden = !html; n.classList.toggle('err', !!isErr); n.innerHTML = html || '';
+        }
+        function badge() {
+            const n = (state.items || []).filter(x => x.status === 'new').length;
+            const b = $('inqCount');
+            b.hidden = !n; b.textContent = n > 99 ? '99+' : String(n);
+        }
+        function render() {
+            const list = $('inqList');
+            if (!state.items) { list.innerHTML = ''; return; }
+            const items = state.filter === 'all' ? state.items : state.items.filter(x => x.status === state.filter);
+            if (!items.length) {
+                list.innerHTML = `<div class="empty">${state.items.length ? '이 상태의 신청이 없습니다.' : '아직 들어온 신청이 없습니다.'}</div>`;
+                return;
+            }
+            list.innerHTML = items.map(q => {
+                const subj = `Re: [TEN AI 상담] ${KIND[q.kind] || '기타'}`;
+                const gmail = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(q.email) + '&su=' + encodeURIComponent(subj);
+                const next = q.status === 'new' ? ['doing', '진행 중으로'] : q.status === 'doing' ? ['done', '끝냄'] : ['new', '새 신청으로'];
+                return `
+                <div class="item-row" data-id="${esc(q.id)}">
+                    <div class="item-top">
+                        <div>
+                            <div class="item-title">
+                                <span class="chip ${STATUS_CHIP[q.status] || 'chip-private'}">${esc(STATUS[q.status] || q.status)}</span>
+                                <span class="chip chip-notice">${esc(KIND[q.kind] || '기타')}</span>
+                                ${esc(q.name)}${q.org ? ' · ' + esc(q.org) : ''}
+                            </div>
+                            <div class="item-meta">접수 ${esc(when(q.createdAt))}${q.page ? ' · 보낸 곳 <code>' + esc(q.page) + '</code>' : ''}${q.handledAt ? ' · 끝낸 날 ' + esc(when(q.handledAt)) : ''}</div>
+                        </div>
+                        <div class="item-actions">
+                            <a class="btn btn-cyan btn-sm" href="${esc(gmail)}" target="_blank" rel="noopener">Gmail로 답장</a>
+                            <button type="button" class="btn btn-ghost btn-sm" data-iset="${esc(next[0])}">${esc(next[1])}</button>
+                            <button type="button" class="btn btn-danger btn-sm" data-idel>삭제</button>
+                        </div>
+                    </div>
+                    <div class="inq-contact">
+                        <a href="mailto:${esc(q.email)}">${esc(q.email)}</a>
+                        ${q.phone ? '<a href="tel:' + esc(q.phone.replace(/[^0-9+]/g, '')) + '">' + esc(q.phone) + '</a>' : ''}
+                    </div>
+                    <p class="inq-msg">${esc(q.message)}</p>
+                </div>`;
+            }).join('');
+        }
+        async function load(quiet) {
+            if (state.loading) return;
+            state.loading = true;
+            if (!quiet) notice('');
+            let r;
+            try { r = await TenStore.listInquiries(); }
+            catch (e) {
+                state.loading = false;
+                if (!quiet) notice(`신청을 불러오지 못했습니다 — ${esc(e && e.message || e)}<br>잠시 뒤 <b>새로고침</b>을 눌러 주세요.`, true);
+                return;
+            }
+            state.loading = false;
+            if (r.missing) {
+                state.items = []; render(); badge();
+                notice(`상담 신청 표가 아직 없습니다. <a href="${sqlLink()}" target="_blank" rel="noopener">Supabase SQL Editor</a>에서 <b>supabase-inquiries.sql</b> 을 실행해 주세요. 그 전까지 사이트의 신청서는 '메일로 보내기'로 이어집니다.`);
+                return;
+            }
+            if (r.forbidden) { state.items = []; render(); badge(); notice('관리자 계정으로 로그인해야 볼 수 있습니다.', true); return; }
+            if (r.local) notice('로컬 모드입니다 — 이 브라우저에서 보낸 신청만 보입니다.');
+            state.items = r.items || [];
+            render(); badge();
+        }
+
+        document.querySelectorAll('#panel-inquiries [data-if]').forEach(b => b.addEventListener('click', () => {
+            document.querySelectorAll('#panel-inquiries [data-if]').forEach(x => x.classList.toggle('active', x === b));
+            state.filter = b.dataset.if; render();
+        }));
+        $('inqReload').addEventListener('click', () => load(false));
+        $('inqList').addEventListener('click', async e => {
+            const row = e.target.closest('.item-row'); if (!row) return;
+            const id = row.dataset.id;
+            const set = e.target.closest('[data-iset]');
+            const del = e.target.closest('[data-idel]');
+            try {
+                if (set) {
+                    await TenStore.setInquiryStatus(id, set.dataset.iset);
+                    const it = state.items.find(x => String(x.id) === String(id));
+                    if (it) { it.status = set.dataset.iset; it.handledAt = it.status === 'done' ? Date.now() : null; }
+                    render(); badge(); toast('상태를 바꿨습니다.');
+                }
+                if (del) {
+                    if (!confirm('이 신청을 지울까요? 되돌릴 수 없습니다.')) return;
+                    await TenStore.deleteInquiry(id);
+                    state.items = state.items.filter(x => String(x.id) !== String(id));
+                    render(); badge(); toast('지웠습니다.');
+                }
+            } catch (err) { toast('처리하지 못했습니다 — ' + (err && err.message || err)); }
+        });
+        const tab = document.querySelector('.admin-tab[data-panel="inquiries"]');
+        if (tab) tab.addEventListener('click', () => load(false));
+
+        // 로그인해 관리 화면이 열리면 한 번 조용히 불러와 새 신청 개수를 띄운다
+        const gate = $('gate');
+        const onOpen = () => { if (gate && gate.classList.contains('hidden') && state.items === null) load(true); };
+        if (gate) new MutationObserver(onOpen).observe(gate, { attributes: true, attributeFilter: ['class'] });
+        onOpen();
     </script>
 </body>
 </html>

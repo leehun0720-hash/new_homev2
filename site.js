@@ -1822,12 +1822,13 @@ function copyMailAddr(addr, okMsg) {
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(addr).then(() => showToast(t(okMsg)), fail);
     else fail();
 }
-function openMailSheet(a) {
+function openMailSheet(a, extra = {}) {
     const href = a.href;
     const url = new URL(href);
     const to = decodeURIComponent(url.pathname);
     // 제목은 주소에 붙어 있거나(관리자 설정을 읽은 뒤) data-mail-subject 에 있다
-    const subject = url.searchParams.get('subject') || a.dataset.mailSubject || '';
+    const subject = extra.subject || url.searchParams.get('subject') || a.dataset.mailSubject || '';
+    const body = extra.body || '';
     mailSheet = mailSheet || buildMailSheet();
     mailSheet.dataset.to = to;
     mailSheet.querySelector('.mail-sheet-to').textContent = to;
@@ -1835,9 +1836,10 @@ function openMailSheet(a) {
     subj.hidden = !subject;
     mailSheet.querySelector('.mail-sheet-subj-text').textContent = subject;
     mailSheet.querySelector('[data-way="gmail"]').href = 'https://mail.google.com/mail/?view=cm&fs=1&to=' +
-        encodeURIComponent(to) + (subject ? '&su=' + encodeURIComponent(subject) : '');
-    mailSheet.querySelector('[data-way="app"]').href = subject && !url.searchParams.get('subject')
-        ? href + (href.includes('?') ? '&' : '?') + 'subject=' + encodeURIComponent(subject) : href;
+        encodeURIComponent(to) + (subject ? '&su=' + encodeURIComponent(subject) : '') +
+        (body ? '&body=' + encodeURIComponent(body) : '');
+    mailSheet.querySelector('[data-way="app"]').href = 'mailto:' + to +
+        (subject || body ? '?' + [subject && 'subject=' + encodeURIComponent(subject), body && 'body=' + encodeURIComponent(body)].filter(Boolean).join('&') : '');
     mailSheet.classList.add('open');
     document.body.style.overflow = 'hidden';
     openOverlay(mailSheet);
@@ -1850,10 +1852,232 @@ function closeMailSheet() {
 }
 document.addEventListener('click', e => {
     const a = e.target.closest('a[href^="mailto:"]');
-    if (!a || a.closest('#mailSheet')) return;
+    if (!a || a.closest('#mailSheet') || a.hasAttribute('data-inquiry')) return;
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     openMailSheet(a);
+});
+
+/* ============ 상담 신청서 ============
+   [data-inquiry] 를 누르면 연다 (메뉴·상담 구역의 '상담 신청', RUNIQ '먼저 써 보기 문의').
+   값이 있으면 문의 종류를 미리 고른다: data-inquiry="runiq".
+   보내기는 TenStore.submitInquiry → supabase-inquiries.sql 의 submit_inquiry().
+     ok       접수 화면
+     invalid  어디를 고칠지 알려 준다
+     busy     잠시 뒤에 — 급하면 메일로
+     missing·error  SQL 을 아직 안 돌렸거나 연결이 끊김 → 쓴 내용이 담긴 메일 쓰기로 이어 준다
+   쓰는 중인 내용은 이 탭에 잠시 남겨 둔다(sessionStorage) — 실수로 닫아도 다시 열면 그대로다.
+   봇 막기: 사람에게 보이지 않는 칸(website)이 채워졌거나, 연 지 3초 안에 보내면 받은 척만 한다. */
+const INQ_DRAFT = 'tenai_inq_draft';
+const INQ_KINDS = (window.TenStore && TenStore.INQUIRY_KINDS) || [['etc', '기타']];
+let inqSheet = null;
+let inqOpenedAt = 0;
+const tt = s => (window.TenI18n ? window.TenI18n.t(s) : s);
+
+function buildInquirySheet() {
+    const el = document.createElement('div');
+    el.className = 'inq-sheet';
+    el.id = 'inqSheet';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'inqTitle');
+    const kinds = INQ_KINDS.map(([v, label]) =>
+        `<label class="inq-kind"><input type="radio" name="kind" value="${v}"><span>${label}</span></label>`).join('');
+    el.innerHTML = `
+        <div class="inq-panel">
+            <div class="inq-head">
+                <div>
+                    <p class="label">상담 신청</p>
+                    <h2 class="inq-title" id="inqTitle">지금 상황을 알려 주세요</h2>
+                    <p class="inq-sub">확인한 뒤 남겨 주신 연락처로 답을 드립니다.</p>
+                </div>
+                <button type="button" class="mail-sheet-x" data-inq-close aria-label="닫기">×</button>
+            </div>
+            <form class="inq-form" novalidate>
+                <fieldset class="inq-kinds">
+                    <legend class="label">문의 종류</legend>
+                    <div class="inq-kind-list">${kinds}</div>
+                </fieldset>
+                <div class="inq-row">
+                    <label class="inq-field"><span class="inq-lab">이름 <b class="inq-req" aria-hidden="true">*</b></span>
+                        <input name="name" autocomplete="name" maxlength="40" required aria-required="true"></label>
+                    <label class="inq-field"><span class="inq-lab">소속 <small>회사·기관</small></span>
+                        <input name="org" autocomplete="organization" maxlength="80"></label>
+                </div>
+                <div class="inq-row">
+                    <label class="inq-field"><span class="inq-lab">이메일 <b class="inq-req" aria-hidden="true">*</b></span>
+                        <input name="email" type="email" inputmode="email" autocomplete="email" maxlength="120" required aria-required="true"></label>
+                    <label class="inq-field"><span class="inq-lab">전화번호 <small>선택</small></span>
+                        <input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20"></label>
+                </div>
+                <label class="inq-field"><span class="inq-lab">문의 내용 <b class="inq-req" aria-hidden="true">*</b></span>
+                    <textarea name="message" rows="5" maxlength="2000" required aria-required="true"
+                        placeholder="지금 상황과 원하시는 것을 적어 주세요. 예: 직원 30명 대상 생성형 AI 실무 교육을 11월 중에 하고 싶습니다."></textarea>
+                    <small class="inq-count" aria-hidden="true">0 / 2000</small></label>
+                <label class="inq-website" aria-hidden="true">웹사이트 <input name="website" tabindex="-1" autocomplete="off"></label>
+                <div class="inq-consent">
+                    <label class="inq-agree"><input type="checkbox" name="agree" required aria-required="true">
+                        <span>개인정보 수집·이용에 동의합니다 <b>(필수)</b></span></label>
+                    <details class="inq-detail">
+                        <summary>무엇을 왜 받나요?</summary>
+                        <p>받는 항목: 이름, 이메일, 문의 내용, (선택) 소속·전화번호</p>
+                        <p>쓰는 곳: 상담 문의에 답하기 위해서만 씁니다.</p>
+                        <p>보관 기간: 접수일로부터 1년. 그 전에 지워 달라고 하시면 바로 지웁니다.</p>
+                        <p>동의하지 않으셔도 됩니다. 그때는 신청서 대신 메일로 문의해 주세요. <a href="/privacy">개인정보 처리방침</a></p>
+                    </details>
+                </div>
+                <p class="inq-error" role="alert" hidden></p>
+                <div class="inq-actions">
+                    <button type="submit" class="btn btn-ink inq-submit">신청 보내기 <span class="arr" aria-hidden="true">→</span></button>
+                    <a class="inq-mail-alt" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 문의하기</a>
+                </div>
+            </form>
+            <div class="inq-done" hidden>
+                <span class="inq-done-mark" aria-hidden="true"></span>
+                <h3 class="inq-done-title" tabindex="-1">신청이 접수되었습니다</h3>
+                <p>확인한 뒤 남겨 주신 연락처로 답을 드리겠습니다. 고맙습니다.</p>
+                <button type="button" class="btn btn-ghost" data-inq-close>닫기</button>
+            </div>
+        </div>`;
+
+    const form = el.querySelector('form');
+    const count = el.querySelector('.inq-count');
+    const saveDraft = () => {
+        const d = {};
+        new FormData(form).forEach((v, k) => { if (k !== 'website' && k !== 'agree') d[k] = v; });
+        try { sessionStorage.setItem(INQ_DRAFT, JSON.stringify(d)); } catch (e) { /* 저장 막힘 */ }
+        count.textContent = `${form.message.value.length} / 2000`;
+    };
+    form.addEventListener('input', saveDraft);
+    form.addEventListener('change', saveDraft);
+    form.addEventListener('submit', ev => { ev.preventDefault(); sendInquiry(); });
+    el.addEventListener('click', ev => {
+        if (ev.target.closest('[data-inq-close]')) { closeInquirySheet(); return; }
+        const alt = ev.target.closest('.inq-mail-alt, [data-inq-mail]');
+        if (alt) {
+            ev.preventDefault();
+            const a = el.querySelector('.inq-mail-alt');
+            const withBody = !!ev.target.closest('[data-inq-mail]');
+            closeInquirySheet();
+            openMailSheet(a, withBody ? inquiryAsMail() : {});
+        }
+    });
+    el.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeInquirySheet(); });
+    document.body.appendChild(el);
+    return el;
+}
+
+function inquiryFields() {
+    const f = inqSheet.querySelector('form');
+    return {
+        kind: (f.querySelector('input[name="kind"]:checked') || {}).value || 'etc',
+        name: f.name.value.trim(), org: f.org.value.trim(), email: f.email.value.trim(),
+        phone: f.phone.value.trim(), message: f.message.value.trim(), website: f.website.value,
+        agree: f.agree.checked
+    };
+}
+
+function inquiryAsMail() {
+    const v = inquiryFields();
+    const kind = (INQ_KINDS.find(k => k[0] === v.kind) || INQ_KINDS[INQ_KINDS.length - 1])[1];
+    return {
+        subject: `[상담 신청] ${kind}${v.name ? ' · ' + v.name : ''}`,
+        body: [`문의 종류: ${kind}`, `이름: ${v.name}`, v.org ? `소속: ${v.org}` : null, `이메일: ${v.email}`,
+               v.phone ? `전화번호: ${v.phone}` : null, '', v.message].filter(x => x != null).join('\n')
+    };
+}
+
+function inquiryError(msg, field, withMail) {
+    const box = inqSheet.querySelector('.inq-error');
+    box.hidden = !msg;
+    box.innerHTML = '';
+    if (!msg) return;
+    box.append(document.createTextNode(tt(msg)));
+    if (withMail) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'inq-error-mail'; b.dataset.inqMail = '';
+        b.textContent = tt('쓴 내용으로 메일 보내기');
+        box.append(' ', b);
+    }
+    inqSheet.querySelectorAll('[aria-invalid]').forEach(x => x.removeAttribute('aria-invalid'));
+    if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+}
+
+async function sendInquiry() {
+    const f = inqSheet.querySelector('form');
+    const v = inquiryFields();
+    if (!v.name) return inquiryError('이름을 적어 주세요.', f.name);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) return inquiryError('이메일 주소를 확인해 주세요.', f.email);
+    if (v.phone && !/^[0-9+() -]{7,20}$/.test(v.phone)) return inquiryError('전화번호는 숫자와 - 만 적어 주세요.', f.phone);
+    if (v.message.length < 5) return inquiryError('문의 내용을 다섯 글자 이상 적어 주세요.', f.message);
+    if (!v.agree) return inquiryError('개인정보 수집·이용에 동의해 주셔야 신청서를 보낼 수 있습니다.', f.agree);
+    inquiryError('');
+
+    const btn = f.querySelector('.inq-submit');
+    btn.disabled = true;
+    const label = btn.innerHTML;
+    btn.textContent = tt('보내는 중…');
+
+    let result;
+    if (v.website || Date.now() - inqOpenedAt < 3000) {
+        result = 'ok';                                           // 봇: 받은 척만 한다
+    } else {
+        let page = location.pathname.toLowerCase().replace(/\.html$/, '').replace(/\/+$/, '') || '/';
+        if (!/^\/[a-z0-9/_-]{0,80}$/.test(page)) page = null;
+        result = await TenStore.submitInquiry({ ...v, page });
+    }
+    btn.disabled = false;
+    btn.innerHTML = label;
+
+    if (result === 'ok') {
+        try { sessionStorage.removeItem(INQ_DRAFT); } catch (e) { /* 저장 막힘 */ }
+        f.reset();
+        f.hidden = true;
+        inqSheet.querySelector('.inq-head').hidden = true;
+        const done = inqSheet.querySelector('.inq-done');
+        done.hidden = false;
+        done.querySelector('.inq-done-title').focus();
+        return;
+    }
+    if (result === 'invalid') return inquiryError('입력한 내용을 다시 확인해 주세요. (이메일 형식, 문의 내용 다섯 글자 이상)', f.email);
+    if (result === 'busy') return inquiryError('지금 신청이 몰려 잠시 뒤에 다시 보내 주세요. 급하시면 메일로 보내 주셔도 됩니다.', null, true);
+    inquiryError('지금은 신청서를 보낼 수 없습니다. 쓰신 내용을 메일로 보내 주세요.', null, true);
+}
+
+function openInquirySheet(kind) {
+    inqSheet = inqSheet || buildInquirySheet();
+    const f = inqSheet.querySelector('form');
+    // 접수 화면에서 다시 열면 새 신청서로
+    f.hidden = false;
+    inqSheet.querySelector('.inq-head').hidden = false;
+    inqSheet.querySelector('.inq-done').hidden = true;
+    inquiryError('');
+    try {
+        const d = JSON.parse(sessionStorage.getItem(INQ_DRAFT) || 'null');
+        if (d) ['name', 'org', 'email', 'phone', 'message'].forEach(k => { if (d[k] != null) f[k].value = d[k]; });
+        if (d && d.kind && !kind) kind = d.kind;
+    } catch (e) { /* 저장 막힘 */ }
+    const radio = kind && f.querySelector(`input[name="kind"][value="${kind}"]`);
+    if (radio) radio.checked = true;
+    inqSheet.querySelector('.inq-count').textContent = `${f.message.value.length} / 2000`;
+    inqOpenedAt = Date.now();
+    closeMobileMenu();
+    inqSheet.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    openOverlay(inqSheet);
+}
+function closeInquirySheet() {
+    if (!inqSheet || !inqSheet.classList.contains('open')) return;
+    inqSheet.classList.remove('open');
+    document.body.style.overflow = '';
+    closeOverlay(inqSheet);
+}
+document.addEventListener('click', e => {
+    const t = e.target.closest('[data-inquiry]');
+    if (!t || t.closest('#inqSheet')) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    openInquirySheet(t.dataset.inquiry || '');
 });
 
 /* ----- 초기 로드 ----- */

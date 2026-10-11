@@ -74,7 +74,7 @@
                     <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
                 </div>
                 <button class="nav-login" type="button" data-login>로그인</button>
-                <a class="btn btn-light btn-sm nav-cta" href="#contact">상담 신청</a>
+                <a class="btn btn-light btn-sm nav-cta" href="#contact" data-inquiry>상담 신청</a>
                 <button class="mobile-menu-btn" id="menuBtn" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileMenu">
                     <span></span><span></span><span></span>
                 </button>
@@ -95,7 +95,7 @@
                 <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
             </div>
             <button class="nav-login" type="button" data-login>로그인 / 회원가입</button>
-            <a class="btn btn-light" href="#contact">상담 신청</a>
+            <a class="btn btn-light" href="#contact" data-inquiry>상담 신청</a>
         </div>
     </div>
 
@@ -121,6 +121,10 @@
             <p class="legal-note" id="revision-2026-10-16"><strong>개정 예고</strong> — 2026년 10월 16일부터
             <a href="#visit-stats">1조 &lsquo;마. 방문 통계&rsquo;</a>가 새로 적용됩니다. 개인을 알아볼 수 없는
             방문 집계이며, 그 전에는 기록하지 않습니다. 함께 바뀌는 곳: 1조 라의 안내 · 2조 보유 기간.</p>
+
+            <p class="legal-note" id="revision-2026-10-11" data-i18n="rev-inquiry"><strong>추가</strong> — 2026년 10월 11일부터
+            <a href="#inquiry">1조 &lsquo;바. 상담 신청서&rsquo;</a>와 2조의 &lsquo;상담 신청&rsquo; 보유 기간이 적용됩니다.
+            사이트에 상담 신청서를 새로 열면서 받는 항목을 알려 드립니다.</p>
 
             <p class="legal-lead">TEN AI(이하 &lsquo;회사&rsquo;)는 이용자의 개인정보를 소중히 다루며,
             「개인정보 보호법」 등 관련 법령을 준수합니다. 이 방침은 회사가 tenai.kr 에서
@@ -193,6 +197,22 @@
             <p class="legal-note">브라우저에서 &lsquo;추적 안 함(Do Not Track)&rsquo; 또는 GPC 를 켜 두시면
             기록하지 않습니다. 모은 값은 관리자 화면에서 합계로만 보며, 1년이 지나면 자동으로 지웁니다.</p>
 
+            <h3 id="inquiry">바. 상담 신청서</h3>
+            <p>사이트의 &lsquo;상담 신청&rsquo; 신청서를 보내실 때, 동의를 받은 뒤 아래 정보를 받습니다.</p>
+            <div class="legal-scroll"><table class="legal-table">
+                <thead><tr><th>항목</th><th>필수 여부</th><th>이용 목적</th></tr></thead>
+                <tbody>
+                    <tr><td>이름</td><td>필수</td><td>문의 구분, 답변 시 호칭</td></tr>
+                    <tr><td>이메일</td><td>필수</td><td>답변 발송</td></tr>
+                    <tr><td>문의 내용</td><td>필수</td><td>상담 응대</td></tr>
+                    <tr><td>소속(회사·기관)</td><td>선택</td><td>상담 준비</td></tr>
+                    <tr><td>전화번호</td><td>선택</td><td>전화 상담 연락</td></tr>
+                    <tr><td>문의 종류, 신청서를 보낸 쪽 주소</td><td>자동</td><td>담당 배정</td></tr>
+                </tbody>
+            </table></div>
+            <p class="legal-note">신청서는 관리자가 아닌 접속에서는 조회조차 되지 않습니다.
+            접수일로부터 1년이 지나면 자동으로 지우며, 그 전에 지워 달라고 하시면 바로 지웁니다.</p>
+
             <h2>2. 보유 및 이용 기간</h2>
             <div class="legal-scroll"><table class="legal-table">
                 <thead><tr><th>구분</th><th>보유 기간</th></tr></thead>
@@ -201,6 +221,7 @@
                     <tr><td>Q&amp;A 질문·답변</td><td>삭제 요청 시까지</td></tr>
                     <tr><td>접속 기록</td><td>「통신비밀보호법」에 따라 3개월</td></tr>
                     <tr><td>방문 통계 (2026년 10월 16일부터)</td><td>1년. 지난 기록은 자동으로 삭제</td></tr>
+                    <tr><td>상담 신청</td><td>접수일로부터 1년. 지난 신청은 자동으로 삭제하며, 삭제 요청 시 즉시 파기</td></tr>
                 </tbody>
             </table></div>
             <p>법령이 별도의 보존 기간을 정한 경우에는 그 기간을 따르며, 해당 정보는 다른 목적으로
@@ -283,13 +304,13 @@
                 <h2 class="cta-title" id="contactTitle">AI가 삶에 닿을 때,<br>혁신은 현실이 됩니다</h2>
                 <p class="lead">TEN AI와 함께 실천적 지능의 시대를 열어가세요. 교육, 컨설팅, 플랫폼 구축까지 맞춤형 솔루션을 제공합니다.</p>
                 <div class="cta-actions">
-                    <a class="btn btn-ink" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 상담 신청 <span class="arr" aria-hidden="true">→</span></a>
-                    <button class="btn btn-ghost" type="button" data-copy-mail>주소 복사</button>
+                    <a class="btn btn-ink" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의" data-inquiry>상담 신청서 쓰기 <span class="arr" aria-hidden="true">→</span></a>
+                    <a class="btn btn-ghost" href="mailto:leesh@tenai.kr" data-mail-subject="TEN AI 상담 문의">메일로 문의</a>
                 </div>
                 <p class="cta-mail"><span class="label">상담 메일</span><a data-mail href="mailto:leesh@tenai.kr" translate="no">leesh@tenai.kr</a></p>
             </div>
             <ol class="steps" aria-label="상담 진행 순서">
-                <li><span class="label num">01</span><span>메일로 지금 상황을 알려 주세요</span></li>
+                <li><span class="label num">01</span><span>신청서나 메일로 지금 상황을 알려 주세요</span></li>
                 <li><span class="label num">02</span><span>진단 미팅에서 할 일과 순서를 정합니다</span></li>
                 <li><span class="label num">03</span><span>범위와 일정을 담은 제안서를 드립니다</span></li>
             </ol>

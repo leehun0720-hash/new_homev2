@@ -112,7 +112,8 @@ function doText(node) {
 }
 
 function doAttrs(el) {
-    if (skipped(el)) return;
+    // 입력칸(textarea)은 안의 글은 건드리지 않지만, 안내 문구(placeholder)는 옮긴다
+    if (skipped(el.tagName === 'TEXTAREA' ? el.parentElement : el)) return;
     for (const a of ATTRS) {
         if (!el.hasAttribute(a)) continue;
         const saved = state.attrNodes.get(el);

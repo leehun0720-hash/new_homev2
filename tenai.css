@@ -402,6 +402,15 @@ footer.site-foot { background: var(--night); color: var(--on-night); padding-blo
 .ann-dim { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .1em; fill: var(--on-night); text-anchor: middle; }
 .chip-j { fill: var(--jeok); } .chip-h { fill: var(--hwang); } .chip-c { fill: var(--cheong); } .chip-n { fill: var(--nok); } .chip-w { fill: var(--on-night); }
 
+/* 설명선: hero-callouts.js 가 그릴 때는 CSS 의 단순 나타나기를 끈다 */
+.hero-art.js-co .co :is(.ldr, .ann, .lead-dot) { animation: none; }
+.co-ring { fill: none; stroke: var(--on-night); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: 0; }
+.co-arm { transition: stroke .4s; }
+.co-dot { transition: fill .4s; }
+.co-chips rect { transform-box: fill-box; transform-origin: center; transition: transform .35s var(--ease); }
+.co-chips rect.on { transform: scale(1.6); }
+.co-chips tspan { transition: fill .3s; }
+.co-chips tspan.on { fill: var(--on-night); font-weight: 700; }
 @media (prefers-reduced-motion: no-preference) {
   .draw use, .draw circle.core-ring { stroke-dasharray: 1; stroke-dashoffset: 1; animation: tn-draw 1.6s cubic-bezier(.6, 0, .2, 1) forwards; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
   .spin { transform-box: fill-box; transform-origin: center; animation: tn-spin 160s linear infinite; }
@@ -1289,4 +1298,78 @@ html[data-lang="en"] .tenos-rank-badge em::before { content: "#"; }
 @media (max-width: 520px) {
   .mail-sheet { place-items: end stretch; padding: 0; }
   .mail-sheet-panel { width: 100%; border-radius: var(--radius) var(--radius) 0 0; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateY(24px); }
+}
+
+/* ---------------------------------------------------------------------
+   상담 신청서 (#inqSheet · site.js 가 만든다 · supabase-inquiries.sql)
+   --------------------------------------------------------------------- */
+.inq-sheet {
+  position: fixed; inset: 0; z-index: 1400; display: grid; place-items: center; padding: 20px;
+  background: rgba(10, 11, 12, .66); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  opacity: 0; visibility: hidden; transition: opacity .22s, visibility 0s .22s;
+}
+.inq-sheet.open { opacity: 1; visibility: visible; transition: opacity .22s, visibility 0s; }
+.inq-panel {
+  width: min(640px, 100%); max-height: calc(100dvh - 40px); overflow: auto; overscroll-behavior: contain;
+  display: grid; gap: 18px; padding: 26px 26px 22px;
+  border-radius: var(--radius); background: var(--white); color: var(--ink);
+  transform: translateY(10px); transition: transform .25s var(--ease);
+}
+.inq-sheet.open .inq-panel { transform: none; }
+.inq-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.inq-head .label { color: var(--ink-3); }
+.inq-title { margin-top: 6px; font-size: clamp(21px, 2.2vw, 26px); line-height: 1.3; letter-spacing: -0.03em; }
+.inq-sub { margin-top: 4px; color: var(--ink-2); font-size: 14.5px; }
+.inq-form { display: grid; gap: 16px; }
+.inq-kinds { margin: 0; padding: 0; border: 0; min-width: 0; }
+.inq-kinds legend { padding: 0; margin-bottom: 10px; color: var(--ink-3); }
+.inq-kind-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.inq-kind { position: relative; }
+.inq-kind input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.inq-kind span {
+  display: inline-flex; align-items: center; min-height: 38px; padding: 0 14px;
+  border: 1px solid var(--hair); border-radius: 999px; font-size: 14px; color: var(--ink-2);
+  transition: border-color .2s, background .2s, color .2s;
+}
+.inq-kind:hover span { border-color: var(--ink); color: var(--ink); }
+.inq-kind input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--white); }
+.inq-kind input:focus-visible + span { outline: 2px solid var(--cheong); outline-offset: 2px; }
+.inq-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.inq-field { display: grid; gap: 6px; min-width: 0; }
+.inq-lab { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.inq-lab small { margin-left: 4px; font-weight: 400; color: var(--ink-3); }
+.inq-req { color: var(--jeok); font-weight: 600; }
+.inq-field input, .inq-field textarea {
+  width: 100%; padding: 11px 14px; border: 1px solid var(--hair); border-radius: 12px;
+  background: var(--paper); color: var(--ink); font: inherit; font-size: 15px;
+  transition: border-color .2s, background .2s;
+}
+.inq-field textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+.inq-field input:focus, .inq-field textarea:focus { outline: none; border-color: var(--ink); background: var(--white); }
+.inq-field [aria-invalid="true"], .inq-agree [aria-invalid="true"] { border-color: var(--jeok); outline: 2px solid rgba(224, 72, 43, .25); }
+.inq-count { justify-self: end; font: 400 12px/1.3 var(--mono); color: var(--ink-3); }
+.inq-website { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.inq-consent { display: grid; gap: 8px; padding: 14px 16px; border-radius: 14px; background: var(--paper); }
+.inq-agree { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; cursor: pointer; }
+.inq-agree input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ink); }
+.inq-agree b { color: var(--jeok); font-weight: 600; }
+.inq-detail summary { cursor: pointer; font-size: 13px; color: var(--ink-2); }
+.inq-detail p { margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+.inq-detail a { color: var(--ink); }
+.inq-error { padding: 12px 14px; border-radius: 12px; background: rgba(224, 72, 43, .08); color: #b3341b; font-size: 14px; }
+.inq-error-mail { padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.inq-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.inq-submit:disabled { opacity: .6; }
+.inq-mail-alt { font-size: 14px; color: var(--ink-2); text-underline-offset: 3px; }
+.inq-mail-alt:hover { color: var(--ink); }
+.inq-done { display: grid; justify-items: start; gap: 12px; padding: 8px 0 4px; }
+.inq-done-mark { position: relative; width: 44px; height: 44px; border-radius: 50%; background: var(--nok); }
+.inq-done-mark::after { content: ""; position: absolute; left: 16px; top: 10px; width: 10px; height: 19px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg); }
+.inq-done-title { font-size: 22px; letter-spacing: -0.03em; }
+.inq-done-title:focus { outline: none; }
+.inq-done p { color: var(--ink-2); }
+@media (max-width: 600px) {
+  .inq-sheet { place-items: end stretch; padding: 0; }
+  .inq-panel { width: 100%; max-height: 94dvh; padding: 22px 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-radius: var(--radius) var(--radius) 0 0; transform: translateY(24px); }
+  .inq-row { grid-template-columns: 1fr; }
 }
