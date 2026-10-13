@@ -669,7 +669,7 @@ html.i18n-pending body { opacity: 0; animation: tn-reveal 0s 1.5s forwards; }
 }
 
 /* 쪽 안의 일반 구역 여백 */
-main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec) { padding-block: clamp(72px, 9vw, 128px); }
+main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.cert-band) { padding-block: clamp(72px, 9vw, 128px); }
 main > section > .wrap, .section-inner { max-width: var(--wrap); margin-inline: auto; padding-inline: var(--gutter); }
 
 /* ----- 분류 꼬리표: 색은 점 하나로 ----- */
@@ -918,7 +918,7 @@ main > section > .wrap, .section-inner { max-width: var(--wrap); margin-inline: 
 .promo-pop-today:hover, .promo-pop-close:hover { color: var(--ink); background: var(--paper); }
 
 /* 래퍼가 없는 예전 구역: 안쪽 여백으로 가운데 맞춘다 */
-main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.home-hero) {
+main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.home-hero):not(.cert-band) {
   padding-inline: max(var(--gutter), calc((100% - var(--wrap)) / 2 + var(--gutter)));
 }
 
@@ -1394,3 +1394,85 @@ html[data-lang="en"] .tenos-rank-badge em::before { content: "#"; }
 /* 멈춘 상태에서는 켜기 단추를 조금 더 눈에 띄게 */
 .motion-toggle[data-state="off"] { color: var(--on-night); border-color: var(--hair-night-2); }
 @media (max-width: 600px) { .motion-toggle { top: 10px; right: 12px; min-height: 30px; padding: 0 11px 0 10px; font-size: 10.5px; } }
+
+/* ---------------------------------------------------------------------
+   인증 · 서울 AI 허브 멤버십 (첫 화면 · 회사 홈 · 소개)
+   증서는 못에 건 액자처럼 건다. 화면에 들어오면 한 번 흔들리다 멈춘다(site.js).
+   누르면 크게 본다 (#zoomSheet · site.js).
+   밤 바탕(.night)과 종이 바탕 모두에 놓일 수 있게 선·흐린 글자를 변수로 둔다.
+   --------------------------------------------------------------------- */
+.cert-band { --cert-line: var(--hair); --cert-dim: var(--ink-3); padding-block: clamp(64px, 8vw, 112px); border-top: 1px solid var(--cert-line); }
+.cert-band.night { --cert-line: var(--hair-night); --cert-dim: var(--on-night-3); }
+.cert-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: clamp(40px, 7vw, 120px); }
+.cert-copy { display: grid; gap: 18px; justify-items: start; max-width: 40rem; }
+.cert-copy .title-l { text-wrap: balance; }
+.cert-facts { width: 100%; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.3fr) minmax(0, 1fr); margin-top: 8px; border-top: 1px solid var(--cert-line); }
+.cert-facts > div { display: grid; align-content: start; gap: 8px; padding: 18px 16px 0 0; }
+.cert-facts > div + div { padding-left: 16px; border-left: 1px solid var(--cert-line); }
+.cert-facts dt { color: var(--cert-dim); }
+.cert-facts dd { margin: 0; font: 500 15px/1.45 var(--mono); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.cert-open { margin-top: 10px; }
+
+.cert-frame { width: clamp(220px, 23vw, 300px); margin: 0; display: grid; justify-items: center; gap: 18px; }
+.cert-hang { position: relative; width: 100%; padding-top: 40px; transform-origin: 50% 4px; transition: transform .7s var(--ease); }
+.cert-hanger { position: absolute; top: 0; left: 50%; width: 160px; height: 44px; margin-left: -80px; overflow: visible; }
+.cert-hanger path { fill: none; stroke: var(--cert-dim); stroke-width: 1; }
+.cert-hanger circle { fill: var(--hwang); }
+.cert-thumb {
+  position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 3px;
+  background: var(--white); cursor: zoom-in;
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, .7), 0 0 0 1px rgba(0, 0, 0, .06);
+}
+.cert-thumb img { display: block; width: 100%; height: auto; border-radius: 3px; }
+.cert-thumb:focus-visible { outline: 2px solid var(--hwang); outline-offset: 6px; }
+.cert-frame figcaption { color: var(--cert-dim); text-align: center; }
+@keyframes cert-swing {
+  0%   { transform: rotate(5deg); }
+  18%  { transform: rotate(-3.4deg); }
+  36%  { transform: rotate(2.2deg); }
+  54%  { transform: rotate(-1.3deg); }
+  72%  { transform: rotate(.6deg); }
+  88%  { transform: rotate(-.2deg); }
+  100% { transform: rotate(0deg); }
+}
+.cert-hang.is-swinging { animation: cert-swing 2.6s cubic-bezier(.37, 0, .63, 1) both; }
+@media (hover: hover) { .cert-frame:hover .cert-hang:not(.is-swinging) { transform: rotate(-1.4deg); } }
+html.motion-reduced .cert-hang { animation: none; transition: none; transform: none !important; }
+@media (max-width: 860px) {
+  .cert-grid { grid-template-columns: minmax(0, 1fr); }
+  .cert-frame { width: min(62vw, 260px); justify-self: center; }
+}
+@media (max-width: 600px) {
+  .cert-facts { grid-template-columns: minmax(0, 1fr); }
+  .cert-facts > div { grid-template-columns: 8.5em minmax(0, 1fr); align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--cert-line); }
+  .cert-facts > div + div { padding-left: 0; border-left: 0; }
+}
+
+/* ---------------------------------------------------------------------
+   크게 보기 (#zoomSheet · site.js) — [data-zoom] 을 누르면 연다
+   그림을 누르면 화면 맞춤 ↔ 원래 크기. 바깥 · × · Esc 로 닫는다.
+   --------------------------------------------------------------------- */
+.zoom-sheet {
+  position: fixed; inset: 0; z-index: 1500; display: grid; grid-template-rows: auto minmax(0, 1fr);
+  background: rgba(10, 11, 12, .9); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: var(--on-night);
+  opacity: 0; visibility: hidden; transition: opacity .22s, visibility 0s .22s;
+}
+.zoom-sheet.open { opacity: 1; visibility: visible; transition: opacity .22s, visibility 0s; }
+.zoom-sheet:focus { outline: none; }
+.zoom-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(12px + env(safe-area-inset-top, 0px)) var(--gutter) 12px; }
+.zoom-title { min-width: 0; color: var(--on-night-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zoom-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.zoom-full { color: var(--on-night); border-color: var(--hair-night-2); text-decoration: none; }
+.zoom-full:hover, .zoom-full:focus-visible { border-color: var(--on-night); }
+.zoom-x { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hair-night-2); background: transparent; color: var(--on-night); font-size: 20px; line-height: 1; cursor: pointer; }
+.zoom-x:hover, .zoom-x:focus-visible { border-color: var(--on-night); }
+.zoom-stage { outline: none; overflow: auto; overscroll-behavior: contain; display: grid; place-items: center; padding: 0 var(--gutter) calc(24px + env(safe-area-inset-bottom, 0px)); }
+.zoom-stage img {
+  display: block; width: auto; height: auto; max-width: min(100%, 860px); max-height: calc(100dvh - 100px);
+  border-radius: 3px; background: var(--white); box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .8);
+  cursor: zoom-in; transform: translateY(10px) scale(.98); transition: transform .3s var(--ease);
+}
+.zoom-sheet.open .zoom-stage img { transform: none; }
+.zoom-stage.is-full { place-items: start center; }
+.zoom-stage.is-full img { max-width: none; max-height: none; width: min(1200px, 100%); cursor: zoom-out; }
+@media (max-width: 600px) { .zoom-full { display: none; } }

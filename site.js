@@ -1001,8 +1001,11 @@ function openOverlay(container) {
         const list = Array.from(container.querySelectorAll(FOCUSABLE_SEL)).filter(el => el.offsetParent !== null);
         if (!list.length) return;
         const first = list[0], last = list[list.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        const at = list.indexOf(document.activeElement);
+        // 창 자체나 tabindex="-1" 칸(그림 등)에 포커스가 있으면 목록 밖이다 — 밖으로 새지 않게 처음·끝으로
+        if (at === -1) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+        else if (e.shiftKey && at === 0) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && at === list.length - 1) { e.preventDefault(); first.focus(); }
     };
     container.addEventListener('keydown', container._fxTrap);
 }
@@ -1857,6 +1860,83 @@ document.addEventListener('click', e => {
     e.preventDefault();
     openMailSheet(a);
 });
+
+/* ============ 크게 보기 ============
+   [data-zoom="큰 그림 주소"] 를 누르면 화면 가득 보여 준다 (지금은 서울 AI 허브 인증서).
+     data-zoom-title  위 띠에 적을 제목
+     data-zoom-alt    그림 설명
+   그림을 누르면 화면 맞춤 ↔ 원래 크기. 바깥 · × · Esc 로 닫는다.
+   창과 그림 칸은 tabindex="-1" — 어디를 눌러도 포커스가 창 안에 남아 Esc · Tab 이 그대로 듣는다.
+   제목·설명은 연 순간의 언어로 옮겨 넣는다(TenI18n.t). */
+let zoomSheet = null;
+function buildZoomSheet() {
+    const el = document.createElement('div');
+    el.className = 'zoom-sheet';
+    el.id = 'zoomSheet';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'zoomTitle');
+    el.tabIndex = -1;
+    el.innerHTML = `
+        <div class="zoom-bar">
+            <p class="label zoom-title" id="zoomTitle"></p>
+            <div class="zoom-actions">
+                <a class="pill zoom-full" target="_blank" rel="noopener">원본 크기로 열기 <span aria-hidden="true">↗</span></a>
+                <button type="button" class="zoom-x" data-zoom-close aria-label="닫기">×</button>
+            </div>
+        </div>
+        <div class="zoom-stage" tabindex="-1"><img alt="" decoding="async"></div>`;
+    el.addEventListener('click', ev => {
+        const stage = el.querySelector('.zoom-stage');
+        if (ev.target === el || ev.target === stage || ev.target.closest('[data-zoom-close]')) { closeZoom(); return; }
+        if (ev.target.tagName === 'IMG') stage.classList.toggle('is-full');
+    });
+    el.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeZoom(); });
+    document.body.appendChild(el);
+    return el;
+}
+function openZoom(btn) {
+    const t = s => (s && window.TenI18n ? window.TenI18n.t(s) : s || '');
+    zoomSheet = zoomSheet || buildZoomSheet();
+    const src = btn.dataset.zoom;
+    const img = zoomSheet.querySelector('.zoom-stage img');
+    if (img.getAttribute('src') !== src) img.src = src;
+    img.alt = t(btn.dataset.zoomAlt);
+    zoomSheet.querySelector('.zoom-title').textContent = t(btn.dataset.zoomTitle);
+    zoomSheet.querySelector('.zoom-full').href = src;
+    zoomSheet.querySelector('.zoom-stage').classList.remove('is-full');
+    zoomSheet.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    openOverlay(zoomSheet);
+}
+function closeZoom() {
+    if (!zoomSheet || !zoomSheet.classList.contains('open')) return;
+    zoomSheet.classList.remove('open');
+    document.body.style.overflow = '';
+    closeOverlay(zoomSheet);
+}
+document.addEventListener('click', e => {
+    const b = e.target.closest('[data-zoom]');
+    if (!b) return;
+    e.preventDefault();
+    openZoom(b);
+});
+
+/* 걸어 둔 인증서 — 화면에 들어오면 못에 걸린 액자처럼 한 번 흔들리다 멈춘다.
+   '움직임 멈춤'(motion.js)이거나 기기에서 움직임을 줄였으면 흔들지 않는다. */
+const certHangs = document.querySelectorAll('.cert-hang');
+if (certHangs.length && 'IntersectionObserver' in window) {
+    const still = () => (window.TenMotion ? window.TenMotion.reduced
+        : window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const hangObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        hangObserver.unobserve(entry.target);
+        if (still()) return;
+        entry.target.classList.add('is-swinging');
+        entry.target.addEventListener('animationend', () => entry.target.classList.remove('is-swinging'), { once: true });
+    }), { threshold: 0.4 });
+    certHangs.forEach(h => hangObserver.observe(h));
+}
 
 /* ============ 상담 신청서 ============
    [data-inquiry] 를 누르면 연다 (메뉴·상담 구역의 '상담 신청', RUNIQ '먼저 써 보기 문의').
