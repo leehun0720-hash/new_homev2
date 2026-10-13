@@ -709,15 +709,19 @@ async function listBanners() {
     return localList('tenai_banners', SEED_BANNERS).map(bannerFromRow).sort(bannerOrder);
 }
 
-/* 지금 이 순간 띄울 배너를 고른다.
-   활성 + 노출 기간 안에 든 것 중 sort_order 가 가장 앞선 하나. */
-function pickLiveBanner(items, now) {
+/* 지금 이 순간 띄울 배너들 — 활성 + 노출 기간 안, sort_order 순.
+   여러 개면 팝업 한 창에서 넘겨 본다(site.js). */
+function pickLiveBanners(items, now) {
     const t = Number(now) || Date.now();
     return (items || []).filter(b =>
         b.active &&
         (!b.startAt || t >= b.startAt) &&
         (!b.endAt   || t <= b.endAt)
-    ).sort(bannerOrder)[0] || null;
+    ).sort(bannerOrder);
+}
+/* 맨 앞 하나 (팝업을 열면 처음 보이는 것) */
+function pickLiveBanner(items, now) {
+    return pickLiveBanners(items, now)[0] || null;
 }
 
 async function saveBanner(banner) {
@@ -1170,7 +1174,7 @@ window.TenStore = {
     listCategories, categoriesOf, categorySource,
     saveCategory, deleteCategory, reorderCategories, countCategoryUsage,
     /* 홍보 배너 */
-    listBanners, pickLiveBanner, saveBanner, deleteBanner,
+    listBanners, pickLiveBanner, pickLiveBanners, saveBanner, deleteBanner,
     uploadBannerImage, deleteBannerImage,
     getSettings, getPublicSettings, saveSettings,
     listPosts, savePost, deletePost,
