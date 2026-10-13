@@ -1572,13 +1572,20 @@ async function renderTenosRank() {
      - 팝업 내용은 정적 HTML 에 있으면 안 된다. 크롤러가 본문으로 읽고,
        JS 를 끈 사용자에게는 닫을 수 없는 덩어리로 남는다
 
+   여러 개가 동시에 노출 중이면 한 창에서 넘겨 본다 (‹ 1 / 2 ›)
+     정렬 순서가 작은 것부터. 화살표 · 점 · 좌우 방향키 · 손가락 밀기로 넘긴다.
+     가만히 두면 7초마다 다음 것으로 넘어간다 — 마우스를 올려 두면 멈추고,
+     직접 넘기거나 키보드를 한 번이라도 쓰면 다시는 저절로 넘기지 않는다.
+     '움직임 멈춤'(motion.js)이면 저절로 넘기지 않는다.
+
    다시 보여 주는 규칙
-     '오늘 하루 보지 않기' 를 누르면 그 배너는 날짜가 바뀔 때까지 안 뜬다.
+     '오늘 하루 보지 않기' 를 누르면 지금 창에 든 배너 모두 날짜가 바뀔 때까지 안 뜬다.
      그냥 닫으면 이 방문(탭)에서만 안 뜬다 — 다음 방문에는 다시 보인다.
      배너를 고쳐 다시 올리면 저장 시각이 바뀌므로 닫아 둔 사람에게도 다시 뜬다.
    ===================================================================== */
 const BANNER_DAY_KEY = 'tenai_banner_hidden';     // { [키]: 'YYYY-MM-DD' }
-const BANNER_SESSION_KEY = 'tenai_banner_closed'; // 이 탭에서 닫은 배너 키
+const BANNER_SESSION_KEY = 'tenai_banner_closed'; // 이 탭에서 닫은 배너 키 목록 (JSON 배열)
+const BANNER_ROTATE_MS = 7000;
 
 /* 내용이 바뀌면 키도 바뀐다 — 닫아 둔 사람도 새 소식은 보게 */
 const bannerKey = b => `${b.id}:${b.createdAt || 0}`;
@@ -1590,26 +1597,37 @@ const todayStamp = () => {
 
 /* 저장소는 사생활 보호 모드나 차단 설정에서 던질 수 있다.
    배너 하나 때문에 페이지가 죽지 않도록 전부 감싼다. */
-function bannerHidden(key) {
+function sessionClosedKeys() {
+    let raw = null;
+    try { raw = sessionStorage.getItem(BANNER_SESSION_KEY); } catch (e) { return []; }
+    if (!raw) return [];
     try {
-        if (sessionStorage.getItem(BANNER_SESSION_KEY) === key) return true;
+        const v = JSON.parse(raw);
+        return Array.isArray(v) ? v.map(String) : [];
+    } catch (e) { return [raw]; }               // 예전 형식: 키 하나를 그대로 적어 두었다
+}
+function bannerHidden(key) {
+    if (sessionClosedKeys().includes(key)) return true;
+    try {
         const map = JSON.parse(localStorage.getItem(BANNER_DAY_KEY) || '{}');
         return map[key] === todayStamp();
     } catch (e) { return false; }
 }
-function hideBannerToday(key) {
+function hideBannersToday(keys) {
     try {
         const map = JSON.parse(localStorage.getItem(BANNER_DAY_KEY) || '{}');
         // 지난 날짜 기록은 버린다 — 저장소에 옛 배너 키가 쌓이지 않게
         const today = todayStamp();
         const next = {};
         Object.keys(map).forEach(k => { if (map[k] === today) next[k] = map[k]; });
-        next[key] = today;
+        keys.forEach(k => { next[k] = today; });
         localStorage.setItem(BANNER_DAY_KEY, JSON.stringify(next));
     } catch (e) { /* 저장 못 해도 닫히기는 한다 */ }
 }
-function hideBannerThisVisit(key) {
-    try { sessionStorage.setItem(BANNER_SESSION_KEY, key); } catch (e) { /* 무시 */ }
+function hideBannersThisVisit(keys) {
+    const set = new Set(sessionClosedKeys());
+    keys.forEach(k => set.add(k));
+    try { sessionStorage.setItem(BANNER_SESSION_KEY, JSON.stringify([...set])); } catch (e) { /* 무시 */ }
 }
 
 /* 배너 주소 검사 — safeUrl 은 빈 값을 '/apps' 로 바꾸므로 여기선 쓸 수 없다.
@@ -1633,11 +1651,13 @@ const bannerLinkUrl = u => {
 
 let bannerEl = null;
 let bannerEsc = null;
+let bannerTimer = null;
 
-function closePromoBanner(key, forToday) {
+function closePromoBanner(keys, forToday) {
     if (!bannerEl) return;
-    if (forToday) hideBannerToday(key); else hideBannerThisVisit(key);
+    if (forToday) hideBannersToday(keys); else hideBannersThisVisit(keys);
     if (bannerEsc) { document.removeEventListener('keydown', bannerEsc); bannerEsc = null; }
+    if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
     bannerEl.classList.remove('open');
     document.body.style.overflow = '';
     closeOverlay(bannerEl);
@@ -1645,47 +1665,118 @@ function closePromoBanner(key, forToday) {
     setTimeout(() => { if (bannerEl) { bannerEl.remove(); bannerEl = null; } }, 300);
 }
 
-function buildPromoBanner(b) {
-    const key = bannerKey(b);
+function promoSlideHtml(b, i) {
     const img = bannerImgUrl(b.imageUrl);
     const link = bannerLinkUrl(b.linkUrl);
     const label = String(b.linkLabel || '자세히 보기').trim() || '자세히 보기';
-
-    const el = document.createElement('div');
-    el.className = 'promo-pop';
-    el.id = 'promoPop';
-    el.setAttribute('role', 'dialog');
-    el.setAttribute('aria-modal', 'true');
-    el.setAttribute('aria-labelledby', 'promoPopTitle');
-    el.innerHTML = `
-        <div class="promo-pop-box">
+    return `
+        <div class="promo-pop-slide" data-i="${i}">
             ${img ? `<div class="promo-pop-figure">
                 <img src="${escHtml(img)}" alt="${escHtml(b.imageAlt || '')}" loading="eager" decoding="async">
             </div>` : ''}
             <div class="promo-pop-body">
                 ${b.badge ? `<span class="promo-pop-badge">${escHtml(b.badge)}</span>` : ''}
-                <h2 class="promo-pop-title" id="promoPopTitle">${escHtml(b.title)}</h2>
+                <h2 class="promo-pop-title" id="promoPopTitle${i}">${escHtml(b.title)}</h2>
                 ${b.body ? `<p class="promo-pop-text">${escHtml(b.body)}</p>` : ''}
-                ${link ? `<a class="promo-pop-cta" href="${escHtml(link)}" target="_blank" rel="noopener">
+                ${link ? `<a class="promo-pop-cta" href="${escHtml(link)}" target="_blank" rel="noopener" data-key="${escHtml(bannerKey(b))}">
                     ${escHtml(label)}
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>` : ''}
             </div>
+        </div>`;
+}
+
+function buildPromoBanner(list) {
+    const keys = list.map(bannerKey);
+    const n = list.length;
+
+    const el = document.createElement('div');
+    el.className = 'promo-pop' + (n > 1 ? ' is-multi' : '');
+    el.id = 'promoPop';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'promoPopTitle0');
+    el.innerHTML = `
+        <div class="promo-pop-box">
+            <div class="promo-pop-slides">${list.map(promoSlideHtml).join('')}</div>
+            ${n > 1 ? `<div class="promo-pop-pager">
+                <button type="button" class="promo-pop-nav" data-step="-1" aria-label="이전 소식">‹</button>
+                <span class="promo-pop-dots" aria-hidden="true">${list.map((_, i) => `<i data-go="${i}"></i>`).join('')}</span>
+                <span class="promo-pop-count" aria-live="polite"><b>1</b> / ${n}</span>
+                <button type="button" class="promo-pop-nav" data-step="1" aria-label="다음 소식">›</button>
+            </div>` : ''}
             <div class="promo-pop-foot">
                 <button type="button" class="promo-pop-today" data-close-today>오늘 하루 보지 않기</button>
                 <button type="button" class="promo-pop-close" data-close aria-label="배너 닫기">닫기 ✕</button>
             </div>
         </div>`;
 
+    const slides = [...el.querySelectorAll('.promo-pop-slide')];
+    let cur = 0;
+    let userMoved = false;
+    let paused = false;
+    const show = i => {
+        cur = (i + n) % n;
+        slides.forEach((s, k) => {
+            const on = k === cur;
+            s.classList.toggle('is-on', on);
+            s.setAttribute('aria-hidden', String(!on));
+            if ('inert' in HTMLElement.prototype) s.inert = !on;
+        });
+        el.setAttribute('aria-labelledby', 'promoPopTitle' + cur);
+        el.querySelectorAll('.promo-pop-dots i').forEach((d, k) => d.classList.toggle('on', k === cur));
+        const c = el.querySelector('.promo-pop-count b');
+        if (c) c.textContent = String(cur + 1);
+    };
+    const step = d => { userMoved = true; show(cur + d); };
+    show(0);
+
     on(el, 'click', e => {
-        if (e.target === el) { closePromoBanner(key, false); return; }          // 배경 클릭
-        if (e.target.closest('[data-close-today]')) { closePromoBanner(key, true); return; }
-        if (e.target.closest('[data-close]')) { closePromoBanner(key, false); return; }
-        // 링크를 눌러 나가는 경우도 이 방문에서는 그만 보여 준다
-        if (e.target.closest('.promo-pop-cta')) hideBannerThisVisit(key);
+        if (e.target === el) { closePromoBanner(keys, false); return; }          // 배경 클릭
+        if (e.target.closest('[data-close-today]')) { closePromoBanner(keys, true); return; }
+        if (e.target.closest('[data-close]')) { closePromoBanner(keys, false); return; }
+        const nav = e.target.closest('[data-step]');
+        if (nav) { step(Number(nav.dataset.step)); return; }
+        const dot = e.target.closest('[data-go]');
+        if (dot) { userMoved = true; show(Number(dot.dataset.go)); return; }
+        // 링크를 눌러 나가는 경우도 이 방문에서는 그 배너를 그만 보여 준다
+        const cta = e.target.closest('.promo-pop-cta');
+        if (cta) hideBannersThisVisit([cta.dataset.key]);
     });
-    bannerEsc = e => { if (e.key === 'Escape' && bannerEl) closePromoBanner(key, false); };
+    bannerEsc = e => {
+        if (!bannerEl) return;
+        if (e.key === 'Escape') closePromoBanner(keys, false);
+        else if (n > 1 && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && bannerEl.contains(document.activeElement)) {
+            step(e.key === 'ArrowRight' ? 1 : -1);
+        }
+    };
     document.addEventListener('keydown', bannerEsc);
+
+    if (n > 1) {
+        // 휴대폰: 좌우로 밀어 넘기기
+        let x0 = null;
+        on(el, 'touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+        on(el, 'touchend', e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            if (Math.abs(dx) > 44) step(dx < 0 ? 1 : -1);
+            x0 = null;
+        }, { passive: true });
+        // 저절로 넘기기 — 손을 대면 멈춘다
+        const box = el.querySelector('.promo-pop-box');
+        // (포커스로는 판단하지 않는다 — 창이 열리면 포커스가 저절로 안에 들어오므로.
+        //  키보드를 한 번이라도 누르면 그 사람이 읽고 있는 것이니 그만 넘긴다)
+        on(box, 'pointerenter', () => { paused = true; });
+        on(box, 'pointerleave', () => { paused = false; });
+        on(box, 'keydown', () => { userMoved = true; });
+        el._startRotate = () => {
+            if (window.TenMotion && window.TenMotion.reduced) return;
+            bannerTimer = setInterval(() => {
+                if (userMoved || paused || document.hidden || !el.classList.contains('open')) return;
+                show(cur + 1);
+            }, BANNER_ROTATE_MS);
+        };
+    }
     return el;
 }
 
@@ -1699,11 +1790,10 @@ async function initPromoBanner() {
 
     let items = [];
     try { items = await TenStore.listBanners(); } catch (e) { return; }
-    const b = TenStore.pickLiveBanner(items, Date.now());
-    if (!b) return;
-    if (bannerHidden(bannerKey(b))) return;
+    const list = TenStore.pickLiveBanners(items, Date.now()).filter(b => !bannerHidden(bannerKey(b)));
+    if (!list.length) return;
 
-    bannerEl = buildPromoBanner(b);
+    bannerEl = buildPromoBanner(list);
     document.body.appendChild(bannerEl);
 
     // 페이지가 자리를 잡은 뒤 띄운다 — 로딩 중에 끼어들면 닫기 버튼을 헛누른다
@@ -1712,6 +1802,7 @@ async function initPromoBanner() {
         bannerEl.classList.add('open');
         document.body.style.overflow = 'hidden';
         openOverlay(bannerEl);
+        if (bannerEl._startRotate) bannerEl._startRotate();
     }, 700);
 }
 

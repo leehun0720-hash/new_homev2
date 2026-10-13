@@ -916,6 +916,21 @@ main > section > .wrap, .section-inner { max-width: var(--wrap); margin-inline: 
 .promo-pop-foot { display: flex; justify-content: space-between; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--hair); }
 .promo-pop-today, .promo-pop-close { min-height: 40px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); font-size: 13.5px; }
 .promo-pop-today:hover, .promo-pop-close:hover { color: var(--ink); background: var(--paper); }
+/* 여러 개면 한 칸에 겹쳐 두고 하나만 보인다 — 창 높이는 가장 긴 것에 맞춰 넘길 때 흔들리지 않는다 */
+.promo-pop-slides { display: grid; }
+.promo-pop-slide { grid-area: 1 / 1; display: flex; flex-direction: column; transition: opacity .3s var(--ease), visibility 0s; }
+.promo-pop-slide:not(.is-on) { opacity: 0; visibility: hidden; transition: opacity .3s var(--ease), visibility 0s .3s; }
+.promo-pop.is-multi .promo-pop-figure { aspect-ratio: 1200 / 630; overflow: hidden; background: var(--paper-2); }
+.promo-pop.is-multi .promo-pop-figure img { height: 100%; object-fit: cover; }
+.promo-pop-pager { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 18px 14px; }
+.promo-pop-nav { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--hair); border-radius: 50%; background: transparent; color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+.promo-pop-nav:hover, .promo-pop-nav:focus-visible { border-color: var(--ink); }
+.promo-pop-dots { display: flex; gap: 6px; }
+.promo-pop-dots i { width: 6px; height: 6px; border-radius: 999px; background: var(--hair-2); cursor: pointer; transition: width .25s var(--ease), background .25s; }
+.promo-pop-dots i.on { width: 18px; background: var(--ink); }
+.promo-pop-count { min-width: 3.2em; text-align: center; color: var(--ink-3); font: 500 12px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.promo-pop-count b { color: var(--ink); font-weight: 600; }
+html.motion-reduced .promo-pop-slide, html.motion-reduced .promo-pop-dots i { transition: none; }
 
 /* 래퍼가 없는 예전 구역: 안쪽 여백으로 가운데 맞춘다 */
 main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.home-hero):not(.cert-band) {

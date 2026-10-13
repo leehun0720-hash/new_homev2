@@ -820,7 +820,7 @@
                     <p class="sub">
                         홈페이지에 <strong>팝업</strong>으로 뜨는 홍보 배너입니다. 방문자가 처음 들어올 때 한 번 뜨고,
                         '오늘 하루 보지 않기'를 누르면 그날은 다시 뜨지 않습니다.<br>
-                        <strong>노출 중</strong>으로 켠 배너가 여러 개면 <strong>정렬 순서</strong>가 가장 앞선 하나만 뜹니다.
+                        <strong>노출 중</strong>으로 켠 배너가 여러 개면 한 팝업 안에서 <strong>정렬 순서</strong>대로 넘겨 볼 수 있게 뜹니다 (작은 수가 먼저).
                     </p>
                     <input type="hidden" id="banId">
 
@@ -1827,10 +1827,12 @@
             try { items = await TenStore.listBanners(); }
             catch (e) { items = []; }
 
-            const live = TenStore.pickLiveBanner(items, Date.now());
+            const liveList = TenStore.pickLiveBanners(items, Date.now());
+            const liveIds = new Set(liveList.map(b => b.id));
             $('banCount').innerHTML = '총 ' + items.length + '개' +
-                (live ? ' · 지금 뜨는 배너: <strong>' + esc(live.title || '(제목 없음)') + '</strong>'
-                      : ' · 지금 뜨는 배너 없음');
+                (liveList.length
+                    ? ' · 지금 뜨는 배너 ' + liveList.length + '개: ' + liveList.map(b => '<strong>' + esc(b.title || '(제목 없음)') + '</strong>').join(' → ')
+                    : ' · 지금 뜨는 배너 없음');
 
             if (!items.length) {
                 $('banList').innerHTML = '<div class="empty">배너가 없습니다. 위에서 만들어 주세요.</div>';
@@ -1839,7 +1841,7 @@
 
             $('banList').innerHTML = items.map(b => {
                 const st = banStatusText(b);
-                const isLive = live && live.id === b.id;
+                const isLive = liveIds.has(b.id);
                 const period = (b.startAt || b.endAt)
                     ? (b.startAt ? fmtDate(b.startAt) : '제한 없음') + ' ~ ' + (b.endAt ? fmtDate(b.endAt) : '제한 없음')
                     : '기간 제한 없음';
