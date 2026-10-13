@@ -68,6 +68,14 @@
   to = "/education"
   status = 301
 
+# 회사소개서 PDF — 누르면 화면에 열지 않고 바로 저장되게 한다.
+# a[download] 를 무시하는 브라우저(아이폰 사파리·카카오톡 안 브라우저 등)도 이 머리글은 따른다.
+# 저장 이름: 한글(filename*) · 이를 모르는 옛 브라우저는 영문(filename).
+[[headers]]
+  for = "/docs/TenAI-Company-Profile-2026.pdf"
+  [headers.values]
+    Content-Disposition = "attachment; filename=\"TenAI-Company-Profile-2026.pdf\"; filename*=UTF-8''TenAI_%ED%9A%8C%EC%82%AC%EC%86%8C%EA%B0%9C%EC%84%9C_2026.pdf"
+
 # SPA 아님(멀티 페이지) — 그 외 주소는 홈을 404 본문으로
 [[redirects]]
   from = "/*"
