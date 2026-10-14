@@ -1572,20 +1572,18 @@ async function renderTenosRank() {
      - 팝업 내용은 정적 HTML 에 있으면 안 된다. 크롤러가 본문으로 읽고,
        JS 를 끈 사용자에게는 닫을 수 없는 덩어리로 남는다
 
-   여러 개가 동시에 노출 중이면 한 창에서 넘겨 본다 (‹ 1 / 2 ›)
-     정렬 순서가 작은 것부터. 화살표 · 점 · 좌우 방향키 · 손가락 밀기로 넘긴다.
-     가만히 두면 7초마다 다음 것으로 넘어간다 — 마우스를 올려 두면 멈추고,
-     직접 넘기거나 키보드를 한 번이라도 쓰면 다시는 저절로 넘기지 않는다.
-     '움직임 멈춤'(motion.js)이면 저절로 넘기지 않는다.
+   여러 개가 동시에 노출 중이면 나란히 함께 띄운다 (정렬 순서가 작은 것이 왼쪽 · 위)
+     PC 는 옆으로 나란히, 좁은 화면은 위아래로 쌓고 창 안에서 스크롤한다.
+     카드마다 '오늘 하루 보지 않기' · '닫기' 가 따로 있어 하나씩 닫을 수 있다.
+     어두운 바깥을 누르거나 Esc 를 누르면 남은 카드를 한꺼번에 닫는다.
 
    다시 보여 주는 규칙
-     '오늘 하루 보지 않기' 를 누르면 지금 창에 든 배너 모두 날짜가 바뀔 때까지 안 뜬다.
+     '오늘 하루 보지 않기' 를 누르면 그 배너는 날짜가 바뀔 때까지 안 뜬다.
      그냥 닫으면 이 방문(탭)에서만 안 뜬다 — 다음 방문에는 다시 보인다.
      배너를 고쳐 다시 올리면 저장 시각이 바뀌므로 닫아 둔 사람에게도 다시 뜬다.
    ===================================================================== */
 const BANNER_DAY_KEY = 'tenai_banner_hidden';     // { [키]: 'YYYY-MM-DD' }
 const BANNER_SESSION_KEY = 'tenai_banner_closed'; // 이 탭에서 닫은 배너 키 목록 (JSON 배열)
-const BANNER_ROTATE_MS = 7000;
 
 /* 내용이 바뀌면 키도 바뀐다 — 닫아 둔 사람도 새 소식은 보게 */
 const bannerKey = b => `${b.id}:${b.createdAt || 0}`;
@@ -1651,26 +1649,42 @@ const bannerLinkUrl = u => {
 
 let bannerEl = null;
 let bannerEsc = null;
-let bannerTimer = null;
 
-function closePromoBanner(keys, forToday) {
+/* 창 전체를 닫는다 — 남아 있는 카드 모두에 같은 규칙을 적용 */
+function closePromoBanner(forToday) {
     if (!bannerEl) return;
-    if (forToday) hideBannersToday(keys); else hideBannersThisVisit(keys);
+    const keys = [...bannerEl.querySelectorAll('.promo-pop-card')].map(c => c.dataset.key);
+    if (keys.length) { if (forToday) hideBannersToday(keys); else hideBannersThisVisit(keys); }
     if (bannerEsc) { document.removeEventListener('keydown', bannerEsc); bannerEsc = null; }
-    if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
     bannerEl.classList.remove('open');
     document.body.style.overflow = '';
     closeOverlay(bannerEl);
     // 전환이 끝난 뒤 치운다 — 닫히는 모습이 보이게
-    setTimeout(() => { if (bannerEl) { bannerEl.remove(); bannerEl = null; } }, 300);
+    const el = bannerEl;
+    bannerEl = null;
+    setTimeout(() => el.remove(), 300);
 }
 
-function promoSlideHtml(b, i) {
+/* 카드 하나만 닫는다 — 마지막 카드였으면 창도 닫는다 */
+function closePromoCard(card, forToday) {
+    if (!bannerEl || !card) return;
+    const rest = [...bannerEl.querySelectorAll('.promo-pop-card')].filter(c => c !== card);
+    if (!rest.length) { closePromoBanner(forToday); return; }
+    if (forToday) hideBannersToday([card.dataset.key]); else hideBannersThisVisit([card.dataset.key]);
+    card.classList.add('is-closing');
+    setTimeout(() => card.remove(), 200);
+    bannerEl.setAttribute('aria-labelledby', rest.map(c => c.getAttribute('aria-labelledby')).join(' '));
+    // 포커스는 남은 카드로 — 사라진 단추에 남아 길을 잃지 않게
+    const next = rest[0].querySelector('.promo-pop-cta, button');
+    if (next) next.focus();
+}
+
+function promoCardHtml(b, i) {
     const img = bannerImgUrl(b.imageUrl);
     const link = bannerLinkUrl(b.linkUrl);
     const label = String(b.linkLabel || '자세히 보기').trim() || '자세히 보기';
     return `
-        <div class="promo-pop-slide" data-i="${i}">
+        <article class="promo-pop-box promo-pop-card" data-key="${escHtml(bannerKey(b))}" aria-labelledby="promoPopTitle${i}" style="--i:${i}">
             ${img ? `<div class="promo-pop-figure">
                 <img src="${escHtml(img)}" alt="${escHtml(b.imageAlt || '')}" loading="eager" decoding="async">
             </div>` : ''}
@@ -1678,116 +1692,44 @@ function promoSlideHtml(b, i) {
                 ${b.badge ? `<span class="promo-pop-badge">${escHtml(b.badge)}</span>` : ''}
                 <h2 class="promo-pop-title" id="promoPopTitle${i}">${escHtml(b.title)}</h2>
                 ${b.body ? `<p class="promo-pop-text">${escHtml(b.body)}</p>` : ''}
-                ${link ? `<a class="promo-pop-cta" href="${escHtml(link)}" target="_blank" rel="noopener" data-key="${escHtml(bannerKey(b))}">
+                ${link ? `<a class="promo-pop-cta" href="${escHtml(link)}" target="_blank" rel="noopener">
                     ${escHtml(label)}
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>` : ''}
             </div>
-        </div>`;
-}
-
-function buildPromoBanner(list) {
-    const keys = list.map(bannerKey);
-    const n = list.length;
-
-    const el = document.createElement('div');
-    el.className = 'promo-pop' + (n > 1 ? ' is-multi' : '');
-    el.id = 'promoPop';
-    el.setAttribute('role', 'dialog');
-    el.setAttribute('aria-modal', 'true');
-    el.setAttribute('aria-labelledby', 'promoPopTitle0');
-    el.innerHTML = `
-        <div class="promo-pop-box">
-            <div class="promo-pop-slides">${list.map(promoSlideHtml).join('')}</div>
-            ${n > 1 ? `<div class="promo-pop-pager">
-                <button type="button" class="promo-pop-nav" data-step="-1" aria-label="이전 소식">‹</button>
-                <span class="promo-pop-dots" aria-hidden="true">${list.map((_, i) => `<i data-go="${i}"></i>`).join('')}</span>
-                <span class="promo-pop-count" aria-live="polite"><b>1</b> / ${n}</span>
-                <button type="button" class="promo-pop-nav" data-step="1" aria-label="다음 소식">›</button>
-            </div>` : ''}
             <div class="promo-pop-foot">
                 <button type="button" class="promo-pop-today" data-close-today>오늘 하루 보지 않기</button>
                 <button type="button" class="promo-pop-close" data-close aria-label="배너 닫기">닫기 ✕</button>
             </div>
-        </div>`;
+        </article>`;
+}
 
-    const slides = [...el.querySelectorAll('.promo-pop-slide')];
-    let cur = 0;
-    let userMoved = false;
-    let paused = false;
-    const show = i => {
-        cur = (i + n) % n;
-        slides.forEach((s, k) => {
-            const on = k === cur;
-            s.classList.toggle('is-on', on);
-            s.setAttribute('aria-hidden', String(!on));
-            if ('inert' in HTMLElement.prototype) s.inert = !on;
-        });
-        el.setAttribute('aria-labelledby', 'promoPopTitle' + cur);
-        el.querySelectorAll('.promo-pop-dots i').forEach((d, k) => d.classList.toggle('on', k === cur));
-        const c = el.querySelector('.promo-pop-count b');
-        if (c) c.textContent = String(cur + 1);
-    };
-    const step = d => { userMoved = true; show(cur + d); };
-    show(0);
+function buildPromoBanner(list) {
+    const el = document.createElement('div');
+    el.className = 'promo-pop' + (list.length > 1 ? ' is-multi' : '');
+    el.id = 'promoPop';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', list.map((_, i) => 'promoPopTitle' + i).join(' '));
+    el.innerHTML = `<div class="promo-pop-row">${list.map(promoCardHtml).join('')}</div>`;
 
     on(el, 'click', e => {
-        if (e.target === el) { closePromoBanner(keys, false); return; }          // 배경 클릭
-        if (e.target.closest('[data-close-today]')) { closePromoBanner(keys, true); return; }
-        if (e.target.closest('[data-close]')) { closePromoBanner(keys, false); return; }
-        const nav = e.target.closest('[data-step]');
-        if (nav) { step(Number(nav.dataset.step)); return; }
-        const dot = e.target.closest('[data-go]');
-        if (dot) { userMoved = true; show(Number(dot.dataset.go)); return; }
+        // 카드 바깥(어두운 배경)을 누르면 전부 닫는다
+        if (!e.target.closest('.promo-pop-card')) { closePromoBanner(false); return; }
+        const card = e.target.closest('.promo-pop-card');
+        if (e.target.closest('[data-close-today]')) { closePromoCard(card, true); return; }
+        if (e.target.closest('[data-close]')) { closePromoCard(card, false); return; }
         // 링크를 눌러 나가는 경우도 이 방문에서는 그 배너를 그만 보여 준다
-        const cta = e.target.closest('.promo-pop-cta');
-        if (cta) hideBannersThisVisit([cta.dataset.key]);
+        if (e.target.closest('.promo-pop-cta')) hideBannersThisVisit([card.dataset.key]);
     });
-    bannerEsc = e => {
-        if (!bannerEl) return;
-        if (e.key === 'Escape') closePromoBanner(keys, false);
-        else if (n > 1 && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') && bannerEl.contains(document.activeElement)) {
-            step(e.key === 'ArrowRight' ? 1 : -1);
-        }
-    };
+    bannerEsc = e => { if (e.key === 'Escape' && bannerEl) closePromoBanner(false); };
     document.addEventListener('keydown', bannerEsc);
-
-    if (n > 1) {
-        // 휴대폰: 좌우로 밀어 넘기기
-        let x0 = null;
-        on(el, 'touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
-        on(el, 'touchend', e => {
-            if (x0 === null) return;
-            const dx = e.changedTouches[0].clientX - x0;
-            if (Math.abs(dx) > 44) step(dx < 0 ? 1 : -1);
-            x0 = null;
-        }, { passive: true });
-        // 저절로 넘기기 — 손을 대면 멈춘다
-        const box = el.querySelector('.promo-pop-box');
-        // (포커스로는 판단하지 않는다 — 창이 열리면 포커스가 저절로 안에 들어오므로.
-        //  키보드를 한 번이라도 누르면 그 사람이 읽고 있는 것이니 그만 넘긴다)
-        on(box, 'pointerenter', () => { paused = true; });
-        on(box, 'pointerleave', () => { paused = false; });
-        on(box, 'keydown', () => { userMoved = true; });
-        el._startRotate = () => {
-            if (window.TenMotion && window.TenMotion.reduced) return;
-            bannerTimer = setInterval(() => {
-                if (userMoved || paused || document.hidden || !el.classList.contains('open')) return;
-                show(cur + 1);
-            }, BANNER_ROTATE_MS);
-        };
-    }
     return el;
 }
 
 async function initPromoBanner() {
-    /* 현관에는 띄우지 않는다.
-       현관은 '어느 쪽으로 갈지' 하나만 고르는 화면이다. 그 위에 팝업이
-       덮이면 고를 것이 셋이 되고, 복잡해서 나눈 의미가 없어진다.
-       안으로 한 발 들어온 뒤(회사 홈·학습 홈)에 보여 준다. */
-    const nav = document.getElementById('nav');
-    if (nav && nav.dataset && nav.dataset.mode === 'gate') return;
-
+    /* 첫 화면(현관)에도 띄운다 — 방문자가 가장 먼저 보는 곳이 메인이므로.
+       (예전에는 현관을 비워 두었으나, 2026-10 요청으로 바꿈) */
     let items = [];
     try { items = await TenStore.listBanners(); } catch (e) { return; }
     const list = TenStore.pickLiveBanners(items, Date.now()).filter(b => !bannerHidden(bannerKey(b)));
@@ -1802,7 +1744,6 @@ async function initPromoBanner() {
         bannerEl.classList.add('open');
         document.body.style.overflow = 'hidden';
         openOverlay(bannerEl);
-        if (bannerEl._startRotate) bannerEl._startRotate();
     }, 700);
 }
 
