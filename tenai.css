@@ -899,7 +899,7 @@ main > section > .wrap, .section-inner { max-width: var(--wrap); margin-inline: 
 
 /* ----- 홍보 팝업 (.promo-pop) — 닫히고 300ms 뒤 지워지므로 전환은 그보다 짧게 ----- */
 .promo-pop {
-  position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 20px;
+  position: fixed; inset: 0; z-index: 2000; display: flex; padding: 20px; overflow-y: auto; overscroll-behavior: contain;
   background: rgba(10, 11, 12, .66); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
   opacity: 0; visibility: hidden; transition: opacity .22s, visibility 0s .22s;
 }
@@ -916,21 +916,27 @@ main > section > .wrap, .section-inner { max-width: var(--wrap); margin-inline: 
 .promo-pop-foot { display: flex; justify-content: space-between; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--hair); }
 .promo-pop-today, .promo-pop-close { min-height: 40px; padding: 0 12px; border: 0; border-radius: 999px; background: transparent; color: var(--ink-2); font-size: 13.5px; }
 .promo-pop-today:hover, .promo-pop-close:hover { color: var(--ink); background: var(--paper); }
-/* 여러 개면 한 칸에 겹쳐 두고 하나만 보인다 — 창 높이는 가장 긴 것에 맞춰 넘길 때 흔들리지 않는다 */
-.promo-pop-slides { display: grid; }
-.promo-pop-slide { grid-area: 1 / 1; display: flex; flex-direction: column; transition: opacity .3s var(--ease), visibility 0s; }
-.promo-pop-slide:not(.is-on) { opacity: 0; visibility: hidden; transition: opacity .3s var(--ease), visibility 0s .3s; }
+/* 카드들을 담는 줄 — margin:auto 로 가운데 두되, 화면보다 길면 창 안에서 스크롤된다 */
+.promo-pop-row { margin: auto; display: flex; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 20px; width: 100%; max-width: 900px; }
+.promo-pop-card { display: flex; flex-direction: column; transition: transform .25s var(--ease) calc(var(--i, 0) * 70ms), opacity .18s; }
+.promo-pop-card .promo-pop-foot { margin-top: auto; }
+.promo-pop-card.is-closing { opacity: 0; transform: scale(.97); }
+/* 여러 개를 나란히 — 그림 높이를 맞춰 카드 윗줄이 가지런하게 */
+.promo-pop.is-multi .promo-pop-card { flex: 1 1 300px; max-width: 420px; min-width: 0; max-height: none; overflow: hidden; }   /* 태블릿까지 나란히, 그보다 좁으면 위아래 */
 .promo-pop.is-multi .promo-pop-figure { aspect-ratio: 1200 / 630; overflow: hidden; background: var(--paper-2); }
 .promo-pop.is-multi .promo-pop-figure img { height: 100%; object-fit: cover; }
-.promo-pop-pager { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 18px 14px; }
-.promo-pop-nav { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--hair); border-radius: 50%; background: transparent; color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
-.promo-pop-nav:hover, .promo-pop-nav:focus-visible { border-color: var(--ink); }
-.promo-pop-dots { display: flex; gap: 6px; }
-.promo-pop-dots i { width: 6px; height: 6px; border-radius: 999px; background: var(--hair-2); cursor: pointer; transition: width .25s var(--ease), background .25s; }
-.promo-pop-dots i.on { width: 18px; background: var(--ink); }
-.promo-pop-count { min-width: 3.2em; text-align: center; color: var(--ink-3); font: 500 12px/1 var(--mono); font-variant-numeric: tabular-nums; }
-.promo-pop-count b { color: var(--ink); font-weight: 600; }
-html.motion-reduced .promo-pop-slide, html.motion-reduced .promo-pop-dots i { transition: none; }
+@media (max-width: 600px) {
+  /* 좁은 화면은 위아래로 쌓는다 — 글과 여백을 조금 줄인다.
+     그림은 자르지 않는다: 배너 그림에는 글자가 든 경우가 많아 잘리면 읽히지 않는다 */
+  .promo-pop.is-multi { padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .promo-pop.is-multi .promo-pop-row { gap: 10px; }
+  .promo-pop.is-multi .promo-pop-body { gap: 8px; padding: 14px 16px 12px; }
+  .promo-pop.is-multi .promo-pop-title { font-size: 18px; }
+  .promo-pop.is-multi .promo-pop-text { font-size: 13.5px; line-height: 1.55; }
+  .promo-pop.is-multi .promo-pop-cta { min-height: 40px; padding: 0 16px; font-size: 14px; }
+  .promo-pop.is-multi .promo-pop-foot { padding: 6px 10px; }
+}
+html.motion-reduced .promo-pop-card { transition: none; }
 
 /* 래퍼가 없는 예전 구역: 안쪽 여백으로 가운데 맞춘다 */
 main > section:not(.cta):not(.eaves):not(.stats-band):not(.sec):not(.home-hero):not(.cert-band) {
