@@ -25,7 +25,7 @@
   </url>
   <url>
     <loc>https://tenai.kr/about</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -72,8 +72,18 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://tenai.kr/profile/</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://tenai.kr/profile/assets/og-profile.jpg</image:loc>
+      <image:title>TEN AI 회사소개서 2026 · Web Edition 표지</image:title>
+    </image:image>
+  </url>
+  <url>
     <loc>https://tenai.kr/docs/TenAI-Company-Profile-2026.pdf</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
