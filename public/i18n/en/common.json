@@ -228,7 +228,15 @@
   "회원": "member",
   "위": "",
   "종합 점수": "Overall score",
-  "K-AI 리더보드": "K-AI Leaderboard"
+  "K-AI 리더보드": "K-AI Leaderboard",
+  "상담 문의": "Contact",
+  "회사 소개서": "Profile",
+  "사업 영역": "Services",
+  "회사 소개": "About",
+  "바로가기": "Quick links",
+  "바로가기 열기": "Open quick links",
+  "바로가기 닫기": "Close quick links",
+  "맨 위로": "Back to top"
  },
  "patterns": [
   [
