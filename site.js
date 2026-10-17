@@ -1040,6 +1040,60 @@ if (menuBtn && mobileMenu) {
     mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMobileMenu));
 }
 
+/* ============ 오른쪽 형광 퀵메뉴 (#qnav) ============
+   모든 공개 페이지 오른쪽에 늘 떠 있는 바로가기. 상담 문의는 [data-inquiry] 라
+   아래 상담 신청 창이 그대로 받고, JS 가 없으면 #contact 로 간다.
+   넓은 화면(1360px 이상)은 늘 펼쳐 두고, 그보다 좁으면 형광 손잡이를 눌러 꺼낸다
+   — 본문 가장자리를 가리지 않도록. 손잡이 · 바깥 누르기 · Esc 로 닫는다. */
+(function buildQuickNav() {
+    const LINKS = [
+        ['#contact', '상담 문의', 'cta'],
+        ['/profile/', '회사 소개서'],
+        ['/business', '사업 영역'],
+        ['/education', '교육'],
+        ['/apps', 'AI 앱'],
+        ['/news', '소식'],
+        ['/about', '회사 소개']
+    ];
+    const el = document.createElement('nav');
+    el.className = 'qnav';
+    el.id = 'qnav';
+    el.setAttribute('aria-label', '바로가기');
+    el.innerHTML =
+        '<button class="qnav-handle" type="button" aria-expanded="false" aria-controls="qnavPanel" aria-label="바로가기 열기">' +
+            '<span class="qnav-chev" aria-hidden="true">‹</span><span class="qnav-handle-t" aria-hidden="true">QUICK</span></button>' +
+        '<div class="qnav-panel" id="qnavPanel">' +
+            '<span class="qnav-head" aria-hidden="true">QUICK</span>' +
+            '<ul class="qnav-list">' +
+            LINKS.map(([href, label, kind]) =>
+                `<li><a class="qnav-link${kind ? ' qnav-cta' : ''}" href="${href}"${kind ? ' data-inquiry' : ''}>${label}</a></li>`).join('') +
+            '</ul>' +
+            '<button class="qnav-top" type="button" aria-label="맨 위로"><span aria-hidden="true">TOP</span></button>' +
+        '</div>';
+    document.body.appendChild(el);
+
+    const handle = el.querySelector('.qnav-handle');
+    const setOpen = open => {
+        el.classList.toggle('open', open);
+        handle.setAttribute('aria-expanded', String(open));
+        handle.setAttribute('aria-label', open ? '바로가기 닫기' : '바로가기 열기');
+    };
+    handle.addEventListener('click', () => setOpen(!el.classList.contains('open')));
+    el.querySelectorAll('.qnav-link').forEach(a => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('click', e => { if (el.classList.contains('open') && !el.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape' || !el.classList.contains('open')) return;
+        setOpen(false);
+        handle.focus();
+    });
+    el.querySelector('.qnav-top').addEventListener('click', () => {
+        const still = window.TenMotion ? window.TenMotion.reduced
+            : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: still ? 'instant' : 'smooth' });
+        setOpen(false);
+    });
+})();
+
 /* ============ 현재 페이지 메뉴 표시 ============
    멀티페이지이므로 스크롤 위치가 아니라 주소로 활성 메뉴를 정한다.
    /apps, /apps/, /apps.html 이 모두 같은 곳을 가리키도록 맞춘다. */
@@ -1050,7 +1104,7 @@ if (menuBtn && mobileMenu) {
         return t || '/';
     };
     const here = norm(location.pathname);
-    document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(a => {
+    document.querySelectorAll('.nav-links a, .mobile-menu a, .qnav a').forEach(a => {
         const href = a.getAttribute('href') || '';
         if (!href || href.startsWith('#') || /^[a-z]+:/i.test(href)) return;
         const active = norm(href) === here;

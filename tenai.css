@@ -299,6 +299,68 @@ footer.site-foot { background: var(--night); color: var(--on-night); padding-blo
 @media (max-width: 480px) { .foot-grid { grid-template-columns: 1fr; } }
 
 /* ---------------------------------------------------------------------
+   오른쪽 형광 퀵메뉴 (#qnav)  site.js 가 모든 공개 페이지에 붙인다
+   형광 연두 면 + 먹 글자(대비 15:1). 상담 문의만 먹 면 + 형광 글자로 뒤집는다.
+   1360px 이상은 늘 펼침, 그보다 좁으면 손잡이(.qnav-handle)로 꺼낸다(.open)
+   --------------------------------------------------------------------- */
+:root { --neon: #d4ff1e; --neon-glow: rgba(212, 255, 30, .38); }
+.qnav { position: fixed; right: 12px; top: 50%; transform: translateY(-50%); z-index: 90; }
+.qnav-handle { display: none; }
+.qnav-panel {
+  width: 68px; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--neon); color: var(--ink); border-radius: var(--radius);
+  box-shadow: 0 0 0 1px rgba(15, 16, 17, .16), 0 12px 32px rgba(15, 16, 17, .26), 0 0 26px var(--neon-glow);
+}
+.qnav-head { padding: 11px 0 8px; text-align: center; font: 600 9.5px/1 var(--mono); letter-spacing: .2em; padding-left: .2em; color: rgba(22, 24, 26, .58); }
+.qnav-list { list-style: none; margin: 0; padding: 0; }
+.qnav-list li + li { border-top: 1px solid rgba(22, 24, 26, .14); }
+.qnav-link {
+  position: relative; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 8px 6px;
+  text-align: center; text-decoration: none; word-break: keep-all;
+  font-size: 12.5px; font-weight: 700; line-height: 1.25; letter-spacing: -0.02em; color: var(--ink);
+  transition: background-color .2s;
+}
+.qnav-link:hover { background: rgba(22, 24, 26, .09); }
+.qnav-link.active { background: rgba(22, 24, 26, .13); }
+.qnav-link.active::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ink); }
+.qnav-cta { background: var(--night); color: var(--neon); }
+.qnav-cta:hover { background: #000; }
+.qnav-top {
+  min-height: 42px; border: 0; border-top: 1px solid rgba(22, 24, 26, .14); background: transparent; color: var(--ink); cursor: pointer;
+  font: 700 10.5px/1 var(--mono); letter-spacing: .14em; padding-left: .14em; transition: background-color .2s;
+}
+.qnav-top::after { content: "↑"; display: block; margin-top: 4px; font-size: 12px; letter-spacing: 0; }
+.qnav-top:hover { background: rgba(22, 24, 26, .09); }
+.qnav-link:focus-visible, .qnav-top:focus-visible { outline: 2px solid var(--ink); outline-offset: -5px; }
+.qnav-cta:focus-visible { outline-color: var(--neon); }
+html[lang="en"] .qnav-link { font-size: 11px; letter-spacing: 0; word-break: normal; }
+@media (max-height: 600px) { .qnav-link { min-height: 42px; } .qnav-head { display: none; } }
+
+@media (max-width: 1359px) {
+  .qnav { right: 0; transform: none; }
+  .qnav-handle {
+    position: absolute; right: 0; top: 0; transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px; width: 30px; padding: 12px 0 14px;
+    border: 0; border-radius: var(--radius-s) 0 0 var(--radius-s); background: var(--neon); color: var(--ink); cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(15, 16, 17, .16), -4px 8px 22px rgba(15, 16, 17, .24), 0 0 20px var(--neon-glow);
+    transition: right .3s var(--ease);
+  }
+  .qnav-chev { font-size: 16px; line-height: 1; font-weight: 700; transition: transform .3s var(--ease); }
+  .qnav-handle-t { writing-mode: vertical-rl; font: 700 10.5px/1 var(--mono); letter-spacing: .22em; }
+  .qnav-handle:focus-visible { outline: 2px solid var(--ink); outline-offset: -5px; }
+  .qnav-panel {
+    position: absolute; right: 12px; top: 0; transform: translate(calc(100% + 24px), -50%); visibility: hidden;
+    transition: transform .3s var(--ease), visibility 0s .3s;
+  }
+  .qnav.open .qnav-panel { transform: translate(0, -50%); visibility: visible; transition: transform .3s var(--ease), visibility 0s; }
+  .qnav.open .qnav-handle { right: 80px; border-radius: var(--radius-s); }
+  .qnav.open .qnav-chev { transform: rotate(180deg); }
+}
+@media (prefers-reduced-motion: reduce) { .qnav-handle, .qnav-chev, .qnav-panel { transition: none !important; } }
+html.motion-reduced .qnav-handle, html.motion-reduced .qnav-chev, html.motion-reduced .qnav-panel { transition: none !important; }
+@media print { .qnav { display: none !important; } }
+
+/* ---------------------------------------------------------------------
    알림 (#toast)  site.js: .show
    --------------------------------------------------------------------- */
 .toast {
