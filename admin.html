@@ -453,7 +453,7 @@
             </div>
             <h1>TEN AI 관리자 콘솔</h1>
             <p id="gateDesc">접속 암호를 입력하세요</p>
-            <input type="email" id="gateEmail" placeholder="관리자 이메일" autocomplete="username" hidden>
+            <input type="text" id="gateEmail" placeholder="관리자 아이디" autocomplete="username" autocapitalize="none" spellcheck="false" hidden>
             <input type="password" id="gatePass" placeholder="••••••••" autocomplete="current-password">
             <button class="btn btn-cyan" style="width:100%; justify-content:center;" id="gateBtn">접속하기</button>
             <p class="gate-note" id="gateNote">
@@ -1054,11 +1054,18 @@
             $('gateEmail').hidden = false;
             $('gateDesc').textContent = '관리자 계정으로 로그인하세요';
             $('gatePass').placeholder = '비밀번호';
-            $('gateNote').innerHTML =
-                'Supabase Auth 계정으로 로그인합니다.<br>' +
-                '관리자 계정은 Supabase 대시보드 &gt; Authentication &gt; Users 에서 생성하고,<br>' +
-                '신규 가입(Sign up)은 반드시 꺼두세요.';
+            // 아이디·비밀번호 바꾸기: supabase-admin-account.sql (공개 화면이라 안내문에는 적지 않는다)
+            $('gateNote').textContent = '관리자 아이디(또는 이메일)와 비밀번호로 로그인합니다.';
         }
+
+        /* 아이디 로그인 — Supabase Auth 는 이메일로만 로그인하므로
+           '@' 가 없는 아이디는 관리자 전용 주소(아이디@admin.tenai.kr)로 바꿔 보낸다.
+           실제 메일함이 아닌 로그인용 이름이다. 이메일을 그대로 넣어도 된다. */
+        const ADMIN_ID_DOMAIN = 'admin.tenai.kr';
+        const toAdminEmail = v => {
+            const s = String(v || '').trim().toLowerCase();
+            return !s || s.includes('@') ? s : s + '@' + ADMIN_ID_DOMAIN;
+        };
 
         async function unlockUI() {
             SETTINGS = await TenStore.getSettings();
@@ -1068,9 +1075,9 @@
 
         async function tryUnlock() {
             if (IS_SUPA) {
-                const email = $('gateEmail').value.trim();
+                const email = toAdminEmail($('gateEmail').value);
                 const pass = $('gatePass').value;
-                if (!email || !pass) { showToast('이메일과 비밀번호를 입력하세요.'); return; }
+                if (!email || !pass) { showToast('아이디와 비밀번호를 입력하세요.'); return; }
                 try {
                     await TenStore.signInAdmin(email, pass);
                     // 일반 회원 계정으로는 관리자 콘솔 접근 불가
@@ -1084,7 +1091,7 @@
                     showToast('관리자로 로그인되었습니다.');
                 } catch (e) {
                     console.warn(e);
-                    showToast('로그인 실패: 이메일 또는 비밀번호를 확인하세요.');
+                    showToast('로그인 실패: 아이디 또는 비밀번호를 확인하세요.');
                     $('gatePass').value = '';
                     $('gatePass').focus();
                 }
